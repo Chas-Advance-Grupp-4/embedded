@@ -5,4 +5,4 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-project(ESP32_idf_basic_server)
+project(Chas_Advance_4_ESP32_control_unit)
