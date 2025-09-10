@@ -7,7 +7,7 @@ void setup()
     Serial.begin(115200);
     delay(2000);
 
-    Serial.print("Hello ESP32 No ");
+    Serial.print("Hello Arduino No ");
     Serial.println(counter);
     counter++;
 }
@@ -15,7 +15,7 @@ void setup()
 void loop()
 {
     delay(2000);
-    Serial.print("Hello ESP32 No ");
+    Serial.print("Hello Arduino No ");
     Serial.println(counter);
     counter++;
 }
