@@ -1,0 +1,9 @@
+# Ignore VS Code config folder
+.vscode/
+
+# Ignore platformIO folder including local dependencies and build files
+.pio/
+
+# Ignore sensitive files
+arduino_secrets.h
+.env
