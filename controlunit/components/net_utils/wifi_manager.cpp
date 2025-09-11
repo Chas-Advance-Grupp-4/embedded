@@ -1,5 +1,7 @@
 #include "wifi_manager.h"
 
+static const char* WIFI_TAG = "wifi_setup";
+
 static void wifi_event_handler(void* arg, esp_event_base_t event_base,
                                int32_t event_id, void* event_data) {
     ESP_LOGI(WIFI_TAG, "wifi_event_handler triggered: base=%s, id=%d", event_base, event_id);
