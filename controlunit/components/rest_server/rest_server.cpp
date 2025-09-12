@@ -1,6 +1,7 @@
 #include "rest_server.h"
 #include "hello_handler.h"
 #include "status_handler.h"
+#include "postexample_handler.h"
 #include "esp_http_server.h"
 #include "esp_log.h"
 
@@ -29,6 +30,14 @@ void start_rest_server() {
             .user_ctx = NULL
         };
         httpd_register_uri_handler(server, &status_uri);
+
+        httpd_uri_t postexample_uri = {
+            .uri      = "/postexample",
+            .method   = HTTP_POST,
+            .handler  = postexample_post_handler,
+            .user_ctx = NULL
+            };
+        httpd_register_uri_handler(server, &postexample_uri);
 
         ESP_LOGI(TAG, "Server started");
     } else {
