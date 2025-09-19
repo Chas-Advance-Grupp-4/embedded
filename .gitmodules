@@ -1,0 +1,3 @@
+[submodule "dependencies/etl"]
+	path = dependencies/etl
+	url = https://github.com/ETLCPP/etl

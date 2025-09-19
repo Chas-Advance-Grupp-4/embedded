@@ -16,3 +16,6 @@
 # Ignore sensitive files
 arduino_secrets.h
 .env
+
+# Ignore build folder
+build/
