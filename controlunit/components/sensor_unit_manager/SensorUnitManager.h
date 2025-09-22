@@ -11,7 +11,7 @@ public:
     bool hasUnit(const std::string& uuid) const;
 
     void storeReading(const ca_sensorunit_snapshot& reading);
-    std::vector<ca_sensorunit_snapshot> getGroupedReadings() const;
+    std::map<time_t, std::vector<ca_sensorunit_snapshot>> getGroupedReadings() const;
     void clearReadings();
 
 private:

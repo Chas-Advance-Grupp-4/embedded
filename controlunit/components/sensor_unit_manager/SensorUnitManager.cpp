@@ -31,17 +31,21 @@ bool SensorUnitManager::hasUnit(const std::string& uuid) const
 
 void SensorUnitManager::storeReading(const ca_sensorunit_snapshot& reading)
 {
-
+    m_all_readings.push_back(reading);
 }
 
-std::vector<ca_sensorunit_snapshot> SensorUnitManager::getGroupedReadings() const
+std::map<time_t, std::vector<ca_sensorunit_snapshot>> SensorUnitManager::getGroupedReadings() const
 {
-    return {};
+    std::map<time_t, std::vector<ca_sensorunit_snapshot>> grouped;
+    for (const auto& snapshot : m_all_readings) {
+        grouped[snapshot.timestamp].push_back(snapshot);
+    }
+    return grouped;
 }
 
 void SensorUnitManager::clearReadings()
 {
-
+    m_all_readings.clear();
 }
 
     
