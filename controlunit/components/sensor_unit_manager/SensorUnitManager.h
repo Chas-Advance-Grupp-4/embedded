@@ -6,15 +6,15 @@
 
 class SensorUnitManager {
 public:
-    void addUnit(const std::string& uuid);
-    void removeUnit(const std::string& uuid);
-    bool hasUnit(const std::string& uuid) const;
+    void addUnit(const Uuid& uuid);
+    void removeUnit(const Uuid& uuid);
+    bool hasUnit(const Uuid& uuid) const;
 
     void storeReading(const ca_sensorunit_snapshot& reading);
     std::map<time_t, std::vector<ca_sensorunit_snapshot>> getGroupedReadings() const;
     void clearReadings();
 
 private:
-    std::map<std::string, std::shared_ptr<std::string>> m_active_units;
+    std::map<Uuid, std::shared_ptr<Uuid>> m_active_units;
     std::vector<ca_sensorunit_snapshot> m_all_readings;
 };
