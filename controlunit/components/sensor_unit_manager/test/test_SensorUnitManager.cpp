@@ -1,23 +1,23 @@
 /**
  * @brief Test file for SensorUnitManager.cpp
- * 
- * 
+ *
+ *
  */
 extern "C" {
-    #include "unity.h"
+#include "unity.h"
 }
 #include "SensorUnitManager.h"
 
 extern "C" void when_manager_empty_then_hasUnit_returns_false(void) {
     SensorUnitManager manager;
-    Uuid uuid  {"abc"};
-    bool hasUnit = manager.hasUnit(uuid);
+    Uuid              uuid{"abc"};
+    bool              hasUnit = manager.hasUnit(uuid);
     TEST_ASSERT_EQUAL(hasUnit, false);
 }
 
 extern "C" void when_unit_added_then_hasUnit_returns_true(void) {
     SensorUnitManager manager;
-    Uuid uuid {"abc"};
+    Uuid              uuid{"abc"};
     manager.addUnit(uuid);
     bool hasUnit = manager.hasUnit(uuid);
     TEST_ASSERT_EQUAL(hasUnit, true);
@@ -25,7 +25,7 @@ extern "C" void when_unit_added_then_hasUnit_returns_true(void) {
 
 extern "C" void when_unit_added_and_removed_then_hasUnit_returns_false(void) {
     SensorUnitManager manager;
-    Uuid uuid {"abc"};
+    Uuid              uuid{"abc"};
     manager.addUnit(uuid);
     manager.removeUnit(uuid);
     bool hasUnit = manager.hasUnit(uuid);
@@ -34,16 +34,16 @@ extern "C" void when_unit_added_and_removed_then_hasUnit_returns_false(void) {
 
 extern "C" void when_unit_added_twice_then_logs_error(void) {
     SensorUnitManager manager;
-    Uuid uuid {"abc"};
+    Uuid              uuid{"abc"};
     manager.addUnit(uuid);
-    manager.addUnit(uuid); 
+    manager.addUnit(uuid);
     TEST_ASSERT_EQUAL(manager.hasUnit(uuid), true);
 }
 
 extern "C" void when_nonexistent_unit_removed_then_logs_error(void) {
     SensorUnitManager manager;
-    Uuid uuid {"xyz"};
-    manager.removeUnit(uuid); 
+    Uuid              uuid{"xyz"};
+    manager.removeUnit(uuid);
     TEST_ASSERT_EQUAL(manager.hasUnit(uuid), false);
 }
 
@@ -55,12 +55,14 @@ extern "C" void stress_test_many_units(void) {
     TEST_ASSERT_EQUAL(manager.hasUnit(Uuid{"500"}), true);
 }
 
-static ca_sensorunit_snapshot makeSnapshot(const std::string& uuid_str, time_t timestamp, double temp, double humidity) {
+static ca_sensorunit_snapshot
+makeSnapshot(const std::string& uuid_str, time_t timestamp, double temp, double humidity) {
     auto uuid_ptr = std::make_shared<Uuid>(Uuid{uuid_str});
     return ca_sensorunit_snapshot{uuid_ptr, timestamp, temp, humidity};
 }
 
-static void assertSnapshotEqual(const ca_sensorunit_snapshot& expected, const ca_sensorunit_snapshot& actual) {
+static void assertSnapshotEqual(const ca_sensorunit_snapshot& expected,
+                                const ca_sensorunit_snapshot& actual) {
     TEST_ASSERT_NOT_NULL(actual.uuid.get());
     TEST_ASSERT_EQUAL_STRING(expected.uuid->toString().c_str(), actual.uuid->toString().c_str());
     TEST_ASSERT_EQUAL(expected.timestamp, actual.timestamp);
@@ -68,16 +70,16 @@ static void assertSnapshotEqual(const ca_sensorunit_snapshot& expected, const ca
     TEST_ASSERT_EQUAL(expected.humidity, actual.humidity);
 }
 
-extern "C" void when_reading_stored_then_it_is_grouped_by_timestamp(void) { 
+extern "C" void when_reading_stored_then_it_is_grouped_by_timestamp(void) {
     SensorUnitManager manager;
-    manager.addUnit(Uuid{"abcde"});     
-    ca_sensorunit_snapshot snapshot = makeSnapshot("qwe", 1000, 25, 50);    
+    manager.addUnit(Uuid{"abcde"});
+    ca_sensorunit_snapshot snapshot = makeSnapshot("qwe", 1000, 25, 50);
     manager.storeReading(snapshot);
     auto grouped = manager.getGroupedReadings();
 
     TEST_ASSERT_NOT_EQUAL(grouped.end(), grouped.find(1000));
-    TEST_ASSERT_EQUAL(1, grouped.size());    
-    TEST_ASSERT_EQUAL(1, grouped[1000].size());    
+    TEST_ASSERT_EQUAL(1, grouped.size());
+    TEST_ASSERT_EQUAL(1, grouped[1000].size());
 
     assertSnapshotEqual(snapshot, grouped[1000].at(0));
 }

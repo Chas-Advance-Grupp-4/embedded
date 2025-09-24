@@ -1,16 +1,16 @@
 /**
  * @brief main file for the test_runner
- * 
+ *
  * This is for running unit tests. It is still just an example
  * For now it runs them on the hardware
  * Will be separated into native logic tests and also Dockerized later on
- * 
+ *
  */
 extern "C" {
-    #include <unity.h>
-    #include <freertos/FreeRTOS.h>
-    #include <freertos/task.h>
-    #include <esp_log.h>
+#include <esp_log.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/task.h>
+#include <unity.h>
 }
 
 // Deklarera testfunktionen från komponenten
@@ -38,7 +38,7 @@ extern "C" void app_main() {
     ESP_LOGI("TEST", "Testing SensorUnitManager");
     UNITY_BEGIN();
     RUN_TEST(when_manager_empty_then_hasUnit_returns_false);
-    RUN_TEST(when_unit_added_then_hasUnit_returns_true);     
+    RUN_TEST(when_unit_added_then_hasUnit_returns_true);
     RUN_TEST(when_unit_added_and_removed_then_hasUnit_returns_false);
     RUN_TEST(when_unit_added_twice_then_logs_error);
     RUN_TEST(when_nonexistent_unit_removed_then_logs_error);
@@ -48,4 +48,4 @@ extern "C" void app_main() {
     RUN_TEST(when_storing_readings_with_different_timestamps_then_grouped_separately);
     RUN_TEST(after_clearing_readings_grouped_readings_is_empty);
     UNITY_END();
-    }
+}
