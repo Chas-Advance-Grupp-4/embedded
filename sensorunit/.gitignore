@@ -7,3 +7,6 @@
 # Ignore sensitive files
 arduino_secrets.h
 .env
+
+# Ignore local file generated when building
+compile_commands.json
