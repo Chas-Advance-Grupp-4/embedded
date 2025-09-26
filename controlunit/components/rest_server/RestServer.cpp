@@ -1,4 +1,5 @@
 #include "RestServer.h"
+#include "HelloHandler.h"
 #include "esp_log.h"
 #include "hello_handler.h"
 #include "postexample_handler.h"
@@ -33,11 +34,9 @@ void RestServer::stop() {
 }
 
 void RestServer::registerHandlers() {
-    httpd_uri_t hello_uri = {.uri      = "/hello",
-                             .method   = HTTP_GET,
-                             .handler  = hello_get_handler,
-                             .user_ctx = nullptr};
-    httpd_register_uri_handler(m_server, &hello_uri);
+    auto hello = std::make_unique<HelloHandler>("Hej från ESP32 med klasser");
+    httpd_register_uri_handler(m_server, hello->getUri());
+    m_handlers.push_back(std::move(hello));
 
     httpd_uri_t status_uri = {.uri      = "/status",
                               .method   = HTTP_GET,
