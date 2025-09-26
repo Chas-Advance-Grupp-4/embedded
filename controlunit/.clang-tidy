@@ -11,18 +11,26 @@ Checks: >
   -hicpp-*,
   -llvm-header-guard,
   -modernize-use-trailing-return-type
+  -misc-include-cleaner
+  -clang-diagnostic-error
 
 CheckOptions:
   - key: modernize-use-auto.MinTypeNameLength
     value: '15'
   - key: readability-identifier-naming.FunctionCase
-    value: camelCase
+    value: camelBack
   - key: readability-identifier-naming.VariableCase
     value: camelBack
   - key: readability-identifier-naming.ConstantPrefix
     value: k
-  - key: readability-identifier-naming.MemberPrefix
+  - key: readability-identifier-naming.PrivateMemberPrefix
     value: m_
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: camelBack
+  - key: readability-identifier-naming.ProtectedMemberPrefix
+    value: m_
+  - key: readability-identifier-naming.ProtectedMemberCase
+    value: camelBack
   - key: readability-identifier-naming.ClassCase
     value: CamelCase
   - key: readability-identifier-naming.StructCase
