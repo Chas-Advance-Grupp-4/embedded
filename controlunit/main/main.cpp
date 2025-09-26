@@ -11,7 +11,7 @@
 extern "C" void app_main(void) {
     nvs_flash_init();
     init_wifi();
-    RestServer server;
+    static RestServer server;
     if (server.start()) {
         // Possible additional LOG message here
     }
