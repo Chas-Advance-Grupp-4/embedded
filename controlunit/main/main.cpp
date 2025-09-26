@@ -1,5 +1,4 @@
-#include "hello_handler.h"
-#include "rest_server.h"
+#include "RestServer.h"
 #include "wifi_config.h"
 #include "wifi_manager.h"
 #include <esp_event.h>
@@ -12,5 +11,8 @@
 extern "C" void app_main(void) {
     nvs_flash_init();
     init_wifi();
-    start_rest_server();
+    RestServer server;
+    if (server.start()) {
+        // Possible additional LOG message here
+    }
 }

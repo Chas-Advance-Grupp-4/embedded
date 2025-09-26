@@ -1,5 +1,5 @@
 idf_component_register(
-    SRCS "rest_server.cpp"
+    SRCS "RestServer.cpp"
          "handlers/hello_handler.cpp"
          "handlers/status_handler.cpp"
          "handlers/postexample_handler.cpp"
