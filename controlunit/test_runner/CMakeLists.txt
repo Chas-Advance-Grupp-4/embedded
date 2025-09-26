@@ -5,5 +5,6 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-include_directories(${CMAKE_SOURCE_DIR}/../dependencies/etl/include)
-project(Chas_Advance_4_ESP32_control_unit)
+include_directories(${CMAKE_SOURCE_DIR}/../../dependencies/etl/include)
+set(EXTRA_COMPONENT_DIRS ../components)
+project(Chas_Advance_4_ESP32_cu_test_runner)
