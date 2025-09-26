@@ -1,8 +1,8 @@
 #include "RestServer.h"
 #include "HelloHandler.h"
+#include "PostexampleHandler.h"
 #include "esp_log.h"
 #include "hello_handler.h"
-#include "postexample_handler.h"
 #include "status_handler.h"
 
 static const char* TAG = "RestServer";
@@ -44,9 +44,19 @@ void RestServer::registerHandlers() {
                               .user_ctx = nullptr};
     httpd_register_uri_handler(m_server, &status_uri);
 
-    httpd_uri_t postexample_uri = {.uri      = "/postexample",
-                                   .method   = HTTP_POST,
-                                   .handler  = postexample_post_handler,
-                                   .user_ctx = nullptr};
-    httpd_register_uri_handler(m_server, &postexample_uri);
+    registerHandler(std::make_unique<PostexampleHandler>("/postexample"));
+    
+    }
+
+void RestServer::registerHandler(std::unique_ptr<BaseHandler> handler) {
+    httpd_uri_t* uri = handler->getUri();
+    esp_err_t result = httpd_register_uri_handler(m_server, uri);
+
+    if (result != ESP_OK) {
+        ESP_LOGE("RestServer", "Failed to register handler for URI: %s", uri->uri);
+        return;
+    }
+
+    m_handlers.push_back(std::move(handler));
+    ESP_LOGI("RestServer", "Registered handler for URI: %s", uri->uri);
 }

@@ -18,4 +18,5 @@ private:
     std::vector<std::unique_ptr<BaseHandler>> m_handlers;
 
     void registerHandlers();
+    void registerHandler(std::unique_ptr<BaseHandler> handler);
 };
