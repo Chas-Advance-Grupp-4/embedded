@@ -1,0 +1,43 @@
+BasedOnStyle: LLVM
+Language: Cpp
+Standard: Latest
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+ColumnLimit: 100
+AllowShortFunctionsOnASingleLine: Inline
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterFunction: false
+  AfterControlStatement: false
+  AfterEnum: false
+  AfterStruct: false
+
+SortIncludes: true
+IncludeBlocks: Preserve
+IncludeCategories:
+  - Regex: '^".*\.h"'
+    Priority: 1
+  - Regex: '^<.*\.h>'
+    Priority: 2
+  - Regex: '.*'
+    Priority: 3
+
+PointerAlignment: Left
+ReferenceAlignment: Left
+
+SpacesBeforeTrailingComments: 1
+SpaceBeforeParens: ControlStatements
+SpaceAfterCStyleCast: true
+
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignOperands: true
+AlignTrailingComments: true
+
+Cpp11BracedListStyle: true
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackParameters: false
+BinPackArguments: false

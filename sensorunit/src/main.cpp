@@ -2,12 +2,10 @@
 #include <etl/string.h>
 #include <etl/vector.h>
 
+int             counter{0};
+etl::string<32> hello{};
 
-int counter {0};
-etl::string<32> hello {};
-
-void setup()
-{
+void setup() {
     hello.append("Hello ETL Arduino No ");
 
     Serial.begin(115200);
@@ -18,8 +16,7 @@ void setup()
     counter++;
 }
 
-void loop()
-{
+void loop() {
     delay(2000);
     Serial.print(hello.c_str());
     Serial.println(counter);
