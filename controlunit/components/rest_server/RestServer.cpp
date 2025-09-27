@@ -2,8 +2,6 @@
 #include "HelloHandler.h"
 #include "PostexampleHandler.h"
 #include "esp_log.h"
-#include "hello_handler.h"
-#include "status_handler.h"
 
 static const char* TAG = "RestServer";
 
