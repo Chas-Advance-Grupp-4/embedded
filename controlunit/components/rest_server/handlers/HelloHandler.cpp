@@ -2,14 +2,12 @@
 
 static const char* TAG = "HelloHandler";
 
-HelloHandler::HelloHandler(const std::string& greeting)
-    : m_greeting(greeting) {
-    m_uri = {
-        .uri = "/hello",
-        .method = HTTP_GET,
-        .handler = HelloHandler::staticHandler,
-        .user_ctx = this
-    };
+HelloHandler::HelloHandler(const char* uri)
+    : m_greeting("Hello from ESP32 Still in progress") {
+    m_uri = {.uri      = uri,
+             .method   = HTTP_GET,
+             .handler  = HelloHandler::staticHandler,
+             .user_ctx = this};
 }
 
 httpd_uri_t* HelloHandler::getUri() {

@@ -33,30 +33,21 @@ void RestServer::stop() {
     }
 }
 
-void RestServer::registerHandlers() {
-    auto hello = std::make_unique<HelloHandler>("Hej från ESP32 med klasser");
-    httpd_register_uri_handler(m_server, hello->getUri());
-    m_handlers.push_back(std::move(hello));
-
-    httpd_uri_t status_uri = {.uri      = "/status",
-                              .method   = HTTP_GET,
-                              .handler  = status_get_handler,
-                              .user_ctx = nullptr};
-    httpd_register_uri_handler(m_server, &status_uri);
-
-    registerHandler(std::make_unique<PostexampleHandler>("/postexample"));
-    
-    }
-
 void RestServer::registerHandler(std::unique_ptr<BaseHandler> handler) {
-    httpd_uri_t* uri = handler->getUri();
-    esp_err_t result = httpd_register_uri_handler(m_server, uri);
+    httpd_uri_t* uri    = handler->getUri();
+    esp_err_t    result = httpd_register_uri_handler(m_server, uri);
 
     if (result != ESP_OK) {
-        ESP_LOGE("RestServer", "Failed to register handler for URI: %s", uri->uri);
+        ESP_LOGE(
+            "RestServer", "Failed to register handler for URI: %s", uri->uri);
         return;
     }
 
     m_handlers.push_back(std::move(handler));
     ESP_LOGI("RestServer", "Registered handler for URI: %s", uri->uri);
+}
+
+void RestServer::registerHandlers() {
+    registerHandler(std::make_unique<HelloHandler>("/hello"));
+    registerHandler(std::make_unique<PostexampleHandler>("/postexample"));
 }
