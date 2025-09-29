@@ -14,7 +14,6 @@ extern "C" {
 }
 
 // Deklarera testfunktionen från komponenten
-extern "C" void test_hello_handler_returns_ok(void);
 extern "C" void when_manager_empty_then_hasUnit_returns_false(void);
 extern "C" void when_unit_added_then_hasUnit_returns_true(void);
 extern "C" void when_unit_added_and_removed_then_hasUnit_returns_false(void);
@@ -25,15 +24,14 @@ extern "C" void when_reading_stored_then_it_is_grouped_by_timestamp(void);
 extern "C" void when_storing_multiple_readings_with_same_timestamp_then_grouped_together(void);
 extern "C" void when_storing_readings_with_different_timestamps_then_grouped_separately(void);
 extern "C" void after_clearing_readings_grouped_readings_is_empty(void);
+// JsonParser
+extern "C" void when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots(void);
 
 // Lägg till testen i main
 extern "C" void app_main() {
     vTaskDelay(2000 / portTICK_PERIOD_MS);
     esp_log_level_set("*", ESP_LOG_INFO);
     ESP_LOGI("TEST", "Test-runner startar...");
-    UNITY_BEGIN();
-    RUN_TEST(test_hello_handler_returns_ok);
-    UNITY_END();
 
     ESP_LOGI("TEST", "Testing SensorUnitManager");
     UNITY_BEGIN();
@@ -47,5 +45,10 @@ extern "C" void app_main() {
     RUN_TEST(when_storing_multiple_readings_with_same_timestamp_then_grouped_together);
     RUN_TEST(when_storing_readings_with_different_timestamps_then_grouped_separately);
     RUN_TEST(after_clearing_readings_grouped_readings_is_empty);
+    UNITY_END();
+
+    ESP_LOGI("TEST", "Testing JsonParser");
+    UNITY_BEGIN();
+    RUN_TEST(when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots);
     UNITY_END();
 }
