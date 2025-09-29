@@ -1,0 +1,21 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# macOS
+.DS_Store
+*.pem
+
+# Ignore VS Code config folder
+.vscode/
+
+# Ignore githooks
+.githooks/
+
+# Ignore platformIO folder including local dependencies and build files
+.pio/
+
+# Ignore sensitive files
+arduino_secrets.h
+.env
+
+# Ignore build folder
+build/

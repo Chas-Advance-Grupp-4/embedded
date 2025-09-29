@@ -1,0 +1,5 @@
+# This directory is intended for source files for the Sensor Unit (Arduino UNO R4 WiFi)
+
+Note that updates to platformio.ini is needed for this to work
+
+See this link: [More info](https://community.platformio.org/t/multiple-mcu-project-best-option-if-i-dont-want-multiple-repos/29272)
