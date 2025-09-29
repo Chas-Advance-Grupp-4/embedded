@@ -1,32 +1,28 @@
-# _Sample project_
+# ESP32 Control Unit
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+This directory contains the source code for the ESP32-based Control Unit, which acts as a gateway between sensor units and a backend server. It provides a lightweight web server interface for handling RESTful API requests and managing sensor data.
 
-This is the simplest buildable example. The example is used by command `idf.py create-project`
-that copies the project to user specified path and set it's name. For more information follow the [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project)
+## Overview
 
-## How to use example
+The Control Unit is responsible for:
 
-We encourage the users to use the example as a template for the new projects.
-A recommended way is to follow the instructions on a [docs page](https://docs.espressif.com/projects/esp-idf/en/latest/api-guides/build-system.html#start-a-new-project).
+- Establishing and maintaining connections with multiple sensor units.
+- Communicating with a backend server to relay sensor data and receive commands.
+- Hosting a RESTful web server to expose endpoints for diagnostics, configuration, and data access.
 
-## Example folder contents
+## Example Endpoints
 
-The project **sample_project** contains one source file in C language [main.c](main/main.c). The file is located in folder [main](main).
+- `GET /hello` — Simple greeting endpoint
+- `POST /postexample` — Example POST endpoint
 
-ESP-IDF projects are built using CMake. The project build configuration is contained in `CMakeLists.txt`
-files that provide set of directives and instructions describing the project's source files and targets
-(executable, library, or both).  
+## Getting Started
 
-Below is short explanation of remaining files in the project folder.
+1. Clone the repository and navigate to `controlunit/`.
+2. Configure your ESP-IDF environment (more details coming soon)
+3. Build and flash the firmware:
 
-```shell
-├── CMakeLists.txt  
-├── main  
-│   ├── CMakeLists.txt  
-│   └── main.c  
-└── README.md                  This is the file you are currently reading
+```bash
+source /your-installed-path-to/esp/v5.5.1/esp-idf/export.sh
+idf.py build
+idf.py flash monitor
 ```
-
-Additionally, the sample project contains Makefile and component.mk files, used for the legacy Make based build system.  
-They are not used or needed when building with CMake and idf.py.
