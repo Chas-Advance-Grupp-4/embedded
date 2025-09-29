@@ -19,7 +19,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Set up ESP-IDF environment
-              uses: espressif/setup-idf@v1
+              uses: espressif/setup-idf@latest
               with:
                   esp_idf_version: v5.5.1
 
@@ -37,7 +37,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Set up PlatformIO
-              uses: platformio/action-core@v2
+              uses: platformio/action-core@latest
 
             - name: Echo from sensorunit
               run: echo "Building sensorunit with PlatformIO for Arduino UNO R4 Wifi"
