@@ -26,6 +26,7 @@ extern "C" void when_storing_readings_with_different_timestamps_then_grouped_sep
 extern "C" void after_clearing_readings_grouped_readings_is_empty(void);
 // JsonParser
 extern "C" void when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots(void);
+extern "C" void when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_json(void);
 
 // Lägg till testen i main
 extern "C" void app_main() {
@@ -50,5 +51,6 @@ extern "C" void app_main() {
     ESP_LOGI("TEST", "Testing JsonParser");
     UNITY_BEGIN();
     RUN_TEST(when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots);
+    RUN_TEST(when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_json);
     UNITY_END();
 }

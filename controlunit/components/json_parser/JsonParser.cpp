@@ -61,3 +61,45 @@ JsonParser::parseSensorSnapshotGroup(const std::string& json) {
     cJSON_Delete(root);
     return snapshots;
 }
+
+std::string JsonParser::composeGroupedReadings(const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings) {
+    cJSON* root = cJSON_CreateObject();
+
+    // Device UUID — hardcoded for the moment
+    cJSON_AddStringToObject(root, "device_uuid", "f47ac10b-58cc-4372-a567-0e02b2c3d479");
+
+    // Timestamp Groups
+    cJSON* timestampGroups = cJSON_CreateArray();
+
+    for (const auto& [timestamp, snapshots] : readings) {
+        cJSON* groupObj = cJSON_CreateObject();
+        cJSON_AddNumberToObject(groupObj, "timestamp", static_cast<double>(timestamp));
+
+        cJSON* sensorUnits = cJSON_CreateArray();
+        for (const auto& snapshot : snapshots) {
+            cJSON* unitObj = cJSON_CreateObject();
+            if (snapshot.uuid && snapshot.uuid->isValid()) {
+                cJSON_AddStringToObject(unitObj, "uuid", snapshot.uuid->toString().c_str());
+            } else {
+                cJSON_AddStringToObject(unitObj, "uuid", "unknown");
+            }
+            cJSON_AddNumberToObject(unitObj, "temperature", snapshot.temperature);
+            cJSON_AddNumberToObject(unitObj, "humidity", snapshot.humidity);
+
+            cJSON_AddItemToArray(sensorUnits, unitObj);
+        }
+
+        cJSON_AddItemToObject(groupObj, "sensor_units", sensorUnits);
+        cJSON_AddItemToArray(timestampGroups, groupObj);
+    }
+
+    cJSON_AddItemToObject(root, "timestamp_groups", timestampGroups);
+
+    // Convert to string and clean up
+    char* jsonStr = cJSON_PrintUnformatted(root);
+    std::string result(jsonStr);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+
+    return result;
+}
