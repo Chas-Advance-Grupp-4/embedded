@@ -40,5 +40,5 @@
 #            - name: Set up PlatformIO
 #              uses: platformio/action-core@latest
 
-            - name: Echo from sensorunit
-              run: echo "Building sensorunit with PlatformIO for Arduino UNO R4 Wifi"
+#            - name: Echo from sensorunit
+#              run: echo "Building sensorunit with PlatformIO for Arduino UNO R4 Wifi"
