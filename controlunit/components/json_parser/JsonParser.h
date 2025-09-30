@@ -16,8 +16,8 @@ public:
     static std::string composeSensorConnectResponse(const SensorConnectResponse& response);
 
     // Driver connection
-    // static DriverConnectRequest parseDriverConnectRequest(const std::string& json);
-    // static std::string composeDriverConnectResponse(const DriverConnectResponse& response);
+    static DriverConnectRequest parseDriverConnectRequest(const std::string& json, requestType type);
+    static std::string composeDriverConnectResponse(const DriverConnectResponse& response);
     // static DriverDisconnectRequest parseDriverDisconnectRequest(const std::string& json);
     // static std::string composeDriverDisconnectResponse(const DriverDisconnectResponse& response);
 

@@ -177,3 +177,51 @@ std::string JsonParser::composeSensorConnectResponse(
     cJSON_Delete(root);
     return result;
 }
+
+DriverConnectRequest
+JsonParser::parseDriverConnectRequest(const std::string& json,
+                                      requestType        type) {
+    DriverConnectRequest request;
+
+    cJSON* root = cJSON_Parse(json.c_str());
+    if (!root) {
+        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
+        return request;
+    }
+
+    // DriverId
+    const cJSON* driverIdItem = cJSON_GetObjectItem(root, "driver_id");
+    if (!cJSON_IsNumber(driverIdItem)) {
+        ESP_LOGE(TAG, "Missing or invalid 'driver_id'");
+        cJSON_Delete(root);
+        return request;
+    }
+    double rawValue = driverIdItem->valuedouble;
+    if (rawValue < 0 || rawValue > std::numeric_limits<uint32_t>::max()) {
+        ESP_LOGE(TAG, "'driver_id' out of range");
+        cJSON_Delete(root);
+        return request;
+    }
+    uint32_t driverId = static_cast<uint32_t>(rawValue);
+
+    // Token
+    const cJSON* tokenItem = cJSON_GetObjectItem(root, "token");
+    if (!cJSON_IsString(tokenItem) || !tokenItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'token'");
+        cJSON_Delete(root);
+        return request;
+    }
+    std::string token{tokenItem->valuestring};
+
+    request.driverId = driverId;
+    request.token    = token;
+    request.request  = type;
+
+    cJSON_Delete(root);
+    return request;
+}
+
+std::string JsonParser::composeDriverConnectResponse(
+    const DriverConnectResponse& response) {
+        return "";
+    }
