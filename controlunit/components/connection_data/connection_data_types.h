@@ -20,3 +20,5 @@ struct SensorConnectResponse {
     std::shared_ptr<Uuid> sensorUuid;
     connectionStatus      status;
 };
+
+std::string connectionStatusToString(connectionStatus status);

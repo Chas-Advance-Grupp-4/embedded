@@ -73,7 +73,9 @@ extern "C" void when_grouped_readings_are_given_then_composeGroupedReadings_retu
     TEST_ASSERT_NOT_NULL(strstr(json.c_str(), "\"humidity\":46.8"));
 }
 
-extern "C" void when_sensor_connect_parseSensorConnect_returns_correct_request(void) {
+
+
+extern "C" void when_valid_connect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(void) {
     const std::string json = R"({
         "sensoruuid": "123e4567-e89b-12d3-a456-426614174000",
         "token": "secure-token-abc"
@@ -87,7 +89,8 @@ extern "C" void when_sensor_connect_parseSensorConnect_returns_correct_request(v
     TEST_ASSERT_EQUAL(requestType::CONNECT, result.request);
 }
 
-extern "C" void when_sensor_connect_parseSensorConnect_returns_empty_on_missing_uuid(void) {
+
+extern "C" void when_sensor_uuid_is_missing_then_parseSensorConnectRequest_returns_empty_request(void) {
     const std::string json = R"({
         "token": "secure-token-abc"
     })";
@@ -97,7 +100,7 @@ extern "C" void when_sensor_connect_parseSensorConnect_returns_empty_on_missing_
     TEST_ASSERT_NULL(result.sensorUuid.get());
 }
 
-extern "C" void when_sensor_connect_parseSensorConnect_returns_empty_on_invalid_json(void) {
+extern "C" void when_json_is_invalid_then_parseSensorConnectRequest_returns_empty_request(void) {
     const std::string json = R"({ invalid json )";
 
     SensorConnectRequest result = JsonParser::parseSensorConnectRequest(json, requestType::CONNECT);
@@ -105,7 +108,7 @@ extern "C" void when_sensor_connect_parseSensorConnect_returns_empty_on_invalid_
     TEST_ASSERT_NULL(result.sensorUuid.get());
 }
 
-extern "C" void when_sensor_connect_parseSensorConnect_returns_correct_request_for_disconnect(void) {
+extern "C" void when_valid_disconnect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(void) {
     const std::string json = R"({
         "sensoruuid": "987e6543-e21b-12d3-a456-426614174999",
         "token": "disconnect-token-xyz"
@@ -118,3 +121,39 @@ extern "C" void when_sensor_connect_parseSensorConnect_returns_correct_request_f
     TEST_ASSERT_EQUAL_STRING("disconnect-token-xyz", result.token.c_str());
     TEST_ASSERT_EQUAL(requestType::DISCONNECT, result.request);
 }
+
+extern "C" void when_valid_sensor_response_is_given_then_composeSensorConnectResponse_returns_expected_json(void) {
+    SensorConnectResponse response;
+    response.sensorUuid = std::make_shared<Uuid>("123e4567-e89b-12d3-a456-426614174000");
+    response.status = connectionStatus::CONNECTED;
+
+    std::string json = JsonParser::composeSensorConnectResponse(response);
+
+    // * Control Unit UUID currently hard coded
+    TEST_ASSERT_NOT_EQUAL(0, json.find("\"controlunit_uuid\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\""));
+    TEST_ASSERT_NOT_EQUAL(0, json.find("\"sensor_uuid\":\"123e4567-e89b-12d3-a456-426614174000\""));
+    TEST_ASSERT_NOT_EQUAL(0, json.find("\"connection_status\":\"connected\""));
+}
+
+extern "C" void when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unknown(void) {
+    SensorConnectResponse response;
+    response.sensorUuid = nullptr;  // Simulerar ogiltig UUID
+    response.status = connectionStatus::UNAVAILABLE;
+
+    std::string json = JsonParser::composeSensorConnectResponse(response);
+
+    TEST_ASSERT_NOT_EQUAL(0, json.find("\"sensor_uuid\":\"unknown\""));
+    TEST_ASSERT_NOT_EQUAL(0, json.find("\"connection_status\":\"unavailable\""));
+}
+
+extern "C" void when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_status_correctly(void) {
+    SensorConnectResponse response;
+    response.sensorUuid = std::make_shared<Uuid>("987e6543-e21b-12d3-a456-426614174999");
+    response.status = connectionStatus::PENDING;
+
+    std::string json = JsonParser::composeSensorConnectResponse(response);
+
+    TEST_ASSERT_NOT_EQUAL(0, json.find("\"sensor_uuid\":\"987e6543-e21b-12d3-a456-426614174999\""));
+    TEST_ASSERT_NOT_EQUAL(0, json.find("\"connection_status\":\"pending\""));
+}
+

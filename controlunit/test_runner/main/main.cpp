@@ -27,10 +27,13 @@ extern "C" void after_clearing_readings_grouped_readings_is_empty(void);
 // JsonParser
 extern "C" void when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots(void);
 extern "C" void when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_json(void);
-extern "C" void when_sensor_connect_parseSensorConnect_returns_correct_request(void);
-extern "C" void when_sensor_connect_parseSensorConnect_returns_empty_on_missing_uuid(void);
-extern "C" void when_sensor_connect_parseSensorConnect_returns_empty_on_invalid_json(void);
-extern "C" void when_sensor_connect_parseSensorConnect_returns_correct_request_for_disconnect(void);
+extern "C" void when_valid_connect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(void);
+extern "C" void when_sensor_uuid_is_missing_then_parseSensorConnectRequest_returns_empty_request(void);
+extern "C" void when_json_is_invalid_then_parseSensorConnectRequest_returns_empty_request(void);
+extern "C" void when_valid_disconnect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(void);
+extern "C" void when_valid_sensor_response_is_given_then_composeSensorConnectResponse_returns_expected_json(void);
+extern "C" void when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unknown(void);
+extern "C" void when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_status_correctly(void);
 
 // Lägg till testen i main
 extern "C" void app_main() {
@@ -56,10 +59,12 @@ extern "C" void app_main() {
     UNITY_BEGIN();
     RUN_TEST(when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots);
     RUN_TEST(when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_json);
-    RUN_TEST(when_sensor_connect_parseSensorConnect_returns_correct_request);
-    RUN_TEST(when_sensor_connect_parseSensorConnect_returns_empty_on_missing_uuid);
-    RUN_TEST(when_sensor_connect_parseSensorConnect_returns_empty_on_missing_uuid);
-    RUN_TEST(when_sensor_connect_parseSensorConnect_returns_empty_on_invalid_json);
-    RUN_TEST(when_sensor_connect_parseSensorConnect_returns_correct_request_for_disconnect);
+    RUN_TEST(when_valid_connect_json_is_given_then_parseSensorConnectRequest_returns_expected_request);
+    RUN_TEST(when_sensor_uuid_is_missing_then_parseSensorConnectRequest_returns_empty_request);
+    RUN_TEST(when_json_is_invalid_then_parseSensorConnectRequest_returns_empty_request);
+    RUN_TEST(when_valid_disconnect_json_is_given_then_parseSensorConnectRequest_returns_expected_request);
+    RUN_TEST(when_valid_sensor_response_is_given_then_composeSensorConnectResponse_returns_expected_json);
+    RUN_TEST(when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unknown);
+    RUN_TEST(when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_status_correctly);
     UNITY_END();
 }

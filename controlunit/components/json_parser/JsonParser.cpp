@@ -110,7 +110,8 @@ std::string JsonParser::composeGroupedReadings(
 }
 
 SensorConnectRequest
-JsonParser::parseSensorConnectRequest(const std::string& json, requestType type) {
+JsonParser::parseSensorConnectRequest(const std::string& json,
+                                      requestType        type) {
     SensorConnectRequest request;
     request.sensorUuid = nullptr;
 
@@ -128,7 +129,8 @@ JsonParser::parseSensorConnectRequest(const std::string& json, requestType type)
         cJSON_Delete(root);
         return request;
     }
-    std::shared_ptr<Uuid> sensorUuid = std::make_shared<Uuid>(uuidItem->valuestring);
+    std::shared_ptr<Uuid> sensorUuid =
+        std::make_shared<Uuid>(uuidItem->valuestring);
 
     // Token
     cJSON* tokenItem = cJSON_GetObjectItem(root, "token");
@@ -137,11 +139,11 @@ JsonParser::parseSensorConnectRequest(const std::string& json, requestType type)
         cJSON_Delete(root);
         return request;
     }
-    std::string token { tokenItem->valuestring };
+    std::string token{tokenItem->valuestring};
 
     request.sensorUuid = sensorUuid;
-    request.token = token;
-    request.request = type;
+    request.token      = token;
+    request.request    = type;
 
     cJSON_Delete(root);
     return request;
@@ -149,5 +151,29 @@ JsonParser::parseSensorConnectRequest(const std::string& json, requestType type)
 
 std::string JsonParser::composeSensorConnectResponse(
     const SensorConnectResponse& response) {
-        return "";
+    cJSON* root = cJSON_CreateObject();
+
+    // Control Unit UUID — hardcoded for the moment
+    cJSON_AddStringToObject(
+        root, "controlunit_uuid", "f47ac10b-58cc-4372-a567-0e02b2c3d479");
+
+    // Sensor UUID
+    if (response.sensorUuid && response.sensorUuid->isValid()) {
+        cJSON_AddStringToObject(
+            root, "sensor_uuid", response.sensorUuid->toString().c_str());
+    } else {
+        cJSON_AddStringToObject(root, "sensor_uuid", "unknown");
     }
+
+    // Connection Status
+    cJSON_AddStringToObject(root,
+                            "connection_status",
+                            connectionStatusToString(response.status).c_str());
+
+    // Convert to string and clean up
+    char*       jsonStr = cJSON_PrintUnformatted(root);
+    std::string result(jsonStr);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+    return result;
+}
