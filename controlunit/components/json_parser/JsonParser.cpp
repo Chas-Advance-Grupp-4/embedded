@@ -223,5 +223,30 @@ JsonParser::parseDriverConnectRequest(const std::string& json,
 
 std::string JsonParser::composeDriverConnectResponse(
     const DriverConnectResponse& response) {
-        return "";
+
+    cJSON* root = cJSON_CreateObject();
+
+    // Control Unit UUID — hardcoded for the moment
+    cJSON_AddStringToObject(
+        root, "controlunit_uuid", "f47ac10b-58cc-4372-a567-0e02b2c3d479");
+
+    // Driver ID
+    if (response.driverId != 0) {
+        cJSON_AddNumberToObject(root, "driver_id", response.driverId);
+    } else {
+        ESP_LOGE(TAG, "Missing or invalid 'driver_id'");
+        cJSON_AddNullToObject(root, "driver_id");
     }
+
+    // Connection Status
+    cJSON_AddStringToObject(root,
+                            "connection_status",
+                            connectionStatusToString(response.status).c_str());
+
+    // Convert to string and clean up
+    char*       jsonStr = cJSON_PrintUnformatted(root);
+    std::string result(jsonStr);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+    return result;
+}
