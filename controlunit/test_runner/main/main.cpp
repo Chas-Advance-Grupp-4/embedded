@@ -13,27 +13,49 @@ extern "C" {
 #include <unity.h>
 }
 
-// Deklarera testfunktionen från komponenten
-extern "C" void when_manager_empty_then_hasUnit_returns_false(void);
-extern "C" void when_unit_added_then_hasUnit_returns_true(void);
-extern "C" void when_unit_added_and_removed_then_hasUnit_returns_false(void);
-extern "C" void when_unit_added_twice_then_logs_error(void);
-extern "C" void when_nonexistent_unit_removed_then_logs_error(void);
-extern "C" void stress_test_many_units(void);
-extern "C" void when_reading_stored_then_it_is_grouped_by_timestamp(void);
-extern "C" void when_storing_multiple_readings_with_same_timestamp_then_grouped_together(void);
-extern "C" void when_storing_readings_with_different_timestamps_then_grouped_separately(void);
-extern "C" void after_clearing_readings_grouped_readings_is_empty(void);
+extern "C" {
+
+void when_manager_empty_then_hasUnit_returns_false(void);
+void when_unit_added_then_hasUnit_returns_true(void);
+void when_unit_added_and_removed_then_hasUnit_returns_false(void);
+void when_unit_added_twice_then_logs_error(void);
+void when_nonexistent_unit_removed_then_logs_error(void);
+void stress_test_many_units(void);
+void when_reading_stored_then_it_is_grouped_by_timestamp(void);
+void when_storing_multiple_readings_with_same_timestamp_then_grouped_together(
+    void);
+void when_storing_readings_with_different_timestamps_then_grouped_separately(
+    void);
+void after_clearing_readings_grouped_readings_is_empty(void);
 // JsonParser
-extern "C" void when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots(void);
-extern "C" void when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_json(void);
-extern "C" void when_valid_connect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(void);
-extern "C" void when_sensor_uuid_is_missing_then_parseSensorConnectRequest_returns_empty_request(void);
-extern "C" void when_json_is_invalid_then_parseSensorConnectRequest_returns_empty_request(void);
-extern "C" void when_valid_disconnect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(void);
-extern "C" void when_valid_sensor_response_is_given_then_composeSensorConnectResponse_returns_expected_json(void);
-extern "C" void when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unknown(void);
-extern "C" void when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_status_correctly(void);
+void when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots(
+    void);
+void when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_json(
+    void);
+void when_valid_connect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(
+    void);
+void when_sensor_uuid_is_missing_then_parseSensorConnectRequest_returns_empty_request(
+    void);
+void when_json_is_invalid_then_parseSensorConnectRequest_returns_empty_request(
+    void);
+void when_valid_disconnect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(
+    void);
+void when_valid_sensor_response_is_given_then_composeSensorConnectResponse_returns_expected_json(
+    void);
+void when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unknown(
+    void);
+void when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_status_correctly(
+    void);
+// connectionStatusToString
+void when_given_connected_status_connectionStatusToString_returns_connected(
+    void);
+void when_given_disconnected_status_connectionStatusToString_returns_disconnected(
+    void);
+void when_given_pending_status_connectionStatusToString_returns_pending(void);
+void when_given_unavailable_status_connectionStatusToString_returns_unavailable(
+    void);
+void when_given_invalid_status_connectionStatusToString_returns_unknown(void);
+}
 
 // Lägg till testen i main
 extern "C" void app_main() {
@@ -50,21 +72,46 @@ extern "C" void app_main() {
     RUN_TEST(when_nonexistent_unit_removed_then_logs_error);
     // RUN_TEST(stress_test_many_units);
     RUN_TEST(when_reading_stored_then_it_is_grouped_by_timestamp);
-    RUN_TEST(when_storing_multiple_readings_with_same_timestamp_then_grouped_together);
-    RUN_TEST(when_storing_readings_with_different_timestamps_then_grouped_separately);
+    RUN_TEST(
+        when_storing_multiple_readings_with_same_timestamp_then_grouped_together);
+    RUN_TEST(
+        when_storing_readings_with_different_timestamps_then_grouped_separately);
     RUN_TEST(after_clearing_readings_grouped_readings_is_empty);
     UNITY_END();
 
     ESP_LOGI("TEST", "Testing JsonParser");
     UNITY_BEGIN();
-    RUN_TEST(when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots);
-    RUN_TEST(when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_json);
-    RUN_TEST(when_valid_connect_json_is_given_then_parseSensorConnectRequest_returns_expected_request);
-    RUN_TEST(when_sensor_uuid_is_missing_then_parseSensorConnectRequest_returns_empty_request);
-    RUN_TEST(when_json_is_invalid_then_parseSensorConnectRequest_returns_empty_request);
-    RUN_TEST(when_valid_disconnect_json_is_given_then_parseSensorConnectRequest_returns_expected_request);
-    RUN_TEST(when_valid_sensor_response_is_given_then_composeSensorConnectResponse_returns_expected_json);
-    RUN_TEST(when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unknown);
-    RUN_TEST(when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_status_correctly);
+    RUN_TEST(
+        when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots);
+    RUN_TEST(
+        when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_json);
+    RUN_TEST(
+        when_valid_connect_json_is_given_then_parseSensorConnectRequest_returns_expected_request);
+    RUN_TEST(
+        when_sensor_uuid_is_missing_then_parseSensorConnectRequest_returns_empty_request);
+    RUN_TEST(
+        when_json_is_invalid_then_parseSensorConnectRequest_returns_empty_request);
+    RUN_TEST(
+        when_valid_disconnect_json_is_given_then_parseSensorConnectRequest_returns_expected_request);
+    RUN_TEST(
+        when_valid_sensor_response_is_given_then_composeSensorConnectResponse_returns_expected_json);
+    RUN_TEST(
+        when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unknown);
+    RUN_TEST(
+        when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_status_correctly);
+    UNITY_END();
+
+    ESP_LOGI("TEST", "Testing connectionStatusToString");
+    UNITY_BEGIN();
+    RUN_TEST(
+        when_given_connected_status_connectionStatusToString_returns_connected);
+    RUN_TEST(
+        when_given_disconnected_status_connectionStatusToString_returns_disconnected);
+    RUN_TEST(
+        when_given_pending_status_connectionStatusToString_returns_pending);
+    RUN_TEST(
+        when_given_unavailable_status_connectionStatusToString_returns_unavailable);
+    RUN_TEST(
+        when_given_invalid_status_connectionStatusToString_returns_unknown);
     UNITY_END();
 }
