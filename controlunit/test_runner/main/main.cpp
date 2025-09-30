@@ -13,6 +13,9 @@ extern "C" {
 #include <unity.h>
 }
 
+#define LOG_TEST_GROUP(name)                                                   \
+    ESP_LOGI("TEST", "========== Testing %s ==========", name)
+
 extern "C" {
 
 void when_manager_empty_then_hasUnit_returns_false(void);
@@ -55,6 +58,20 @@ void when_given_pending_status_connectionStatusToString_returns_pending(void);
 void when_given_unavailable_status_connectionStatusToString_returns_unavailable(
     void);
 void when_given_invalid_status_connectionStatusToString_returns_unknown(void);
+
+// parseDriverConnectRequest
+void test_when_valid_connect_json_then_parseDriverConnectRequest_returns_correct_values(
+    void);
+void test_when_valid_disconnect_json_then_parseDriverConnectRequest_returns_correct_values(
+    void);
+void test_when_missing_driver_id_then_parseDriverConnectRequest_returns_default_request(
+    void);
+void test_when_driver_id_out_of_range_then_parseDriverConnectRequest_returns_default_request(
+    void);
+void test_when_missing_token_then_parseDriverConnectRequest_returns_default_request(
+    void);
+void test_when_invalid_json_then_parseDriverConnectRequest_returns_default_request(
+    void);
 }
 
 // Lägg till testen i main
@@ -63,7 +80,7 @@ extern "C" void app_main() {
     esp_log_level_set("*", ESP_LOG_INFO);
     ESP_LOGI("TEST", "Test-runner startar...");
 
-    ESP_LOGI("TEST", "Testing SensorUnitManager");
+    LOG_TEST_GROUP("SensorUnitManager");
     UNITY_BEGIN();
     RUN_TEST(when_manager_empty_then_hasUnit_returns_false);
     RUN_TEST(when_unit_added_then_hasUnit_returns_true);
@@ -77,10 +94,8 @@ extern "C" void app_main() {
     RUN_TEST(
         when_storing_readings_with_different_timestamps_then_grouped_separately);
     RUN_TEST(after_clearing_readings_grouped_readings_is_empty);
-    UNITY_END();
 
-    ESP_LOGI("TEST", "Testing JsonParser");
-    UNITY_BEGIN();
+    LOG_TEST_GROUP("JsonParser");
     RUN_TEST(
         when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots);
     RUN_TEST(
@@ -99,10 +114,7 @@ extern "C" void app_main() {
         when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unknown);
     RUN_TEST(
         when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_status_correctly);
-    UNITY_END();
-
-    ESP_LOGI("TEST", "Testing connectionStatusToString");
-    UNITY_BEGIN();
+    // connectionStatusToString
     RUN_TEST(
         when_given_connected_status_connectionStatusToString_returns_connected);
     RUN_TEST(
@@ -113,5 +125,19 @@ extern "C" void app_main() {
         when_given_unavailable_status_connectionStatusToString_returns_unavailable);
     RUN_TEST(
         when_given_invalid_status_connectionStatusToString_returns_unknown);
+
+    // parseDriverConnectRequest
+    RUN_TEST(
+        test_when_valid_connect_json_then_parseDriverConnectRequest_returns_correct_values);
+    RUN_TEST(
+        test_when_valid_disconnect_json_then_parseDriverConnectRequest_returns_correct_values);
+    RUN_TEST(
+        test_when_missing_driver_id_then_parseDriverConnectRequest_returns_default_request);
+    RUN_TEST(
+        test_when_driver_id_out_of_range_then_parseDriverConnectRequest_returns_default_request);
+    RUN_TEST(
+        test_when_missing_token_then_parseDriverConnectRequest_returns_default_request);
+    RUN_TEST(
+        test_when_invalid_json_then_parseDriverConnectRequest_returns_default_request);
     UNITY_END();
 }
