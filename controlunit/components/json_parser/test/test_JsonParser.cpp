@@ -72,3 +72,49 @@ extern "C" void when_grouped_readings_are_given_then_composeGroupedReadings_retu
     TEST_ASSERT_NOT_NULL(strstr(json.c_str(), "\"temperature\":21.9"));
     TEST_ASSERT_NOT_NULL(strstr(json.c_str(), "\"humidity\":46.8"));
 }
+
+extern "C" void when_sensor_connect_parseSensorConnect_returns_correct_request(void) {
+    const std::string json = R"({
+        "sensoruuid": "123e4567-e89b-12d3-a456-426614174000",
+        "token": "secure-token-abc"
+    })";
+
+    SensorConnectRequest result = JsonParser::parseSensorConnectRequest(json, requestType::CONNECT);
+
+    TEST_ASSERT_NOT_NULL(result.sensorUuid.get());
+    TEST_ASSERT_EQUAL_STRING("123e4567-e89b-12d3-a456-426614174000", result.sensorUuid->toString().c_str());
+    TEST_ASSERT_EQUAL_STRING("secure-token-abc", result.token.c_str());
+    TEST_ASSERT_EQUAL(requestType::CONNECT, result.request);
+}
+
+extern "C" void when_sensor_connect_parseSensorConnect_returns_empty_on_missing_uuid(void) {
+    const std::string json = R"({
+        "token": "secure-token-abc"
+    })";
+
+    SensorConnectRequest result = JsonParser::parseSensorConnectRequest(json, requestType::CONNECT);
+
+    TEST_ASSERT_NULL(result.sensorUuid.get());
+}
+
+extern "C" void when_sensor_connect_parseSensorConnect_returns_empty_on_invalid_json(void) {
+    const std::string json = R"({ invalid json )";
+
+    SensorConnectRequest result = JsonParser::parseSensorConnectRequest(json, requestType::CONNECT);
+
+    TEST_ASSERT_NULL(result.sensorUuid.get());
+}
+
+extern "C" void when_sensor_connect_parseSensorConnect_returns_correct_request_for_disconnect(void) {
+    const std::string json = R"({
+        "sensoruuid": "987e6543-e21b-12d3-a456-426614174999",
+        "token": "disconnect-token-xyz"
+    })";
+
+    SensorConnectRequest result = JsonParser::parseSensorConnectRequest(json, requestType::DISCONNECT);
+
+    TEST_ASSERT_NOT_NULL(result.sensorUuid.get());
+    TEST_ASSERT_EQUAL_STRING("987e6543-e21b-12d3-a456-426614174999", result.sensorUuid->toString().c_str());
+    TEST_ASSERT_EQUAL_STRING("disconnect-token-xyz", result.token.c_str());
+    TEST_ASSERT_EQUAL(requestType::DISCONNECT, result.request);
+}

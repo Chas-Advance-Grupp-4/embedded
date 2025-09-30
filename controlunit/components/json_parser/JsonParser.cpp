@@ -11,7 +11,7 @@ JsonParser::parseSensorSnapshotGroup(const std::string& json) {
 
     cJSON* root = cJSON_Parse(json.c_str());
     if (!root) {
-        ESP_LOGE(TAG, "Failed to parse JSON");
+        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
         return snapshots;
     }
 
@@ -62,28 +62,33 @@ JsonParser::parseSensorSnapshotGroup(const std::string& json) {
     return snapshots;
 }
 
-std::string JsonParser::composeGroupedReadings(const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings) {
+std::string JsonParser::composeGroupedReadings(
+    const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings) {
     cJSON* root = cJSON_CreateObject();
 
     // Device UUID — hardcoded for the moment
-    cJSON_AddStringToObject(root, "device_uuid", "f47ac10b-58cc-4372-a567-0e02b2c3d479");
+    cJSON_AddStringToObject(
+        root, "device_uuid", "f47ac10b-58cc-4372-a567-0e02b2c3d479");
 
     // Timestamp Groups
     cJSON* timestampGroups = cJSON_CreateArray();
 
     for (const auto& [timestamp, snapshots] : readings) {
         cJSON* groupObj = cJSON_CreateObject();
-        cJSON_AddNumberToObject(groupObj, "timestamp", static_cast<double>(timestamp));
+        cJSON_AddNumberToObject(
+            groupObj, "timestamp", static_cast<double>(timestamp));
 
         cJSON* sensorUnits = cJSON_CreateArray();
         for (const auto& snapshot : snapshots) {
             cJSON* unitObj = cJSON_CreateObject();
             if (snapshot.uuid && snapshot.uuid->isValid()) {
-                cJSON_AddStringToObject(unitObj, "uuid", snapshot.uuid->toString().c_str());
+                cJSON_AddStringToObject(
+                    unitObj, "uuid", snapshot.uuid->toString().c_str());
             } else {
                 cJSON_AddStringToObject(unitObj, "uuid", "unknown");
             }
-            cJSON_AddNumberToObject(unitObj, "temperature", snapshot.temperature);
+            cJSON_AddNumberToObject(
+                unitObj, "temperature", snapshot.temperature);
             cJSON_AddNumberToObject(unitObj, "humidity", snapshot.humidity);
 
             cJSON_AddItemToArray(sensorUnits, unitObj);
@@ -96,10 +101,53 @@ std::string JsonParser::composeGroupedReadings(const std::map<time_t, std::vecto
     cJSON_AddItemToObject(root, "timestamp_groups", timestampGroups);
 
     // Convert to string and clean up
-    char* jsonStr = cJSON_PrintUnformatted(root);
+    char*       jsonStr = cJSON_PrintUnformatted(root);
     std::string result(jsonStr);
     cJSON_free(jsonStr);
     cJSON_Delete(root);
 
     return result;
 }
+
+SensorConnectRequest
+JsonParser::parseSensorConnectRequest(const std::string& json, requestType type) {
+    SensorConnectRequest request;
+    request.sensorUuid = nullptr;
+
+    cJSON* root = cJSON_Parse(json.c_str());
+    if (!root) {
+        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
+        return request;
+    }
+
+    // UUID
+    // ? Add check if uuid is valid ?
+    cJSON* uuidItem = cJSON_GetObjectItem(root, "sensoruuid");
+    if (!cJSON_IsString(uuidItem) || !uuidItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'sensoruuid'");
+        cJSON_Delete(root);
+        return request;
+    }
+    std::shared_ptr<Uuid> sensorUuid = std::make_shared<Uuid>(uuidItem->valuestring);
+
+    // Token
+    cJSON* tokenItem = cJSON_GetObjectItem(root, "token");
+    if (!cJSON_IsString(tokenItem) || !tokenItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'token'");
+        cJSON_Delete(root);
+        return request;
+    }
+    std::string token { tokenItem->valuestring };
+
+    request.sensorUuid = sensorUuid;
+    request.token = token;
+    request.request = type;
+
+    cJSON_Delete(root);
+    return request;
+}
+
+std::string JsonParser::composeSensorConnectResponse(
+    const SensorConnectResponse& response) {
+        return "";
+    }
