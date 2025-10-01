@@ -207,3 +207,17 @@ extern "C" void test_when_invalid_json_then_parseDriverConnectRequest_returns_de
     TEST_ASSERT_EQUAL_UINT32(0, result.driverId);
     TEST_ASSERT_EQUAL_STRING("", result.token.c_str());
 }
+
+
+extern "C" void when_passing_message_to_composeErrorResponse_then_it_should_return_valid_json_string(void) {
+
+    const std::string message = "Something went wrong";
+    const std::string uuid = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    std::string result = JsonParser::composeErrorResponse(message, uuid);
+
+    TEST_ASSERT_NOT_NULL(result.c_str());
+    TEST_ASSERT_NOT_EQUAL(0, result.length());
+    TEST_ASSERT_NOT_NULL(strstr(result.c_str(), "\"status\":\"error\""));
+    TEST_ASSERT_NOT_NULL(strstr(result.c_str(), "\"message\":\"Something went wrong\""));
+    TEST_ASSERT_NOT_NULL(strstr(result.c_str(), "\"controlunit_uuid\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\""));
+}

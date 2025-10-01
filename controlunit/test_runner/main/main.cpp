@@ -72,7 +72,9 @@ void test_when_missing_token_then_parseDriverConnectRequest_returns_default_requ
     void);
 void test_when_invalid_json_then_parseDriverConnectRequest_returns_default_request(
     void);
-}
+void when_passing_message_to_composeErrorResponse_then_it_should_return_valid_json_string(
+    void);
+} // extern "C"
 
 // Lägg till testen i main
 extern "C" void app_main() {
@@ -139,5 +141,8 @@ extern "C" void app_main() {
         test_when_missing_token_then_parseDriverConnectRequest_returns_default_request);
     RUN_TEST(
         test_when_invalid_json_then_parseDriverConnectRequest_returns_default_request);
+    RUN_TEST(
+        when_passing_message_to_composeErrorResponse_then_it_should_return_valid_json_string);
+
     UNITY_END();
 }

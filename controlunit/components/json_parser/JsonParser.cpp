@@ -250,3 +250,27 @@ std::string JsonParser::composeDriverConnectResponse(
     cJSON_Delete(root);
     return result;
 }
+
+/**
+ * @brief Generate generic error message for communication
+ * 
+ * TODO: Discuss error handling with backend and expected responses
+ * 
+ * @param message The string that is added to the message field
+ * @return std::string 
+ */
+std::string JsonParser::composeErrorResponse(const std::string& message, const std::string& controlunit_uuid) {
+    cJSON* root = cJSON_CreateObject();
+
+    // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
+    cJSON_AddStringToObject(
+        root, "controlunit_uuid", controlunit_uuid.c_str());
+    cJSON_AddStringToObject(root, "status", "error");
+    cJSON_AddStringToObject(root, "message", message.c_str());
+
+    char*       jsonStr = cJSON_PrintUnformatted(root);
+    std::string result(jsonStr);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+    return result;
+}

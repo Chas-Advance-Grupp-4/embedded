@@ -20,5 +20,5 @@ public:
     static std::string composeDriverConnectResponse(const DriverConnectResponse& response);
 
     // Generic error/status
-    // static std::string composeError(const std::string& message);
+    static std::string composeErrorResponse(const std::string& message, const std::string& controlunit_uuid);
 };
