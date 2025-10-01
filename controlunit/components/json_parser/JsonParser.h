@@ -13,11 +13,11 @@ public:
 
     // Sensor connection
     static SensorConnectRequest parseSensorConnectRequest(const std::string& json, requestType type);
-    static std::string composeSensorConnectResponse(const SensorConnectResponse& response);
+    static std::string composeSensorConnectResponse(const SensorConnectResponse& response, const std::string& controlunit_uuid);
 
     // Driver connection
     static DriverConnectRequest parseDriverConnectRequest(const std::string& json, requestType type);
-    static std::string composeDriverConnectResponse(const DriverConnectResponse& response);
+    static std::string composeDriverConnectResponse(const DriverConnectResponse& response, const std::string& controlunit_uuid);
 
     // Generic error/status
     static std::string composeErrorResponse(const std::string& message, const std::string& controlunit_uuid);

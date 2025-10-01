@@ -150,12 +150,12 @@ JsonParser::parseSensorConnectRequest(const std::string& json,
 }
 
 std::string JsonParser::composeSensorConnectResponse(
-    const SensorConnectResponse& response) {
+    const SensorConnectResponse& response, const std::string& controlunit_uuid) {
     cJSON* root = cJSON_CreateObject();
 
-    // Control Unit UUID — hardcoded for the moment
+    // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
     cJSON_AddStringToObject(
-        root, "controlunit_uuid", "f47ac10b-58cc-4372-a567-0e02b2c3d479");
+        root, "controlunit_uuid", controlunit_uuid.c_str());
 
     // Sensor UUID
     if (response.sensorUuid && response.sensorUuid->isValid()) {
@@ -222,13 +222,13 @@ JsonParser::parseDriverConnectRequest(const std::string& json,
 }
 
 std::string JsonParser::composeDriverConnectResponse(
-    const DriverConnectResponse& response) {
+    const DriverConnectResponse& response, const std::string& controlunit_uuid) {
 
     cJSON* root = cJSON_CreateObject();
 
-    // Control Unit UUID — hardcoded for the moment
+    // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
     cJSON_AddStringToObject(
-        root, "controlunit_uuid", "f47ac10b-58cc-4372-a567-0e02b2c3d479");
+        root, "controlunit_uuid", controlunit_uuid.c_str());
 
     // Driver ID
     if (response.driverId != 0) {
