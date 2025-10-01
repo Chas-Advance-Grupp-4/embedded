@@ -3,7 +3,7 @@
 
 static const char* TAG = "PostexampleHandler";
 
-PostexampleHandler::PostexampleHandler(const char* uri)
+PostexampleHandler::PostexampleHandler(const std::string& uri)
     : PostHandler(uri) {}
 
 esp_err_t PostexampleHandler::processBody(httpd_req_t* req, const std::string& body) {
