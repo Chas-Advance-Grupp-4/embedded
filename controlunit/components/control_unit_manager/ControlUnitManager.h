@@ -9,9 +9,11 @@ class ControlUnitManager {
     void              connectDriver();
     void              disconnectDriver();
     uint32_t          getDriverId();
+    std::string       getControlunitUuidString();
 
   private:
     bool     m_isDriverConnected { false };
     uint32_t m_driverId {};
     Uuid     m_controlunitUuid;
+    static constexpr const char* TAG = "ControlUnitManager";
 };

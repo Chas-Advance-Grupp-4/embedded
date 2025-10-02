@@ -1,4 +1,5 @@
 #include "ReadingsDispatcher.h"
+#include "JsonParser.h"
 
 ReadingDispatchTrigger::ReadingDispatchTrigger(TaskHandle_t target_task,
                                                uint64_t     interval_us)
@@ -79,8 +80,11 @@ void ReadingDispatchTask::run() {
     while (true) {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
         // add m_manager.buildJson();  eller vad den nu heter
-        std::string json =
-            "{\"content\":\"Hello with ControlUnitManager in the backseat\"}";
+        std::string json = JsonParser::composeGroupedReadings(
+            m_manager.sensorManager.getGroupedReadings(),
+            m_manager.getControlunitUuidString());
+        // std::string json =
+        //     "{\"content\":\"Hello with ControlUnitManager in the backseat\"}";
         m_httpClient.postTo("/post", json);
     }
 }
