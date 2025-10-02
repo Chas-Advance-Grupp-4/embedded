@@ -1,59 +1,39 @@
 #pragma once
 
+#include "RestClient.h"
 #include "esp_timer.h"
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 
-// ReadingDispatchTrigger
-class SensorTrigger {
+class ReadingDispatchTrigger {
 public:
-    SensorTrigger(TaskHandle_t target_task, uint64_t interval_us)
-        : task_handle(target_task), interval(interval_us), timer(nullptr) {}
-
-    esp_err_t start() {
-        esp_timer_create_args_t timer_args = {
-            .callback = &SensorTrigger::timer_callback,
-            .arg = this,
-            .name = "SensorTrigger"
-        };
-
-        esp_err_t err = esp_timer_create(&timer_args, &timer);
-        if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Kunde inte skapa timer: %s", esp_err_to_name(err));
-            return err;
-        }
-
-        err = esp_timer_start_periodic(timer, interval);
-        if (err != ESP_OK) {
-            ESP_LOGE(TAG, "Kunde inte starta timer: %s", esp_err_to_name(err));
-            return err;
-        }
-
-        ESP_LOGI(TAG, "SensorTrigger startad");
-        return ESP_OK;
-    }
-
-    void stop() {
-        if (timer) {
-            esp_timer_stop(timer);
-            esp_timer_delete(timer);
-            timer = nullptr;
-            ESP_LOGI(TAG, "SensorTrigger stoppad");
-        }
-    }
-
+    ReadingDispatchTrigger(TaskHandle_t target_task, uint64_t interval_us);
+    esp_err_t start();    
+    void stop();
+    
 private:
-    static void timer_callback(void* arg) {
-        auto* self = static_cast<SensorTrigger*>(arg);
-        if (self->task_handle) {
-            xTaskNotifyGive(self->task_handle);
-        }
-    }
+    static void timerCallback(void* arg);
+    
+    TaskHandle_t m_taskHandle;
+    uint64_t m_interval;
+    esp_timer_handle_t m_timer;
 
-    TaskHandle_t task_handle;
-    uint64_t interval;
-    esp_timer_handle_t timer;
+    static constexpr const char* TAG = "ReadingDispatchTrigger";
+};
 
-    static constexpr const char* TAG = "SensorTrigger";
+class ReadingDispatchTask {
+public:
+    ReadingDispatchTask(RestClient& client);
+    void start();    
+    TaskHandle_t getHandle() const;
+    
+private:
+    static void taskEntry(void* pvParameters);    
+    void run();
+    
+    RestClient& m_httpClient;
+    TaskHandle_t m_taskHandle;
+
+    static constexpr const char* TAG = "ReadingDispatchTask";
 };

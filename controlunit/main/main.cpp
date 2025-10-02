@@ -1,5 +1,6 @@
 #include "RestServer.h"
 #include "RestClient.h"
+#include "ReadingsDispatcher.h"
 #include "wifi_config.h"
 #include "wifi_manager.h"
 #include <esp_event.h>
@@ -10,7 +11,7 @@
 #include <nvs_flash.h>
 
 extern "C" void app_main(void) {
-    // Wait for monitor to get full log
+    // Wait for monitor so we don't miss first part of the log
     vTaskDelay(pdMS_TO_TICKS(500));
 
     nvs_flash_init();
@@ -20,8 +21,15 @@ extern "C" void app_main(void) {
         // Possible additional LOG message here
     }
 
-    
     static RestClient client("http://192.168.1.129:8080", "eyJhbGciOiJIUzI1NiIs...");
     client.init();
     client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
+
+    vTaskDelay(pdMS_TO_TICKS(8000));
+    static auto dispatchTask = std::make_unique<ReadingDispatchTask>(client);
+    dispatchTask->start();
+    static auto trigger = std::make_unique<ReadingDispatchTrigger>(dispatchTask->getHandle(), 5000000);
+    trigger->start();
+
+
 }
