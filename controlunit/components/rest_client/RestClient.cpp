@@ -30,12 +30,14 @@ esp_err_t RestClient::postTo(const std::string& endpoint,
     if (!m_client)
         return ESP_ERR_INVALID_STATE;
 
+    ESP_LOGI(TAG, "Free heap: %u", esp_get_free_heap_size());
     std::string full_url = m_baseUrl + endpoint;
     esp_http_client_set_url(m_client, full_url.c_str());
     esp_http_client_set_method(m_client, HTTP_METHOD_POST);
     esp_http_client_set_post_field(m_client, payload.c_str(), payload.length());
 
     esp_err_t err = esp_http_client_perform(m_client);
+    esp_http_client_close(m_client);    // Close the socket but not the client itself
     if (err == ESP_OK) {
         int status = esp_http_client_get_status_code(m_client);
         ESP_LOGI(TAG, "Svar %d från %s", status, endpoint.c_str());
