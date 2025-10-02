@@ -25,11 +25,10 @@ extern "C" void app_main(void) {
     client.init();
     client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
 
+    // Wait so we have time to see the first post on the server
     vTaskDelay(pdMS_TO_TICKS(8000));
-    static auto dispatchTask = std::make_unique<ReadingDispatchTask>(client);
-    dispatchTask->start();
-    static auto trigger = std::make_unique<ReadingDispatchTrigger>(dispatchTask->getHandle(), 5000000);
-    trigger->start();
-
+    static ReadingsDispatcher dispatcher(client, 5000000);
+    dispatcher.start();
+    
 
 }

@@ -74,6 +74,29 @@ ReadingDispatchTrigger::ReadingDispatchTrigger(TaskHandle_t target_task, uint64_
         ESP_LOGI(TAG, "ReadingDispatchTask is running");
         while (true) {
             ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-            m_httpClient.postTo("/post", "{\"content\":\"Hello from ReadingDispatchTask\"}");
+            m_httpClient.postTo("/post", "{\"content\":\"Hello from ReadingsDispatcher\"}");
         }
     }
+
+
+    ReadingsDispatcher::ReadingsDispatcher(RestClient& client, uint64_t interval_us)
+    : m_client(client), m_interval(interval_us) {}
+
+esp_err_t ReadingsDispatcher::start() {
+    m_task = std::make_unique<ReadingDispatchTask>(m_client);
+    m_task->start();
+
+    m_trigger = std::make_unique<ReadingDispatchTrigger>(m_task->getHandle(), m_interval);
+    return m_trigger->start();
+}
+
+void ReadingsDispatcher::stop() {
+    if (m_trigger) m_trigger->stop();
+    // Task not stopped immediately. Can be added if necessary
+}
+
+// ! restart not yet implemented
+// esp_err_t ReadingsDispatcher::restart(uint64_t new_interval_us) {
+//     if (!m_trigger) return ESP_ERR_INVALID_STATE;
+//     return m_trigger->restart(new_interval_us);
+// }

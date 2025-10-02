@@ -5,6 +5,7 @@
 #include "esp_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <memory>
 
 class ReadingDispatchTrigger {
 public:
@@ -36,4 +37,18 @@ private:
     TaskHandle_t m_taskHandle;
 
     static constexpr const char* TAG = "ReadingDispatchTask";
+};
+
+class ReadingsDispatcher {
+public:
+    ReadingsDispatcher(RestClient& client, uint64_t interval_us);
+    esp_err_t start();
+    void stop();
+    // esp_err_t restart(uint64_t new_interval_us);
+
+private:
+    RestClient& m_client;
+    std::unique_ptr<ReadingDispatchTask> m_task;
+    std::unique_ptr<ReadingDispatchTrigger> m_trigger;
+    uint64_t m_interval;
 };
