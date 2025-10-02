@@ -63,16 +63,22 @@ JsonParser::parseSensorSnapshotGroup(const std::string& json) {
 }
 
 std::string JsonParser::composeGroupedReadings(
-    const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings) {
+    const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings,
+    const std::string& controlunit_uuid) {
     cJSON* root = cJSON_CreateObject();
 
-    // Device UUID — hardcoded for the moment
+    // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
     cJSON_AddStringToObject(
-        root, "device_uuid", "f47ac10b-58cc-4372-a567-0e02b2c3d479");
+        root, "device_uuid", controlunit_uuid.c_str());
 
     // Timestamp Groups
     cJSON* timestampGroups = cJSON_CreateArray();
-
+    if (readings.empty()) {
+        ESP_LOGI(TAG, "No new readings — sending timestamp_groups: []");
+    } else {
+        ESP_LOGI(
+            TAG, "Composing JSON with %zu timestamp groups", readings.size());
+    }
     for (const auto& [timestamp, snapshots] : readings) {
         cJSON* groupObj = cJSON_CreateObject();
         cJSON_AddNumberToObject(
@@ -149,13 +155,13 @@ JsonParser::parseSensorConnectRequest(const std::string& json,
     return request;
 }
 
-std::string JsonParser::composeSensorConnectResponse(
-    const SensorConnectResponse& response, const std::string& controlunit_uuid) {
+std::string
+JsonParser::composeSensorConnectResponse(const SensorConnectResponse& response,
+                                         const std::string& controlunit_uuid) {
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(
-        root, "controlunit_uuid", controlunit_uuid.c_str());
+    cJSON_AddStringToObject(root, "controlunit_uuid", controlunit_uuid.c_str());
 
     // Sensor UUID
     if (response.sensorUuid && response.sensorUuid->isValid()) {
@@ -221,14 +227,14 @@ JsonParser::parseDriverConnectRequest(const std::string& json,
     return request;
 }
 
-std::string JsonParser::composeDriverConnectResponse(
-    const DriverConnectResponse& response, const std::string& controlunit_uuid) {
+std::string
+JsonParser::composeDriverConnectResponse(const DriverConnectResponse& response,
+                                         const std::string& controlunit_uuid) {
 
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(
-        root, "controlunit_uuid", controlunit_uuid.c_str());
+    cJSON_AddStringToObject(root, "controlunit_uuid", controlunit_uuid.c_str());
 
     // Driver ID
     if (response.driverId != 0) {
@@ -253,18 +259,19 @@ std::string JsonParser::composeDriverConnectResponse(
 
 /**
  * @brief Generate generic error message for communication
- * 
+ *
  * TODO: Discuss error handling with backend and expected responses
- * 
+ *
  * @param message The string that is added to the message field
- * @return std::string 
+ * @return std::string
  */
-std::string JsonParser::composeErrorResponse(const std::string& message, const std::string& controlunit_uuid) {
+std::string
+JsonParser::composeErrorResponse(const std::string& message,
+                                 const std::string& controlunit_uuid) {
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(
-        root, "controlunit_uuid", controlunit_uuid.c_str());
+    cJSON_AddStringToObject(root, "controlunit_uuid", controlunit_uuid.c_str());
     cJSON_AddStringToObject(root, "status", "error");
     cJSON_AddStringToObject(root, "message", message.c_str());
 

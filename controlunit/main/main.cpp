@@ -1,4 +1,6 @@
 #include "RestServer.h"
+#include "RestClient.h"
+#include "ReadingsDispatcher.h"
 #include "wifi_config.h"
 #include "wifi_manager.h"
 #include <esp_event.h>
@@ -9,10 +11,25 @@
 #include <nvs_flash.h>
 
 extern "C" void app_main(void) {
+    // Wait for monitor so we don't miss first part of the log
+    vTaskDelay(pdMS_TO_TICKS(500));
+
     nvs_flash_init();
     init_wifi();
     static RestServer server;
     if (server.start()) {
         // Possible additional LOG message here
     }
+
+    static RestClient client("http://192.168.1.129:8080", "eyJhbGciOiJIUzI1NiIs...");
+    client.init();
+    client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
+    static ControlUnitManager manager;
+
+    // Wait so we have time to see the first post on the server
+    vTaskDelay(pdMS_TO_TICKS(8000));
+    static ReadingsDispatcher dispatcher(client, manager, 5000000);
+    dispatcher.start();
+    
+
 }

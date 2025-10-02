@@ -1,5 +1,16 @@
 #include "wifi_manager.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/event_groups.h"
+#include "wifi_config.h"
+#include <esp_event.h>
+#include <esp_http_server.h>
+#include <esp_log.h>
+#include <esp_netif.h>
+#include <esp_wifi.h>
+#include <nvs_flash.h>
 
+#define WIFI_CONNECTED_BIT BIT0
+static EventGroupHandle_t wifi_event_group;
 static const char* WIFI_TAG = "wifi_setup";
 
 static void
@@ -8,6 +19,7 @@ wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, voi
     if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
         ESP_LOGI(WIFI_TAG, "Got IP: " IPSTR, IP2STR(&event->ip_info.ip));
+        xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
         ESP_LOGI(WIFI_TAG, "Gateway: " IPSTR, IP2STR(&event->ip_info.gw));
         ESP_LOGI(WIFI_TAG, "Netmask: " IPSTR, IP2STR(&event->ip_info.netmask));
     }
@@ -21,6 +33,8 @@ void init_wifi() {
     esp_log_level_set("wifi", ESP_LOG_VERBOSE);
 
     ESP_LOGI(WIFI_TAG, "Initializing Wi-Fi");
+
+    wifi_event_group = xEventGroupCreate();
 
     esp_netif_init();
     ESP_ERROR_CHECK(esp_event_loop_create_default());
@@ -56,6 +70,10 @@ void init_wifi() {
     esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
     esp_wifi_start();
     esp_wifi_connect();
+
+    ESP_LOGI(WIFI_TAG, "Wi-Fi started, waiting for connection...");
+    xEventGroupWaitBits(wifi_event_group, WIFI_CONNECTED_BIT, false, true, portMAX_DELAY);
+    ESP_LOGI(WIFI_TAG, "Wi-Fi connected!");
 
     ESP_LOGI(WIFI_TAG, "Wi-Fi started, connecting to SSID: %s", WIFI_SECRET_SSID);
 }
