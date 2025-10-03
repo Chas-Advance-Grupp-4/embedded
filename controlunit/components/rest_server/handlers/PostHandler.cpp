@@ -3,9 +3,10 @@
 
 static const char* TAG = "PostHandler";
 
-PostHandler::PostHandler(const char* uri) {
+PostHandler::PostHandler(const std::string& uri) 
+    : m_uriString { uri } {
     m_uri = {
-        .uri = uri,
+        .uri = m_uriString.c_str(),
         .method = HTTP_POST,
         .handler = PostHandler::staticHandler,
         .user_ctx = this
