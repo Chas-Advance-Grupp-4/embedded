@@ -6,7 +6,7 @@ idf_component_register(
          "handlers/PostexampleHandler.cpp"
          "handlers/HelloHandler.cpp"
     INCLUDE_DIRS "." "handlers"
-    PRIV_REQUIRES esp_http_server esp_wifi log nvs_flash unity
+    REQUIRES esp_http_server esp_wifi log nvs_flash unity
 )
 
 if(CONFIG_UNIT_TEST_ENABLED)
