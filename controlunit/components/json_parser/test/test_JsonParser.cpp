@@ -41,6 +41,8 @@ when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_jso
     void) {
 
     // Construct an object to test
+    std::string controlunit_uuid = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    
     std::map<time_t, std::vector<ca_sensorunit_snapshot>> readings;
 
     time_t ts1 = 1726995600;
@@ -53,7 +55,7 @@ when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_jso
 
     readings[ts2] = {{uuid1, ts2, 22.6, 45.1}, {uuid2, ts2, 21.9, 46.8}};
 
-    std::string json = JsonParser::composeGroupedReadings(readings);
+    std::string json = JsonParser::composeGroupedReadings(readings, controlunit_uuid);
 
     // check that the values match
     TEST_ASSERT_NOT_EQUAL(0, json.length());
