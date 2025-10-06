@@ -85,13 +85,11 @@ void MockDataGeneratorTask::run() {
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
         // Create a random reading (not very sophisticated)
-        const time_t mockTimeOffset =
-            1726995600; // time offset since clock is not yet synced
         ca_sensorunit_snapshot snapshot;
 
         snapshot.uuid =
             std::make_shared<Uuid>("987e6543-e21b-12d3-a456-426614174999");
-        snapshot.timestamp = time(NULL) + mockTimeOffset;
+        snapshot.timestamp = time(NULL);
 
         uint32_t rawTemperature = esp_random();
         snapshot.temperature    = 20.0f + (rawTemperature % 1000) / 100.0f;
