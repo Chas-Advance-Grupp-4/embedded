@@ -11,4 +11,5 @@ idf_component_register(
         esp_wifi 
         log 
         nvs_flash
+        time_sync_manager
 )
