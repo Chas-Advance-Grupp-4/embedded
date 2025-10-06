@@ -6,7 +6,9 @@
 TimeSyncManager::TimeSyncManager(const std::string& ntpServer,
                                  uint32_t           syncIntervalMs)
     : m_ntpServer{ntpServer}, m_syncIntervalMs{syncIntervalMs},
-      m_timeSynced{false} {}
+      m_timeSynced{false} {
+    ESP_LOGI(TAG, "Resync interval set to %d ms", m_syncIntervalMs);
+}
 
 void TimeSyncManager::start() {
     ESP_LOGI(TAG, "Initializing SNTP...");
@@ -22,7 +24,7 @@ void TimeSyncManager::start() {
     while (!m_timeSynced && retry++ < m_maxRetries) {
         time(&now);
         localtime_r(&now, &timeinfo);
-        
+
         if ((timeinfo.tm_year + 1900) >= 2020) {
             m_timeSynced = true;
         } else {
@@ -35,5 +37,44 @@ void TimeSyncManager::start() {
         ESP_LOGI(TAG, "Time synced: %s", asctime(&timeinfo));
     } else {
         ESP_LOGW(TAG, "Could not sync time");
+    }
+    
+}
+
+void TimeSyncManager::enableAutoResync() {
+    if (m_resyncTaskHandle != nullptr) {
+        ESP_LOGW(TAG, "Resync task already running");
+        return;
+    }
+
+    if (m_syncIntervalMs < 10000) {
+        ESP_LOGW(TAG, "Sync interval too short, forcing minimum 10s");
+        m_syncIntervalMs = 10000;
+    }
+
+    // implement with esp_timer as simple as possible
+
+    }
+
+void TimeSyncManager::resyncTask() {
+    // If needed create this task
+}
+
+void TimeSyncManager::resync() {
+    ESP_LOGI(TAG, "Resyncing time...");
+    esp_sntp_stop();
+    esp_sntp_init();
+
+    time_t now;
+    struct tm timeinfo;
+    time(&now);
+    localtime_r(&now, &timeinfo);
+
+    if ((timeinfo.tm_year + 1900) >= 2020) {
+        ESP_LOGI(TAG, "Resync successful: %s", asctime(&timeinfo));
+        m_timeSynced = true;
+    } else {
+        ESP_LOGW(TAG, "Resync failed");
+        m_timeSynced = false;
     }
 }
