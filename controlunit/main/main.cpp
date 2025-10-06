@@ -2,6 +2,7 @@
 #include "ReadingsDispatcher.h"
 #include "RestClient.h"
 #include "RestServer.h"
+#include "TimeSyncManager.h"
 #include "wifi_config.h"
 #include "wifi_manager.h"
 #include <esp_event.h>
@@ -14,9 +15,11 @@
 extern "C" void app_main(void) {
     // Wait for monitor so we don't miss first part of the log
     vTaskDelay(pdMS_TO_TICKS(500));
-
     nvs_flash_init();
     init_wifi();
+    TimeSyncManager timeSyncer;
+    timeSyncer.start();
+
     static RestServer server;
     if (server.start()) {
         // Possible additional LOG message here
