@@ -17,7 +17,7 @@ extern "C" void app_main(void) {
     vTaskDelay(pdMS_TO_TICKS(500));
     nvs_flash_init();
     init_wifi();
-    TimeSyncManager timeSyncer;
+    static TimeSyncManager timeSyncer;
     timeSyncer.start();
 
     static RestServer server;
@@ -25,7 +25,7 @@ extern "C" void app_main(void) {
         // Possible additional LOG message here
     }
 
-    static RestClient client("http://192.168.1.129:8080",
+    static RestClient client(CLIENT_URL,
                              "eyJhbGciOiJIUzI1NiIs...");
     client.init();
     client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
