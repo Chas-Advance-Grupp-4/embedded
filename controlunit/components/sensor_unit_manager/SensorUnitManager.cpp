@@ -15,11 +15,6 @@
 
 static const char* SENSORUM_TAG = "sensor_unit_manager";
 
-/**
- * @brief Add a sensorunit to the Manager
- * 
- * @param uuid of the sensor unit
- */
 void SensorUnitManager::addUnit(const Uuid& uuid) {
     if (m_active_units.find(uuid) == m_active_units.end()) {
         m_active_units[uuid] = std::make_shared<Uuid>(uuid);
@@ -29,11 +24,6 @@ void SensorUnitManager::addUnit(const Uuid& uuid) {
     }
 }
 
-/**
- * @brief Remove a sensorunit from the Manager
- * 
- * @param uuid of the sensor unit to remove
- */
 void SensorUnitManager::removeUnit(const Uuid& uuid) {
     auto it = m_active_units.find(uuid);
     if (it != m_active_units.end()) {
@@ -44,31 +34,14 @@ void SensorUnitManager::removeUnit(const Uuid& uuid) {
     }
 }
 
-/**
- * @brief Check if a sensorunit is added to the Manager
- * 
- * @param uuid 
- * @return true 
- * @return false 
- */
 bool SensorUnitManager::hasUnit(const Uuid& uuid) const {
     return (m_active_units.find(uuid) != m_active_units.end());
 }
 
-/**
- * @brief Store an individual reading from a sensor unit
- * 
- * @param reading type defined in sensor_data_types.h
- */
 void SensorUnitManager::storeReading(const ca_sensorunit_snapshot& reading) {
     m_all_readings.push_back(reading);
 }
 
-/**
- * @brief Group all readings on timestamp for batch sending to backend
- * 
- * @return std::map<time_t, std::vector<ca_sensorunit_snapshot>> 
- */
 std::map<time_t, std::vector<ca_sensorunit_snapshot>>
 SensorUnitManager::getGroupedReadings() const {
     std::map<time_t, std::vector<ca_sensorunit_snapshot>> grouped;
@@ -78,10 +51,6 @@ SensorUnitManager::getGroupedReadings() const {
     return grouped;
 }
 
-/**
- * @brief Clear all readings
- * 
- */
 void SensorUnitManager::clearReadings() {
     m_all_readings.clear();
 }
