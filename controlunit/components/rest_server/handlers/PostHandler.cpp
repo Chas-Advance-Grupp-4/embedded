@@ -1,3 +1,18 @@
+/**
+ * @file PostHandler.cpp
+ * @brief Implementation of the PostHandler base class for HTTP POST request handling.
+ *
+ * Defines the logic for routing POST requests to a subclass-defined `processBody()` method.
+ * Includes static and instance-level handlers for reading the request body and invoking
+ * custom processing logic.
+ *
+ * Used by RestServer to register POST endpoints with dynamic payload handling.
+ *
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @date 2025-10-07
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ */
 #include "PostHandler.h"
 #include "esp_log.h"
 
