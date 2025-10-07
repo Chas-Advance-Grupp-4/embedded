@@ -1,3 +1,18 @@
+/**
+ * @file RestClient.cpp
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Lightweight HTTP client for posting JSON data to a remote endpoint.
+ *
+ * This class wraps the ESP-IDF HTTP client and provides simplified methods
+ * for initialization and sending POST requests. It supports configurable
+ * base URL, JWT token (optional), and timeout settings
+ * 
+ * @date 2025-10-07
+ * 
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ * 
+ */
 #include "RestClient.h"
 
 RestClient::RestClient(const std::string& baseUrl,
