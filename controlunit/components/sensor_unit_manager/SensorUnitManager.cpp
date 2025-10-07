@@ -1,12 +1,14 @@
 /**
  * @file SensorUnitManager.cpp
+ * @brief Implementation of SensorUnitManager for managing sensor units and their readings.
+ *
+ * Defines the logic for adding/removing units, storing readings, and grouping them
+ * for backend dispatch. Uses ESP-IDF logging for diagnostics.
+ *
  * @author Erik Dahl (erik@iunderlandet.se)
- * @brief Classes that handle and store readings from Sensor Units
  * @date 2025-10-07
- * 
  * @copyright Copyright (c) 2025 Erik Dahl
  * @license MIT
- * 
  */
 #include "SensorUnitManager.h"
 #include <esp_log.h>
