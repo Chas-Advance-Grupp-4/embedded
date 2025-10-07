@@ -33,6 +33,10 @@
 #include "freertos/task.h"
 #include <memory>
 
+// Forward declarations for types used in ReadingsDispatcher
+class ReadingDispatchTask;
+class ReadingDispatchTrigger;
+
 /**
  * @class ReadingsDispatcher
  * @brief High-level orchestrator for periodic sensor data dispatch.
