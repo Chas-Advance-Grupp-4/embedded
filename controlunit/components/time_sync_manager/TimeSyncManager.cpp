@@ -1,24 +1,20 @@
 /**
  * @file TimeSyncManager.cpp
+ * @brief Implementation of TimeSyncManager for NTP-based time synchronization.
+ *
+ * Handles SNTP initialization, time validation, and optional periodic resync
+ * using a FreeRTOS task. Uses ESP-IDF logging for diagnostics.
+ *
  * @author Erik Dahl (erik@iunderlandet.se)
- * @brief Classes for syncing ESP clock with NTP
  * @date 2025-10-07
- * 
  * @copyright Copyright (c) 2025 Erik Dahl
  * @license MIT
- * 
  */
 #include "TimeSyncManager.h"
 #include "esp_log.h"
 #include "esp_sntp.h"
 #include <time.h>
 
-/**
- * @brief Constructor for Time Sync Manager
- * 
- * @param ntpServer Defaults to "se.pool.ntp.org"
- * @param syncIntervalMs Defaults to 60*60*1000
- */
 TimeSyncManager::TimeSyncManager(const std::string& ntpServer,
                                  uint32_t           syncIntervalMs)
     : m_ntpServer{ntpServer}, m_syncIntervalMs{syncIntervalMs},
@@ -26,10 +22,6 @@ TimeSyncManager::TimeSyncManager(const std::string& ntpServer,
     ESP_LOGI(TAG, "Resync interval set to %d ms", m_syncIntervalMs);
 }
 
-/**
- * @brief start the sync. Combines init and run into one function call
- * @param m_maxRetries defaults to 10
- */
 void TimeSyncManager::start() {
     ESP_LOGI(TAG, "Initializing SNTP...");
     esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
@@ -62,10 +54,6 @@ void TimeSyncManager::start() {
     
 }
 
-/**
- * @brief Start a task that periodically resyncs the clock
- * 
- */
 void TimeSyncManager::enableAutoResync() {
     if (m_resyncTaskHandle != nullptr) {
         ESP_LOGW(TAG, "Resync task already running");
@@ -89,10 +77,6 @@ void TimeSyncManager::enableAutoResync() {
         &m_resyncTaskHandle);
     }
 
-/**
- * @brief The task used by TimeSyncManager::enableAutoResync
- * 
- */
 void TimeSyncManager::resyncTask() {
    while (true) {
         vTaskDelay(pdMS_TO_TICKS(m_syncIntervalMs));
@@ -100,10 +84,6 @@ void TimeSyncManager::resyncTask() {
     }
 }
 
-/**
- * @brief The actual resync funtction run by TimeSyncManager::resyncTask
- * 
- */
 void TimeSyncManager::resync() {
     ESP_LOGI(TAG, "Resyncing time...");
     esp_sntp_stop();
