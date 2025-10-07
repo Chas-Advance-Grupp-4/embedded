@@ -1,8 +1,8 @@
 /**
  * @file MockDataGenerator.h
  * @author Erik Dahl (erik@iunderlandet.se)
- * @brief
- * @version 0.1
+ * @brief Class for creating a task that generates MockData 
+ * simulating Sensor readings from a Sensor Unit 
  * @date 2025-10-03
  *
  * @copyright Copyright (c) 2025
