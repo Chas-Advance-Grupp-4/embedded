@@ -1,12 +1,22 @@
 /**
  * @file JsonParser.cpp
+ * @brief Implementation of JSON parsing and composition for sensor and
+ * connection data.
+ *
+ * This file defines the logic for converting internal data structures to and
+ * from JSON format. It includes support for:
+ * - Parsing grouped sensor readings from JSON
+ * - Composing sensor and driver connection responses
+ * - Handling error messages in JSON format
+ *
+ * Used primarily for communication between the embedded system and backend
+ * services. All methods are static and stateless, defined in the JsonParser
+ * class.
+ *
  * @author Erik Dahl (erik@iunderlandet.se)
- * @brief 
  * @date 2025-10-07
- * 
  * @copyright Copyright (c) 2025 Erik Dahl
  * @license MIT
- * 
  */
 #include "JsonParser.h"
 #include "cJSON.h"
@@ -15,14 +25,6 @@
 
 static const char* TAG = "JsonParser";
 
-/**
- * @brief parse JSON coming from sensor units, extract and return the data
- * 
- * The resulting std::vector contains readings from one sensor unit
- * 
- * @param json 
- * @return std::vector<ca_sensorunit_snapshot> 
- */
 std::vector<ca_sensorunit_snapshot>
 JsonParser::parseSensorSnapshotGroup(const std::string& json) {
     std::vector<ca_sensorunit_snapshot> snapshots;
@@ -80,23 +82,13 @@ JsonParser::parseSensorSnapshotGroup(const std::string& json) {
     return snapshots;
 }
 
-/**
- * @brief Take a std::map of readings and compose a JSON payload
- * 
- * The resulting JSON is sorted and grouped on (UNIX) timestamps
- * 
- * @param readings 
- * @param controlunit_uuid 
- * @return std::string 
- */
 std::string JsonParser::composeGroupedReadings(
     const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings,
     const std::string& controlunit_uuid) {
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(
-        root, "device_uuid", controlunit_uuid.c_str());
+    cJSON_AddStringToObject(root, "device_uuid", controlunit_uuid.c_str());
 
     // Timestamp Groups
     cJSON* timestampGroups = cJSON_CreateArray();
@@ -142,13 +134,6 @@ std::string JsonParser::composeGroupedReadings(
     return result;
 }
 
-/**
- * @brief Parse JSON message coming from backend regarding connecting sensor units
- * 
- * @param json 
- * @param type valid types: requestType::CONNECT, requestType::DISCONNECT
- * @return SensorConnectRequest
- */
 SensorConnectRequest
 JsonParser::parseSensorConnectRequest(const std::string& json,
                                       requestType        type) {
@@ -189,13 +174,6 @@ JsonParser::parseSensorConnectRequest(const std::string& json,
     return request;
 }
 
-/**
- * @brief Takes a Sensor response struct and composes a JSON payload for backend communication
- * 
- * @param response 
- * @param controlunit_uuid 
- * @return std::string 
- */
 std::string
 JsonParser::composeSensorConnectResponse(const SensorConnectResponse& response,
                                          const std::string& controlunit_uuid) {
@@ -225,13 +203,6 @@ JsonParser::composeSensorConnectResponse(const SensorConnectResponse& response,
     return result;
 }
 
-/**
- * @brief  Parse JSON message coming from backend regarding connecting Driver
- * 
- * @param json 
- * @param type 
- * @return DriverConnectRequest 
- */
 DriverConnectRequest
 JsonParser::parseDriverConnectRequest(const std::string& json,
                                       requestType        type) {
@@ -275,13 +246,6 @@ JsonParser::parseDriverConnectRequest(const std::string& json,
     return request;
 }
 
-/**
- * @brief Takes a Driver response struct and composes a JSON payload for backend communication
- * 
- * @param response 
- * @param controlunit_uuid 
- * @return std::string 
- */
 std::string
 JsonParser::composeDriverConnectResponse(const DriverConnectResponse& response,
                                          const std::string& controlunit_uuid) {
@@ -312,14 +276,6 @@ JsonParser::composeDriverConnectResponse(const DriverConnectResponse& response,
     return result;
 }
 
-/**
- * @brief Generate generic error message for communication
- *
- * TODO: Discuss error handling with backend and expected responses
- *
- * @param message The string that is added to the message field
- * @return std::string
- */
 std::string
 JsonParser::composeErrorResponse(const std::string& message,
                                  const std::string& controlunit_uuid) {
