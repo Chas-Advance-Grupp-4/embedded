@@ -1,3 +1,13 @@
+/**
+ * @file SensorUnitManager.h
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Classes that handle and store readings from Sensor Units
+ * @date 2025-10-07
+ * 
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ * 
+ */
 #pragma once
 #include "sensor_data_types.h"
 #include <map>

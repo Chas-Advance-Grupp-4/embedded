@@ -1,3 +1,13 @@
+/**
+ * @file TimeSyncManager.h
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Classes for syncing ESP clock with NTP
+ * @date 2025-10-07
+ * 
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ * 
+ */
 #pragma once
 #include <string>
 #include "freertos/FreeRTOS.h"

@@ -1,3 +1,12 @@
+/**
+ * @file main.cpp
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Main entry point for the Control Unit app
+ * @date 2025-10-07
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ * 
+ */
 #include "MockDataGenerator.h"
 #include "ReadingsDispatcher.h"
 #include "RestClient.h"
@@ -13,7 +22,7 @@
 #include <nvs_flash.h>
 
 extern "C" void app_main(void) {
-    // Wait for monitor so we don't miss first part of the log
+    /// Wait for monitor so we don't miss first part of the log
     vTaskDelay(pdMS_TO_TICKS(500));
     nvs_flash_init();
     init_wifi();
