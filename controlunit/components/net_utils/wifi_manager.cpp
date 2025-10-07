@@ -1,3 +1,18 @@
+/**
+ * @file wifi_manager.cpp
+ * @brief Implementation of Wi-Fi initialization and event handling.
+ *
+ * Sets up the ESP32 Wi-Fi stack in station mode, registers event handlers
+ * for IP acquisition and disconnection, and connects to the network using
+ * credentials from `wifi_config.h`.
+ *
+ * Uses FreeRTOS event groups to wait for successful connection.
+ *
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @date 2025-10-07
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ */
 #include "wifi_manager.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
@@ -13,6 +28,17 @@
 static EventGroupHandle_t wifi_event_group;
 static const char* WIFI_TAG = "wifi_setup";
 
+/**
+ * @brief Handles Wi-Fi and IP events.
+ *
+ * - On IP acquisition, logs the IP info and sets the connected bit.
+ * - On disconnection, attempts to reconnect automatically.
+ *
+ * @param arg Unused.
+ * @param event_base Event category (e.g., WIFI_EVENT or IP_EVENT).
+ * @param event_id Specific event ID.
+ * @param event_data Pointer to event-specific data.
+ */
 static void
 wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t event_id, void* event_data) {
     ESP_LOGI(WIFI_TAG, "wifi_event_handler triggered: base=%s, id=%d", event_base, event_id);
