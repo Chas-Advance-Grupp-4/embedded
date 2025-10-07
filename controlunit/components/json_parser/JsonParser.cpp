@@ -88,7 +88,7 @@ std::string JsonParser::composeGroupedReadings(
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(root, "device_uuid", controlunit_uuid.c_str());
+    cJSON_AddStringToObject(root, "control_unit_id", controlunit_uuid.c_str());
 
     // Timestamp Groups
     cJSON* timestampGroups = cJSON_CreateArray();
@@ -97,7 +97,7 @@ std::string JsonParser::composeGroupedReadings(
     } else {
         ESP_LOGI(
             TAG, "Composing JSON with %zu timestamp groups", readings.size());
-    }
+     }
     for (const auto& [timestamp, snapshots] : readings) {
         cJSON* groupObj = cJSON_CreateObject();
         cJSON_AddNumberToObject(
@@ -108,9 +108,9 @@ std::string JsonParser::composeGroupedReadings(
             cJSON* unitObj = cJSON_CreateObject();
             if (snapshot.uuid && snapshot.uuid->isValid()) {
                 cJSON_AddStringToObject(
-                    unitObj, "uuid", snapshot.uuid->toString().c_str());
+                    unitObj, "sensor_unit_id", snapshot.uuid->toString().c_str());
             } else {
-                cJSON_AddStringToObject(unitObj, "uuid", "unknown");
+                cJSON_AddStringToObject(unitObj, "sensor_unit_id", "unknown");
             }
             cJSON_AddNumberToObject(
                 unitObj, "temperature", snapshot.temperature);
@@ -128,6 +128,7 @@ std::string JsonParser::composeGroupedReadings(
     // Convert to string and clean up
     char*       jsonStr = cJSON_PrintUnformatted(root);
     std::string result(jsonStr);
+    // ESP_LOGI(TAG, "Resulting JSON: %s ", result.c_str());
     cJSON_free(jsonStr);
     cJSON_Delete(root);
 
