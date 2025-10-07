@@ -35,6 +35,7 @@ void TimeSyncManager::start() {
 
     if (retry < m_maxRetries) {
         ESP_LOGI(TAG, "Time synced: %s", asctime(&timeinfo));
+        enableAutoResync();
     } else {
         ESP_LOGW(TAG, "Could not sync time");
     }
@@ -52,12 +53,23 @@ void TimeSyncManager::enableAutoResync() {
         m_syncIntervalMs = 10000;
     }
 
-    // implement with esp_timer as simple as possible
-
+    ESP_LOGI(TAG, "Starting resync task with interval %d ms", m_syncIntervalMs);
+    xTaskCreate(
+        [](void* arg) {
+            static_cast<TimeSyncManager*>(arg)->resyncTask();
+        },
+        "TimeResyncTask",
+        4096,
+        this,
+        1,
+        &m_resyncTaskHandle);
     }
 
 void TimeSyncManager::resyncTask() {
-    // If needed create this task
+   while (true) {
+        vTaskDelay(pdMS_TO_TICKS(m_syncIntervalMs));
+        resync();
+    }
 }
 
 void TimeSyncManager::resync() {
@@ -72,6 +84,7 @@ void TimeSyncManager::resync() {
 
     if ((timeinfo.tm_year + 1900) >= 2020) {
         ESP_LOGI(TAG, "Resync successful: %s", asctime(&timeinfo));
+        ESP_LOGI(TAG, "Resync interval is set to %d ms", m_syncIntervalMs);
         m_timeSynced = true;
     } else {
         ESP_LOGW(TAG, "Resync failed");
