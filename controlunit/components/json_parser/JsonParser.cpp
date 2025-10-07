@@ -1,3 +1,23 @@
+/**
+ * @file JsonParser.cpp
+ * @brief Implementation of JSON parsing and composition for sensor and
+ * connection data.
+ *
+ * This file defines the logic for converting internal data structures to and
+ * from JSON format. It includes support for:
+ * - Parsing grouped sensor readings from JSON
+ * - Composing sensor and driver connection responses
+ * - Handling error messages in JSON format
+ *
+ * Used primarily for communication between the embedded system and backend
+ * services. All methods are static and stateless, defined in the JsonParser
+ * class.
+ *
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @date 2025-10-07
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ */
 #include "JsonParser.h"
 #include "cJSON.h"
 #include "esp_log.h"
@@ -68,8 +88,7 @@ std::string JsonParser::composeGroupedReadings(
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(
-        root, "device_uuid", controlunit_uuid.c_str());
+    cJSON_AddStringToObject(root, "device_uuid", controlunit_uuid.c_str());
 
     // Timestamp Groups
     cJSON* timestampGroups = cJSON_CreateArray();
@@ -257,14 +276,6 @@ JsonParser::composeDriverConnectResponse(const DriverConnectResponse& response,
     return result;
 }
 
-/**
- * @brief Generate generic error message for communication
- *
- * TODO: Discuss error handling with backend and expected responses
- *
- * @param message The string that is added to the message field
- * @return std::string
- */
 std::string
 JsonParser::composeErrorResponse(const std::string& message,
                                  const std::string& controlunit_uuid) {

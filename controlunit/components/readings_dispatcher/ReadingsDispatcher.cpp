@@ -1,5 +1,87 @@
+/**
+ * @file ReadingsDispatcher.cpp
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Implementation of the periodic sensor data dispatch system.
+ *
+ * This file contains the implementation of the classes declared in
+ * ReadingsDispatcher.h:
+ *
+ * - `ReadingsDispatcher` sets up and coordinates the task and timer trigger.
+ * - `ReadingDispatchTask` defines the FreeRTOS task that collects sensor data
+ * and sends it via HTTP.
+ * - `ReadingDispatchTrigger` manages the periodic timer that notifies the task.
+ *
+ * The system is designed to periodically gather grouped sensor readings from
+ * the ControlUnitManager, format them into JSON, and transmit them to a remote
+ * endpoint using the RestClient.
+ *
+ * Usage typically involves instantiating a `ReadingsDispatcher`, calling
+ * `start()`, and optionally `stop()`
+ *
+ * @date 2025-10-07
+ *
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ *
+ */
 #include "ReadingsDispatcher.h"
 #include "JsonParser.h"
+
+ReadingsDispatcher::ReadingsDispatcher(RestClient&         client,
+                                       ControlUnitManager& manager,
+                                       uint64_t            interval_us)
+    : m_client{client}, m_manager{manager}, m_interval{interval_us} {}
+
+esp_err_t ReadingsDispatcher::start() {
+    m_task = std::make_unique<ReadingDispatchTask>(m_client, m_manager);
+    m_task->start();
+
+    TaskHandle_t handle = m_task->getHandle();
+    m_trigger = std::make_unique<ReadingDispatchTrigger>(handle, m_interval);
+    return m_trigger->start();
+}
+
+void ReadingsDispatcher::stop() {
+    if (m_trigger)
+        m_trigger->stop();
+    // Task not stopped immediately. Can be added if necessary
+}
+
+// ! restart not yet implemented
+// esp_err_t ReadingsDispatcher::restart(uint64_t new_interval_us) {
+//     if (!m_trigger) return ESP_ERR_INVALID_STATE;
+//     return m_trigger->restart(new_interval_us);
+// }
+
+ReadingDispatchTask::ReadingDispatchTask(RestClient&         client,
+                                         ControlUnitManager& manager)
+    : m_httpClient{client}, m_manager{manager}, m_taskHandle{nullptr} {}
+
+void ReadingDispatchTask::start() {
+    ESP_LOGI(TAG, "Starting task...");
+    xTaskCreate(taskEntry, "ReadingDispatchTask", 4096, this, 5, &m_taskHandle);
+    ESP_LOGI(TAG, "Task created, handle: %p", m_taskHandle);
+}
+
+TaskHandle_t ReadingDispatchTask::getHandle() const {
+    return m_taskHandle;
+}
+
+void ReadingDispatchTask::taskEntry(void* pvParameters) {
+    auto* self = static_cast<ReadingDispatchTask*>(pvParameters);
+    self->run();
+}
+
+void ReadingDispatchTask::run() {
+    ESP_LOGI(TAG, "ReadingDispatchTask is running");
+    while (true) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+        std::string json = JsonParser::composeGroupedReadings(
+            m_manager.sensorManager.getGroupedReadings(),
+            m_manager.getControlunitUuidString());
+        m_httpClient.postTo("/post", json);
+    }
+}
 
 ReadingDispatchTrigger::ReadingDispatchTrigger(TaskHandle_t target_task,
                                                uint64_t     interval_us)
@@ -55,62 +137,3 @@ void ReadingDispatchTrigger::timerCallback(void* arg) {
         xTaskNotifyGive(self->m_taskHandle);
     }
 }
-
-ReadingDispatchTask::ReadingDispatchTask(RestClient&         client,
-                                         ControlUnitManager& manager)
-    : m_httpClient{client}, m_manager{manager}, m_taskHandle{nullptr} {}
-
-void ReadingDispatchTask::start() {
-    ESP_LOGI(TAG, "Starting task...");
-    xTaskCreate(taskEntry, "ReadingDispatchTask", 4096, this, 5, &m_taskHandle);
-    ESP_LOGI(TAG, "Task created, handle: %p", m_taskHandle);
-}
-
-TaskHandle_t ReadingDispatchTask::getHandle() const {
-    return m_taskHandle;
-}
-
-void ReadingDispatchTask::taskEntry(void* pvParameters) {
-    auto* self = static_cast<ReadingDispatchTask*>(pvParameters);
-    self->run();
-}
-
-void ReadingDispatchTask::run() {
-    ESP_LOGI(TAG, "ReadingDispatchTask is running");
-    while (true) {
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
-        // add m_manager.buildJson();  eller vad den nu heter
-        std::string json = JsonParser::composeGroupedReadings(
-            m_manager.sensorManager.getGroupedReadings(),
-            m_manager.getControlunitUuidString());
-        // std::string json =
-        //     "{\"content\":\"Hello with ControlUnitManager in the backseat\"}";
-        m_httpClient.postTo("/post", json);
-    }
-}
-
-ReadingsDispatcher::ReadingsDispatcher(RestClient&         client,
-                                       ControlUnitManager& manager,
-                                       uint64_t            interval_us)
-    : m_client{client}, m_manager{manager}, m_interval{interval_us} {}
-
-esp_err_t ReadingsDispatcher::start() {
-    m_task = std::make_unique<ReadingDispatchTask>(m_client, m_manager);
-    m_task->start();
-
-    TaskHandle_t handle = m_task->getHandle();
-    m_trigger = std::make_unique<ReadingDispatchTrigger>(handle, m_interval);
-    return m_trigger->start();
-}
-
-void ReadingsDispatcher::stop() {
-    if (m_trigger)
-        m_trigger->stop();
-    // Task not stopped immediately. Can be added if necessary
-}
-
-// ! restart not yet implemented
-// esp_err_t ReadingsDispatcher::restart(uint64_t new_interval_us) {
-//     if (!m_trigger) return ESP_ERR_INVALID_STATE;
-//     return m_trigger->restart(new_interval_us);
-// }

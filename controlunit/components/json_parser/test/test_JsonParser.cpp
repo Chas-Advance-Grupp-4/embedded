@@ -1,3 +1,9 @@
+/**
+ * @brief Tests for JsonParser.cpp
+ * 
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * 
+ */
 extern "C" {
 #include "unity.h"
 }

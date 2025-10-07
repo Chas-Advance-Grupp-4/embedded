@@ -1,3 +1,17 @@
+/**
+ * @file GetHandler.cpp
+ * @brief Implementation of the GetHandler base class for HTTP GET request handling.
+ *
+ * Defines the logic for routing GET requests to a subclass-defined `process()` method.
+ * Includes static and instance-level handlers for invoking custom response logic.
+ *
+ * Used by RestServer to register GET endpoints with dynamic response handling.
+ *
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @date 2025-10-07
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ */
 #include "GetHandler.h"
 #include "esp_log.h"
 

@@ -1,18 +1,57 @@
+/**
+ * @file ControlUnitManager.cpp
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Class for handling all internal state for Contol Unit
+ * @date 2025-10-07
+ * 
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ * 
+ */
 #include "ControlUnitManager.h"
 #include "esp_log.h"
 
+/**
+ * @brief Constructor for Control Unit Manager
+ * 
+ * @param controlunitUuid 
+ */
 ControlUnitManager::ControlUnitManager(const std::string& controlunitUuid)
     : m_controlunitUuid{controlunitUuid} {}
 
+/**
+ * @brief Query if a driver is connected
+ * 
+ * @return true 
+ * @return false 
+ */
 bool ControlUnitManager::isDriverConnected() {
     return m_isDriverConnected;
 }
+
+/**
+ * @brief Connect a driver to Control Unit
+ * 
+ * TODO: implement
+ */
 void ControlUnitManager::connectDriver() {
-    // TODO: implement
 }
+
+/**
+ * @brief Disconnect a driver to Control Unit
+ * 
+ * TODO: implement
+ */
 void ControlUnitManager::disconnectDriver() {
-    // TODO: implement
 }
+
+/**
+ * @brief Get connected driver_id
+ * 
+ * TODO: Refactor to use UUID
+ * 
+ * @return uint32_t 
+ */
 uint32_t ControlUnitManager::getDriverId() {
     if (m_isDriverConnected) {
         return m_driverId;
@@ -21,6 +60,11 @@ uint32_t ControlUnitManager::getDriverId() {
     }
 }
 
+/**
+ * @brief Get the Control Unit UUID as a string
+ * 
+ * @return std::string 
+ */
 std::string ControlUnitManager::getControlunitUuidString() {
     if (m_controlunitUuid.isValid())
         return m_controlunitUuid.toString();

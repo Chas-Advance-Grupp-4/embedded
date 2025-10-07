@@ -1,3 +1,15 @@
+/**
+ * @file TimeSyncManager.cpp
+ * @brief Implementation of TimeSyncManager for NTP-based time synchronization.
+ *
+ * Handles SNTP initialization, time validation, and optional periodic resync
+ * using a FreeRTOS task. Uses ESP-IDF logging for diagnostics.
+ *
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @date 2025-10-07
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ */
 #include "TimeSyncManager.h"
 #include "esp_log.h"
 #include "esp_sntp.h"
