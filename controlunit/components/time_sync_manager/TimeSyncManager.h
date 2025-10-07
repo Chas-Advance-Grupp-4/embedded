@@ -5,7 +5,7 @@
 
 class TimeSyncManager {
 public:
-    TimeSyncManager(const std::string& ntpServer = "se.pool.ntp.org", uint32_t syncIntervalMs = 1*60*1000);
+    TimeSyncManager(const std::string& ntpServer = "se.pool.ntp.org", uint32_t syncIntervalMs = 60*60*1000);
     void start();
     void enableAutoResync();
     void resync();
