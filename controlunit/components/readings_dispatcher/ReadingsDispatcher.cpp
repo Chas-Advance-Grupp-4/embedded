@@ -79,7 +79,7 @@ void ReadingDispatchTask::run() {
         std::string json = JsonParser::composeGroupedReadings(
             m_manager.sensorManager.getGroupedReadings(),
             m_manager.getControlunitUuidString());
-        m_httpClient.postTo("/post", json);
+        m_httpClient.postTo("/api/v1/control-unit/readings", json);
     }
 }
 
