@@ -5,6 +5,7 @@
 .pio/
 
 # Ignore sensitive files
+config.h
 arduino_secrets.h
 .env
 
