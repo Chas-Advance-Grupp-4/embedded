@@ -22,7 +22,7 @@ void setup() {
     Serial.println(counter);
     counter++;
 
-    Serial.print("JsonParser good luck now: ");
+    Serial.print("JsonParser from lib folder says: ");
     Serial.println(JsonParser::composeSensorSnapshotGroup(testReadings, SENSOR_UNIT_ID).c_str());
 }
 
