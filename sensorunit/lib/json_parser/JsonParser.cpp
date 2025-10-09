@@ -14,10 +14,10 @@
  */
 #include "JsonParser.h"
 
-etl::string<MAX_JSON_SIZE>
-JsonParser::composeSensorSnapshotGroup(etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE>& readings,
+etl::string<json_config::max_json_size>
+JsonParser::composeSensorSnapshotGroup(etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
                                        const char*                                         uuid) {
-    StaticJsonDocument<MAX_JSON_DOC_SIZE> doc;
+    StaticJsonDocument<json_config::max_json_doc_size> doc;
     doc["sensor_unit_id"]   = uuid;
     JsonArray readingsArray = doc["readings"].to<JsonArray>();
 
@@ -28,7 +28,7 @@ JsonParser::composeSensorSnapshotGroup(etl::vector<ca_sensorunit_reading, MAX_BA
         readingsEntry["humidity"]    = reading.humidity;
     }
 
-    char rawOutput[MAX_JSON_SIZE];
+    char rawOutput[json_config::max_json_size];
     serializeJson(doc, rawOutput);
-    return etl::string<MAX_JSON_SIZE>(rawOutput);
+    return etl::string<json_config::max_json_size>(rawOutput);
 }

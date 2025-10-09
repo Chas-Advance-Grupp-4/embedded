@@ -38,7 +38,7 @@ class JsonParser {
      * @param uuid A string representing the unique identifier of the sensor unit.
      * @return etl::string<MAX_JSON_SIZE> A JSON string representing the sensor snapshot group.
      */
-    static etl::string<MAX_JSON_SIZE>
-    composeSensorSnapshotGroup(etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE>& readings,
+    static etl::string<json_config::max_json_size>
+    composeSensorSnapshotGroup(etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
                                const char*                                         uuid);
 };

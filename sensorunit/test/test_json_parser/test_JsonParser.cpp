@@ -5,7 +5,7 @@
 constexpr const char* valid_uuid = "550e8400-e29b-41d4-a716-446655440000";
 
 // Helper to create a sample reading
-ca_sensorunit_reading createReading(uint32_t timestamp, float temperature, float humidity) {
+CaSensorunitReading createReading(uint32_t timestamp, float temperature, float humidity) {
     return {timestamp, temperature, humidity};
 }
 
@@ -18,13 +18,13 @@ void tearDown(void) {
 void when_given_valid_readings_then_composeSensorSnapshotGroup_should_return_valid_json() {
     JsonParser parser;
 
-    etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE> readings;
+    etl::vector<CaSensorunitReading, json_config::max_batch_size> readings;
     readings.push_back(createReading(1726995600, 22.5f, 45.2f));
     readings.push_back(createReading(1726995660, 22.7f, 44.9f));
 
-    etl::string<MAX_JSON_SIZE> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
+    etl::string<json_config::max_json_size> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
 
-    StaticJsonDocument<MAX_JSON_DOC_SIZE> doc;
+    StaticJsonDocument<json_config::max_json_doc_size> doc;
     DeserializationError err = deserializeJson(doc, result.c_str());
     TEST_ASSERT_TRUE(err == DeserializationError::Ok);
 
@@ -44,11 +44,11 @@ void when_given_valid_readings_then_composeSensorSnapshotGroup_should_return_val
 void when_given_empty_readings_then_composeSensorSnapshotGroup_should_return_json_with_empty_array() {
     JsonParser parser;
 
-    etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE> readings;
+    etl::vector<CaSensorunitReading, json_config::max_batch_size> readings;
 
-    etl::string<MAX_JSON_SIZE> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
+    etl::string<json_config::max_json_size> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
 
-    StaticJsonDocument<MAX_JSON_DOC_SIZE> doc;
+    StaticJsonDocument<json_config::max_json_doc_size> doc;
     DeserializationError err = deserializeJson(doc, result.c_str());
     TEST_ASSERT_TRUE(err == DeserializationError::Ok);
 
@@ -60,21 +60,21 @@ void when_given_empty_readings_then_composeSensorSnapshotGroup_should_return_jso
 void when_given_max_batch_size_then_composeSensorSnapshotGroup_should_return_json_with_all_entries() {
     JsonParser parser;
 
-    etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE> readings;
-    for (size_t i = 0; i < MAX_BATCH_SIZE; ++i) {
+    etl::vector<CaSensorunitReading, json_config::max_batch_size> readings;
+    for (size_t i = 0; i < json_config::max_batch_size; ++i) {
         readings.push_back(createReading(1726995600 + i * 60, 20.0f + i, 40.0f + i));
     }
 
-    etl::string<MAX_JSON_SIZE> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
+    etl::string<json_config::max_json_size> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
 
-    StaticJsonDocument<MAX_JSON_DOC_SIZE> doc;
+    StaticJsonDocument<json_config::max_json_doc_size> doc;
     DeserializationError err = deserializeJson(doc, result.c_str());
     TEST_ASSERT_TRUE(err == DeserializationError::Ok);
 
     JsonArray arr = doc["readings"];
-    TEST_ASSERT_EQUAL(MAX_BATCH_SIZE, arr.size());
+    TEST_ASSERT_EQUAL(json_config::max_batch_size, arr.size());
 
-    for (size_t i = 0; i < MAX_BATCH_SIZE; ++i) {
+    for (size_t i = 0; i < json_config::max_batch_size; ++i) {
         TEST_ASSERT_EQUAL(1726995600 + i * 60, arr[i]["timestamp"]);
         TEST_ASSERT_FLOAT_WITHIN(0.01, 20.0f + i, arr[i]["temperature"]);
         TEST_ASSERT_FLOAT_WITHIN(0.01, 40.0f + i, arr[i]["humidity"]);
@@ -85,13 +85,13 @@ void when_given_max_batch_size_then_composeSensorSnapshotGroup_should_return_jso
 void when_given_null_uuid_then_composeSensorSnapshotGroup_should_return_json_with_null_id() {
     JsonParser parser;
 
-    etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE> readings;
+    etl::vector<CaSensorunitReading, json_config::max_batch_size> readings;
     readings.push_back(createReading(1726995600, 22.5f, 45.2f));
 
     // Pass null UUID
-    etl::string<MAX_JSON_SIZE> result = parser.composeSensorSnapshotGroup(readings, nullptr);
+    etl::string<json_config::max_json_size> result = parser.composeSensorSnapshotGroup(readings, nullptr);
 
-    StaticJsonDocument<MAX_JSON_DOC_SIZE> doc;
+    StaticJsonDocument<json_config::max_json_doc_size> doc;
     DeserializationError err = deserializeJson(doc, result.c_str());
     TEST_ASSERT_TRUE(err == DeserializationError::Ok);
 
@@ -102,13 +102,13 @@ void when_given_null_uuid_then_composeSensorSnapshotGroup_should_return_json_wit
 void when_given_extreme_sensor_values_then_composeSensorSnapshotGroup_should_handle_them_correctly() {
     JsonParser parser;
 
-    etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE> readings;
+    etl::vector<CaSensorunitReading, json_config::max_batch_size> readings;
     readings.push_back(createReading(0, -273.15f, 0.0f));         // Absolute zero
     readings.push_back(createReading(4294967295, 1000.0f, 100.0f)); // Max uint32 timestamp, extreme temp/humidity
 
-    etl::string<MAX_JSON_SIZE> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
+    etl::string<json_config::max_json_size> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
 
-    StaticJsonDocument<MAX_JSON_DOC_SIZE> doc;
+    StaticJsonDocument<json_config::max_json_doc_size> doc;
     DeserializationError err = deserializeJson(doc, result.c_str());
     TEST_ASSERT_TRUE(err == DeserializationError::Ok);
 
@@ -129,13 +129,13 @@ void when_given_extreme_sensor_values_then_composeSensorSnapshotGroup_should_han
 void when_given_duplicate_timestamps_then_composeSensorSnapshotGroup_should_include_all_entries() {
     JsonParser parser;
 
-    etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE> readings;
+    etl::vector<CaSensorunitReading, json_config::max_batch_size> readings;
     readings.push_back(createReading(1726995600, 22.5f, 45.2f));
     readings.push_back(createReading(1726995600, 23.0f, 46.0f)); // Same timestamp
 
-    etl::string<MAX_JSON_SIZE> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
+    etl::string<json_config::max_json_size> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
 
-    StaticJsonDocument<MAX_JSON_DOC_SIZE> doc;
+    StaticJsonDocument<json_config::max_json_doc_size> doc;
     DeserializationError err = deserializeJson(doc, result.c_str());
     TEST_ASSERT_TRUE(err == DeserializationError::Ok);
 
@@ -151,12 +151,12 @@ void when_given_duplicate_timestamps_then_composeSensorSnapshotGroup_should_incl
 void when_given_large_temperature_and_humidity_values_then_composeSensorSnapshotGroup_should_not_overflow() {
     JsonParser parser;
 
-    etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE> readings;
+    etl::vector<CaSensorunitReading, json_config::max_batch_size> readings;
     readings.push_back(createReading(1726995600, 999999.99f, 999999.99f));
 
-    etl::string<MAX_JSON_SIZE> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
+    etl::string<json_config::max_json_size> result = parser.composeSensorSnapshotGroup(readings, valid_uuid);
 
-    StaticJsonDocument<MAX_JSON_DOC_SIZE> doc;
+    StaticJsonDocument<json_config::max_json_doc_size> doc;
     DeserializationError err = deserializeJson(doc, result.c_str());
     TEST_ASSERT_TRUE(err == DeserializationError::Ok);
 

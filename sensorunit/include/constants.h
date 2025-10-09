@@ -1,6 +1,8 @@
 #pragma once
 #include <ctime>
 
-constexpr size_t MAX_BATCH_SIZE = 10;
-constexpr size_t MAX_JSON_SIZE = 1024;
-constexpr size_t MAX_JSON_DOC_SIZE = MAX_JSON_SIZE * 2;
+namespace json_config{
+    constexpr size_t max_batch_size = 10;
+    constexpr size_t max_json_size = 1024;
+    constexpr size_t max_json_doc_size = max_json_size * 2;
+}
