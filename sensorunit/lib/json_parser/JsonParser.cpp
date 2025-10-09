@@ -15,7 +15,7 @@
 #include "JsonParser.h"
 
 etl::string<json_config::max_json_size>
-JsonParser::composeSensorSnapshotGroup(etl::vector<ca_sensorunit_reading, json_config::max_batch_size>& readings,
+JsonParser::composeSensorSnapshotGroup(etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
                                        const char*                                         uuid) {
     StaticJsonDocument<json_config::max_json_doc_size> doc;
     doc["sensor_unit_id"]   = uuid;

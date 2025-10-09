@@ -39,6 +39,6 @@ class JsonParser {
      * @return etl::string<MAX_JSON_SIZE> A JSON string representing the sensor snapshot group.
      */
     static etl::string<json_config::max_json_size>
-    composeSensorSnapshotGroup(etl::vector<ca_sensorunit_reading, json_config::max_batch_size>& readings,
+    composeSensorSnapshotGroup(etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
                                const char*                                         uuid);
 };
