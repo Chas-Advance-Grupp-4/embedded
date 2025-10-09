@@ -8,7 +8,7 @@
 
 int             counter{0};
 etl::string<32> hello{};
-etl::vector<ca_sensorunit_reading, MAX_BATCH_SIZE> testReadings;
+etl::vector<CaSensorunitReading, json_config::max_batch_size> testReadings;
 
 void setup() {
     testReadings.push_back({ 1726995605, 25, 50 });
