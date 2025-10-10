@@ -19,4 +19,5 @@ class ReadingBuffer {
 
   private:
     etl::circular_buffer<CaSensorunitReading, buffer_config::max_buffer_size> m_buffer;
+    static constexpr const char* TAG = "ReadingBuffer";
 };

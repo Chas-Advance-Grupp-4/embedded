@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "logging.h"
 #include "JsonParser.h"
 #include "constants.h"
 #include "config.h"
@@ -18,8 +19,10 @@ void setup() {
     Serial.begin(115200);
     delay(2000);
 
-    Serial.print(hello.c_str());
-    Serial.println(counter);
+    LOG_INFO("MAIN", "Hello from LOG Macro Info level");
+    LOG_WARN("MAIN", "A Warning from Main");
+    LOG_ERROR("MAIN", "An Error from Main");
+    LOG_DEBUG("MAIN", "Only for Debugging");
     counter++;
 
     Serial.print("JsonParser from lib folder says: ");

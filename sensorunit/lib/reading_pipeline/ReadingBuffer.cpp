@@ -1,4 +1,5 @@
 #include "ReadingBuffer.h"
+#include "logging.h"
 
 bool ReadingBuffer::hasReadings() const {
     return m_buffer.size() >= 1;
@@ -22,7 +23,7 @@ void ReadingBuffer::push(const CaSensorunitReading& reading) {
     if (!m_buffer.full()) {
         m_buffer.push(reading);
     } else {
-        // TODO: Add log message warning. Buffer full, overwriting oldest value
+        LOG_WARN(TAG, "Buffer full, overwriting oldest value");
         m_buffer.pop();
         m_buffer.push(reading);
     }
