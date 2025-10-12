@@ -23,6 +23,7 @@
 #pragma once
 #include <Arduino.h>
 #include <LibPrintf.h>
+#include "config.h"
 
 /**
  * @enum LogLevel
@@ -60,6 +61,24 @@ extern LogLevel currentLogLevel;
  * @param fmt   A printf-style format string.
  * @param ...   Optional arguments to be formatted into the message.
  */
+
+#ifdef LOG_COLORS
+#define LOG(level, tag, fmt, ...) \
+    do { \
+        if (level != LOG_NONE && level <= currentLogLevel) { \
+            const char* color = ""; \
+            const char* reset = "\033[0m"; \
+            char levelChar = '?'; \
+            switch (level) { \
+                case LOG_ERROR: levelChar = 'E'; color = "\033[31m"; break; \
+                case LOG_WARN:  levelChar = 'W'; color = "\033[33m"; break; \
+                case LOG_INFO:  levelChar = 'I'; color = "\033[32m"; break; \
+                case LOG_DEBUG: levelChar = 'D'; color = "\033[36m"; break; \
+            } \
+            printf("%s%c (%lu) %s: " fmt "%s\n", color, levelChar, millis(), tag, ##__VA_ARGS__, reset); \
+        } \
+    } while (0)
+#else
 #define LOG(level, tag, fmt, ...) \
     do { \
         if (level != LOG_NONE && level <= currentLogLevel) { \
@@ -69,11 +88,11 @@ extern LogLevel currentLogLevel;
                 case LOG_WARN:  levelChar = 'W'; break; \
                 case LOG_INFO:  levelChar = 'I'; break; \
                 case LOG_DEBUG: levelChar = 'D'; break; \
-                default:        levelChar = '?'; break; \
             } \
-            printf("%c (%lu) %s: " fmt "\n",levelChar, millis(), tag, ##__VA_ARGS__); \
+            printf("%c (%lu) %s: " fmt "\n", levelChar, millis(), tag, ##__VA_ARGS__); \
         } \
     } while (0)
+#endif
 
 /**
  * @def LOG_ERROR(tag, fmt, ...)
