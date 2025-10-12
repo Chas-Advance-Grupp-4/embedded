@@ -19,7 +19,7 @@ void setup() {
     Serial.begin(115200);
     delay(2000);
 
-    LOG_INFO("MAIN", "Hello from LOG Macro Info level");
+    LOG_INFO("MAIN", "%s%d", hello.c_str(), 1);
     LOG_WARN("MAIN", "A Warning from Main");
     LOG_ERROR("MAIN", "An Error from Main");
     LOG_DEBUG("MAIN", "Only for Debugging");
