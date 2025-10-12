@@ -40,14 +40,65 @@ enum LogLevel {
     LOG_DEBUG
 };
 
+#ifndef LOG_LEVEL
+#define LOG_LEVEL LOG_INFO
+#endif
+
 /**
  * @brief Global variable that defines the current logging verbosity level.
  *
- * Used by the LOG macros to determine whether a message should be printed.
- * Declared here as extern and defined in logging.cpp.
- * Set your desired log level in config.h.
+ * Used by the LOG macros and logMessage() to determine whether a message should be printed.
+ * You can override the default level by defining LOG_LEVEL in config.h before including logging.h.
  */
-extern LogLevel currentLogLevel;
+inline LogLevel currentLogLevel = LOG_LEVEL;
+
+/**
+ * @brief Logs a formatted message to the serial console with optional ANSI color and severity filtering.
+ *
+ * This templated function provides the core implementation for all log output.
+ * It prints a timestamped message prefixed with a severity character (E/W/I/D) and a user-defined tag.
+ * Messages are filtered based on the global `currentLogLevel`, and optionally color-coded
+ * if `LOG_COLORS` is defined.
+ *
+ * Designed to be used via the `LOG()` macro or its severity-specific wrappers (`LOG_ERROR`, `LOG_WARN`, etc.).
+ *
+ * @tparam Args Variadic template arguments matching the format string.
+ * @param level The severity level of the message (e.g., LOG_ERROR, LOG_INFO).
+ * @param tag   A short identifier for the log source (e.g., module or filename).
+ * @param fmt   A printf-style format string.
+ * @param args  Optional arguments to be formatted into the message.
+ */
+template<typename... Args>
+inline void logMessage(LogLevel level, const char* tag, const char* fmt, Args... args) {
+    if (level == LOG_NONE || level > currentLogLevel) return;
+
+    const char* color = "";
+    const char* reset = "";
+    char levelChar = '?';
+
+#ifdef LOG_COLORS
+    reset = "\033[0m";
+    switch (level) {
+        case LOG_ERROR: levelChar = 'E'; color = "\033[31m"; break;
+        case LOG_WARN:  levelChar = 'W'; color = "\033[33m"; break;
+        case LOG_INFO:  levelChar = 'I'; color = "\033[32m"; break;
+        case LOG_DEBUG: levelChar = 'D'; color = "\033[36m"; break;
+        default: break;
+    }
+#else
+    switch (level) {
+        case LOG_ERROR: levelChar = 'E'; break;
+        case LOG_WARN:  levelChar = 'W'; break;
+        case LOG_INFO:  levelChar = 'I'; break;
+        case LOG_DEBUG: levelChar = 'D'; break;
+        default: break;
+    }
+#endif
+
+    printf("%s%c (%lu) %s: ", color, levelChar, millis(), tag);
+    printf(fmt, args...);
+    printf("%s\n", reset);
+}
 
 /**
  * @def LOG(level, tag, fmt, ...)
@@ -61,38 +112,7 @@ extern LogLevel currentLogLevel;
  * @param fmt   A printf-style format string.
  * @param ...   Optional arguments to be formatted into the message.
  */
-
-#ifdef LOG_COLORS
-#define LOG(level, tag, fmt, ...) \
-    do { \
-        if (level != LOG_NONE && level <= currentLogLevel) { \
-            const char* color = ""; \
-            const char* reset = "\033[0m"; \
-            char levelChar = '?'; \
-            switch (level) { \
-                case LOG_ERROR: levelChar = 'E'; color = "\033[31m"; break; \
-                case LOG_WARN:  levelChar = 'W'; color = "\033[33m"; break; \
-                case LOG_INFO:  levelChar = 'I'; color = "\033[32m"; break; \
-                case LOG_DEBUG: levelChar = 'D'; color = "\033[36m"; break; \
-            } \
-            printf("%s%c (%lu) %s: " fmt "%s\n", color, levelChar, millis(), tag, ##__VA_ARGS__, reset); \
-        } \
-    } while (0)
-#else
-#define LOG(level, tag, fmt, ...) \
-    do { \
-        if (level != LOG_NONE && level <= currentLogLevel) { \
-            char levelChar = '?'; \
-            switch (level) { \
-                case LOG_ERROR: levelChar = 'E'; break; \
-                case LOG_WARN:  levelChar = 'W'; break; \
-                case LOG_INFO:  levelChar = 'I'; break; \
-                case LOG_DEBUG: levelChar = 'D'; break; \
-            } \
-            printf("%c (%lu) %s: " fmt "\n", levelChar, millis(), tag, ##__VA_ARGS__); \
-        } \
-    } while (0)
-#endif
+#define LOG(level, tag, fmt, ...) logMessage(level, tag, fmt, ##__VA_ARGS__)
 
 /**
  * @def LOG_ERROR(tag, fmt, ...)
