@@ -8,13 +8,14 @@ extern "C" {
 #include "unity.h"
 }
 #include "JsonParser.h"
+#include "esp_log.h"
 #include <cstring>
 
 extern "C" void
 when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots(
     void) {
     std::string testJson = R"({
-        "uuid": "550e8400-e29b-41d4-a716-446655440000",
+        "sensor_unit_id": "550e8400-e29b-41d4-a716-446655440000",
         "readings": [
             {
                 "timestamp": 1726995600,
@@ -63,13 +64,14 @@ when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_jso
 
     std::string json = JsonParser::composeGroupedReadings(readings, controlunit_uuid);
 
+    ESP_LOGD("TEST", "%s", json.c_str());
     // check that the values match
     TEST_ASSERT_NOT_EQUAL(0, json.length());
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"device_uuid\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\""));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"control_unit_id\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\""));
     TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"timestamp\":1726995600") );
     TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"timestamp\":1726995605") );
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"uuid\":\"550e8400-e29b-41d4-a716-446655440000\"") );
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"uuid\":\"123e4567-e89b-12d3-a456-426614174000\"") );
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"sensor_unit_id\":\"550e8400-e29b-41d4-a716-446655440000\"") );
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"sensor_unit_id\":\"123e4567-e89b-12d3-a456-426614174000\"") );
     TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"temperature\":22.5") );
     TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"humidity\":45.2") );
     TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"temperature\":21.9") );
@@ -80,7 +82,7 @@ extern "C" void
 when_valid_connect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(
     void) {
     const std::string json = R"({
-        "sensoruuid": "123e4567-e89b-12d3-a456-426614174000",
+        "sensor_unit_id": "123e4567-e89b-12d3-a456-426614174000",
         "token": "secure-token-abc"
     })";
 
@@ -122,7 +124,7 @@ extern "C" void
 when_valid_disconnect_json_is_given_then_parseSensorConnectRequest_returns_expected_request(
     void) {
     const std::string json = R"({
-        "sensoruuid": "987e6543-e21b-12d3-a456-426614174999",
+        "sensor_unit_id": "987e6543-e21b-12d3-a456-426614174999",
         "token": "disconnect-token-xyz"
     })";
 
@@ -148,11 +150,11 @@ when_valid_sensor_response_is_given_then_composeSensorConnectResponse_returns_ex
         JsonParser::composeSensorConnectResponse(response, controlunit_uuid);
 
     std::string expected_controlunit_uuid =
-        "\"controlunit_uuid\":\"" + controlunit_uuid + "\"";
+        "\"control_unit_id\":\"" + controlunit_uuid + "\"";
     TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find(expected_controlunit_uuid));
     TEST_ASSERT_NOT_EQUAL(
         std::string::npos,
-        json.find("\"sensor_uuid\":\"123e4567-e89b-12d3-a456-426614174000\""));
+        json.find("\"sensor_unit_id\":\"123e4567-e89b-12d3-a456-426614174000\""));
     TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"connection_status\":\"connected\""));
 }
 
@@ -167,7 +169,7 @@ when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unkno
     std::string json =
         JsonParser::composeSensorConnectResponse(response, controlunit_uuid);
 
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"sensor_uuid\":\"unknown\""));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"sensor_unit_id\":\"unknown\""));
     TEST_ASSERT_NOT_EQUAL(std::string::npos,
                           json.find("\"connection_status\":\"unavailable\""));
 }
@@ -186,7 +188,7 @@ when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_s
 
     TEST_ASSERT_NOT_EQUAL(
         std::string::npos,
-        json.find("\"sensor_uuid\":\"987e6543-e21b-12d3-a456-426614174999\""));
+        json.find("\"sensor_unit_id\":\"987e6543-e21b-12d3-a456-426614174999\""));
     TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"connection_status\":\"pending\""));
 }
 
@@ -276,7 +278,7 @@ when_passing_message_to_composeErrorResponse_then_it_should_return_valid_json_st
     TEST_ASSERT_NOT_EQUAL(std::string::npos,
                           result.find("\"message\":\"Something went wrong\""));
     std::string expected_controlunit_uuid =
-        "\"controlunit_uuid\":\"" + controlunit_uuid + "\"";
+        "\"control_unit_id\":\"" + controlunit_uuid + "\"";
     TEST_ASSERT_NOT_EQUAL(std::string::npos,
                           result.find(expected_controlunit_uuid));
 }
