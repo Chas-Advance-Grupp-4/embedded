@@ -21,8 +21,10 @@
 #include <esp_http_server.h>
 #include <esp_log.h>
 #include <esp_netif.h>
+#include <esp_netif_ip_addr.h>
 #include <esp_wifi.h>
 #include <nvs_flash.h>
+#include <string>
 
 #define WIFI_CONNECTED_BIT BIT0
 static EventGroupHandle_t wifi_event_group;
@@ -69,8 +71,24 @@ void init_wifi() {
 
     esp_netif_init();
     ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    // Set up STA interface
     esp_netif_create_default_wifi_sta();
 
+    // Set up AP interface with static IP
+    esp_netif_t* ap_netif = esp_netif_create_default_wifi_ap();
+
+    ESP_LOGI(WIFI_TAG, "Setting IP address for AP according to wifi_config.h");
+    esp_netif_ip_info_t ip_info;
+    ip_info.ip.addr      = esp_ip4addr_aton(CONTROL_UNIT_IP_ADDR);
+    ip_info.gw.addr      = esp_ip4addr_aton(CONTROL_UNIT_GATEWAY);
+    ip_info.netmask.addr = esp_ip4addr_aton(CONTROL_UNIT_NETMASK);
+
+    ESP_ERROR_CHECK(esp_netif_dhcps_stop(ap_netif));
+    ESP_ERROR_CHECK(esp_netif_set_ip_info(ap_netif, &ip_info));
+    ESP_ERROR_CHECK(esp_netif_dhcps_start(ap_netif));
+
+    // Register event handlers
     esp_err_t err = esp_event_handler_register(
         IP_EVENT, IP_EVENT_STA_GOT_IP, &wifi_event_handler, NULL);
     if (err != ESP_OK) {
@@ -95,21 +113,61 @@ void init_wifi() {
                  esp_err_to_name(err3));
     }
 
+    // Init WiFi
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     esp_wifi_init(&cfg);
 
-    wifi_config_t wifi_config = {};
-    strncpy((char*) wifi_config.sta.ssid,
-            WIFI_SECRET_SSID,
-            sizeof(wifi_config.sta.ssid));
-    strncpy((char*) wifi_config.sta.password,
-            WIFI_SECRET_PASS,
-            sizeof(wifi_config.sta.password));
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
 
-    esp_wifi_set_mode(WIFI_MODE_STA);
-    esp_wifi_set_config(WIFI_IF_STA, &wifi_config);
+    // Configure STA
+    wifi_config_t sta_config = {};
+    std::string   ssid       = WIFI_SECRET_SSID;
+    std::string   password   = WIFI_SECRET_PASS;
+
+    if (ssid.size() < sizeof(sta_config.sta.ssid)) {
+        std::copy(ssid.begin(), ssid.end(), sta_config.sta.ssid);
+        sta_config.sta.ssid[ssid.size()] = '\0';
+    } else {
+        ESP_LOGE(WIFI_TAG, "STA SSID too long");
+    }
+    if (password.size() < sizeof(sta_config.sta.password)) {
+        std::copy(password.begin(), password.end(), sta_config.sta.password);
+        sta_config.sta.password[password.size()] = '\0';
+    } else {
+        ESP_LOGE(WIFI_TAG, "STA Password too long");
+    }
+
+    esp_wifi_set_config(WIFI_IF_STA, &sta_config);
+
+    // Configure AP
+    wifi_config_t ap_config   = {};
+    std::string   ap_ssid     = CONTROL_UNIT_SSID;
+    std::string   ap_password = CONTROL_UNIT_PASSWORD;
+
+    ap_config.ap.max_connection = 4;
+    ap_config.ap.authmode       = WIFI_AUTH_WPA2_PSK;
+
+    std::copy(ap_ssid.begin(), ap_ssid.end(), ap_config.ap.ssid);
+    ap_config.ap.ssid[ap_ssid.size()] = '\0';
+    ap_config.ap.ssid_len = ap_ssid.size();
+
+    std::copy(ap_password.begin(), ap_password.end(), ap_config.ap.password);
+    ap_config.ap.password[ap_password.size()] = '\0';
+
+    ESP_LOGI(WIFI_TAG, "AP SSID: %s", CONTROL_UNIT_SSID);
+    ESP_LOGI(WIFI_TAG, "AP IP: %s", CONTROL_UNIT_IP_ADDR);
+
+    esp_wifi_set_config(WIFI_IF_AP, &ap_config);
+
+    // Start WiFi
     esp_wifi_start();
-    esp_wifi_connect();
+    // Connect needed for STA
+    esp_err_t connect_err = esp_wifi_connect();
+    if (connect_err != ESP_OK) {
+        ESP_LOGE(WIFI_TAG,
+                 "Failed to connect to STA: %s",
+                 esp_err_to_name(connect_err));
+    }
 
     ESP_LOGI(WIFI_TAG, "Wi-Fi started, waiting for connection...");
     xEventGroupWaitBits(
