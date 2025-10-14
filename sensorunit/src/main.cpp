@@ -19,12 +19,9 @@ void setup() {
     delay(2000);
 
     connectionManager.init();
-    LOG_INFO("MAIN", "Info from Main");
-    LOG_WARN("MAIN", "A Warning from Main");
-    LOG_ERROR("MAIN", "An Error from Main");
-    LOG_DEBUG("MAIN", "Only for Debugging");
+    connectionManager.connect();
 
-    LOG_INFO("MAIN - JsonParser", JsonParser::composeSensorSnapshotGroup(testReadings, SENSOR_UNIT_ID).c_str());
+    LOG_INFO("MAIN", "Setup done");
 }
 
 void loop() {
