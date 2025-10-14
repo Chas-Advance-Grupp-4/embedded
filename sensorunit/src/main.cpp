@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "config.h"
 #include "sensor_data_types.h"
+#include "communication_data_types.h"
 #include "ConnectionManager.h"
 #include <etl/string.h>
 #include <etl/vector.h>
@@ -19,8 +20,11 @@ void setup() {
     delay(2000);
 
     connectionManager.init();
-    connectionManager.connect();
+    // connectionManager.connect();
 
+    ConnectResponse test = JsonParser::parseConnectResponse(R"({"status":"connected","sensor_id": 1}")");
+    LOG_INFO("MAIN", "Connected: %s", test.connected ? "true" : "false");
+    LOG_INFO("MAIN", "Sensor Id: %d", test.sensorId); 
     LOG_INFO("MAIN", "Setup done");
 }
 

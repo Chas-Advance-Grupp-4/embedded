@@ -14,6 +14,7 @@
 #pragma once
 #include "constants.h"
 #include "sensor_data_types.h"
+#include "communication_data_types.h"
 #include <ArduinoJson.h>
 #include <etl/string.h>
 #include <etl/vector.h>
@@ -30,15 +31,34 @@ class JsonParser {
     /**
      * @brief Composes a JSON string representing a group of sensor readings.
      *
-     * This method takes a vector of sensor readings and a UUID string identifying
-     * the sensor unit. It returns a JSON-formatted string containing all readings
-     * in a structured format.
-     *
-     * @param readings A vector containing timestamped sensor readings (temperature, humidity).
-     * @param uuid A string representing the unique identifier of the sensor unit.
-     * @return etl::string<MAX_JSON_SIZE> A JSON string representing the sensor snapshot group.
+     * @param readings
+     * @param uuid
+     * @return etl::string<MAX_JSON_SIZE> A JSON string
      */
-    static etl::string<json_config::max_json_size>
-    composeSensorSnapshotGroup(etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
-                               const char*                                         uuid);
+    static etl::string<json_config::max_json_size> composeSensorSnapshotGroup(
+        etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
+        const char*                                                    uuid);
+    /**
+     * @brief Composes a JSON string with a connect response
+     *
+     * @param su_uuid
+     * @return etl::string<json_config::max_small_json_size>
+     */
+    static etl::string<json_config::max_small_json_size> composeConnectRequest(const char* su_uuid);
+    /**
+     * @brief parse a JSON connect response
+     *
+     * @param payload
+     * @return ConnectResponse
+     */
+    static ConnectResponse parseConnectResponse(etl::string<json_config::max_small_json_size> payload);
+    /**
+     * @brief Parse a JSON response from GET /time
+     *
+     * @param payload
+     * @return unsigned long - Unix timestamp with current time
+     */
+    static unsigned long parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload);
+    private:
+      static constexpr const char* TAG = "JsonParser";
 };
