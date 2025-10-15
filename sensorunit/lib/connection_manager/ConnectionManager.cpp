@@ -1,6 +1,5 @@
 #include "ConnectionManager.h"
 #include "JsonParser.h"
-#include "config.h"
 #include "logging.h"
 #include "WiFiS3.h"
 #include "etl/algorithm.h"
