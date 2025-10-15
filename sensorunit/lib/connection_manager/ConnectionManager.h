@@ -1,6 +1,7 @@
 #pragma once
 #include "RestClient.h"
 #include "communication_data_types.h"
+#include "config.h"
 #include <Arduino.h>
 #include <etl/string.h>
 #include <etl/vector.h>
@@ -23,16 +24,18 @@ class ConnectionManager {
   public:
     ConnectionManager(RestClient& restClient);
     void            init();
-    ConnectResponse connect();
+    void            connect();
     bool            isConnectedToWiFi();
     bool            isPairedWithControlUnit();
+    uint8_t         getSensorId();
 
   private:
     void                                           checkFirmwareVersion();
     bool                                           connectToWiFi();
     void                                           scanForUnits(const char* prefix = "CU-");
-    ConnectResponse                                tryToConnectControlUnit(const char* uuid);
+    void                                           tryToConnectControlUnit(const char* uuid = SENSOR_UNIT_ID);
     bool                                           m_isPaired;
+    uint8_t                                        m_sensorId;
     unsigned long                                  m_latestScan{0};
     unsigned long                                  m_timeoutMs{10000};
     etl::vector<connection_types::cu_candidate, 8> m_candidateSsids;

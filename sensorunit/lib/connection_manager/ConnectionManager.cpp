@@ -1,10 +1,12 @@
 #include "ConnectionManager.h"
 #include "JsonParser.h"
+#include "config.h"
+#include "logging.h"
 #include "WiFiS3.h"
 #include "etl/algorithm.h"
-#include "logging.h"
 
-ConnectionManager::ConnectionManager(RestClient& restClient) : m_restClient{restClient} {}
+ConnectionManager::ConnectionManager(RestClient& restClient)
+    : m_restClient{restClient}, m_isPaired{false}, m_sensorId{0} {}
 
 void ConnectionManager::init() {
     LOG_INFO(TAG, "Initializing...");
@@ -21,11 +23,12 @@ void ConnectionManager::init() {
 
     // Restore internal status variables
     m_isPaired = false;
+    m_sensorId = 0;
 
     LOG_INFO(TAG, "ConnectionManager initialized");
 }
 
-ConnectResponse ConnectionManager::connect() {
+void ConnectionManager::connect() {
     LOG_INFO(TAG, "Running connect()");
     unsigned long       now          = millis();
     const unsigned long scanInterval = 30'000;
@@ -39,14 +42,20 @@ ConnectResponse ConnectionManager::connect() {
         connected = connectToWiFi();
     }
 
-    return {};
+    if (!m_isPaired) {
+        tryToConnectControlUnit();
+    }    
+    LOG_INFO(TAG, "WiFi connected: %s, Paired: %s, Sensor ID: %d",
+         connected ? "yes" : "no",
+         m_isPaired ? "yes" : "no",
+         m_sensorId);
 }
 
 bool ConnectionManager::isConnectedToWiFi() {
     return WiFi.status() == WL_CONNECTED;
 }
 bool ConnectionManager::isPairedWithControlUnit() {
-    return false;
+    return m_isPaired;
 }
 
 void ConnectionManager::checkFirmwareVersion() {
@@ -128,11 +137,10 @@ void ConnectionManager::scanForUnits(const char* prefix) {
                        const connection_types::cu_candidate& b) { return a.rssi > b.rssi; });
 }
 
-ConnectResponse ConnectionManager::tryToConnectControlUnit(const char* uuid = SENSOR_UNIT_ID) {
-    ConnectResponse response{false, 0};
+void ConnectionManager::tryToConnectControlUnit(const char* uuid) {
     if (m_candidateSsids.empty()) {
         LOG_WARN(TAG, "No Candidate Control Units available for connection");
-        return response;
+        return;
     }
     // Could probably be defined as constexpr in constants unless we need to add dynamic element
     etl::string<json_config::max_small_json_size> payload = JsonParser::composeConnectRequest(uuid);
@@ -141,12 +149,16 @@ ConnectResponse ConnectionManager::tryToConnectControlUnit(const char* uuid = SE
         LOG_INFO(TAG, "Trying to connect to candidate: %s", candidate.ssid.c_str());
         RestResponse restResponse = m_restClient.postTo("/connect", payload);
         if (restResponse.status == 200) {
-            response = JsonParser::parseConnectResponse(restResponse.payload);
-            break;
+            ConnectResponse response = JsonParser::parseConnectResponse(restResponse.payload);
+            if (response.connected) {
+                m_isPaired = true;
+                m_sensorId = response.sensorId;
+                break;
+            }
         }
     }
-    if (!response.connected) {
+    if (!m_isPaired) {
         LOG_WARN(TAG, "Failed to connect to any Control Unit");
     }
-    return response;
+    return;
 }
