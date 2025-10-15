@@ -13,10 +13,11 @@
  *
  */
 #include "JsonParser.h"
+#include "logging.h"
 
-etl::string<json_config::max_json_size>
-JsonParser::composeSensorSnapshotGroup(etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
-                                       const char*                                         uuid) {
+etl::string<json_config::max_json_size> JsonParser::composeSensorSnapshotGroup(
+    etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
+    const char*                                                    uuid) {
     StaticJsonDocument<json_config::max_json_doc_size> doc;
     doc["sensor_unit_id"]   = uuid;
     JsonArray readingsArray = doc["readings"].to<JsonArray>();
@@ -31,4 +32,59 @@ JsonParser::composeSensorSnapshotGroup(etl::vector<CaSensorunitReading, json_con
     char rawOutput[json_config::max_json_size];
     serializeJson(doc, rawOutput);
     return etl::string<json_config::max_json_size>(rawOutput);
+}
+
+etl::string<json_config::max_small_json_size>
+JsonParser::composeConnectRequest(const char* su_uuid) {
+    StaticJsonDocument<json_config::max_small_json_doc_size> doc;
+    doc["sensor_unit_id"] = su_uuid;
+    char rawOutput[json_config::max_small_json_size];
+    serializeJson(doc, rawOutput);
+    return etl::string<json_config::max_small_json_size>{rawOutput};
+}
+
+ConnectResponse
+JsonParser::parseConnectResponse(etl::string<json_config::max_small_json_size> payload) {
+    const char*                                              json = payload.c_str();
+    StaticJsonDocument<json_config::max_small_json_doc_size> doc;
+    ConnectResponse response {false, 0};
+    DeserializationError                                     error = deserializeJson(doc, json);
+    if (error) {
+        LOG_ERROR(TAG, "DeserializationError: %s", error.c_str());
+        return response;
+    }
+    if (!doc.containsKey("status")) {
+        LOG_WARN(TAG, "Missing 'status' field in connect response");
+        return response;
+    } else if (!doc.containsKey("sensor_id")) {
+        LOG_WARN(TAG, "Missing 'sensor_id' field in connect response");
+        return response;
+    }
+
+    response.connected = (doc["status"] == "connected");
+    if (response.connected) {
+        response.sensorId = (doc["sensor_id"].as<uint8_t>());
+    }
+    return response;
+}
+
+unsigned long
+JsonParser::parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload) {
+
+    const char*                                              json = payload.c_str();
+    StaticJsonDocument<json_config::max_small_json_doc_size> doc;
+    DeserializationError                                     error = deserializeJson(doc, json);
+    if (error) {
+        LOG_ERROR(TAG, "DeserializationError: %s", error.c_str());
+        return 0;
+    }
+
+    if (!doc.containsKey("timestamp")) {
+        LOG_WARN(TAG, "Missing 'timestamp' field in time response");
+        return 0;
+    }
+
+    unsigned long currentTime = doc["timestamp"].as<unsigned long>();
+
+    return currentTime;
 }

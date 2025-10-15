@@ -1,5 +1,5 @@
 # Convenience commands for long build commands in this Arduino project
-.PHONY: help build flash test
+.PHONY: help build flash test clean monitor
 
 .DEFAULT_GOAL := help
 
@@ -8,6 +8,8 @@ help:
 	@echo "  make build       - Build the project"
 	@echo "  make flash       - Flash and open monitor"
 	@echo "  make test        - Build and flash the test file"
+	@echo "  make clean       - Clean PlatformIO cache"
+	@echo "  make monitor     - Open monitor"
 
 # build and run merge command
 build:
@@ -18,3 +20,9 @@ flash:
 
 test:
 	pio test
+
+clean:
+	pio run -t clean
+
+monitor:
+	pio device monitor --raw

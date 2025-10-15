@@ -12,6 +12,7 @@
  *
  */
 #pragma once
+#include "communication_data_types.h"
 #include "constants.h"
 #include "sensor_data_types.h"
 #include <ArduinoJson.h>
@@ -30,15 +31,44 @@ class JsonParser {
     /**
      * @brief Composes a JSON string representing a group of sensor readings.
      *
-     * This method takes a vector of sensor readings and a UUID string identifying
-     * the sensor unit. It returns a JSON-formatted string containing all readings
-     * in a structured format.
-     *
-     * @param readings A vector containing timestamped sensor readings (temperature, humidity).
-     * @param uuid A string representing the unique identifier of the sensor unit.
-     * @return etl::string<MAX_JSON_SIZE> A JSON string representing the sensor snapshot group.
+     * @param readings
+     * @param uuid
+     * @return etl::string<MAX_JSON_SIZE> A JSON string
      */
-    static etl::string<json_config::max_json_size>
-    composeSensorSnapshotGroup(etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
-                               const char*                                         uuid);
+    static etl::string<json_config::max_json_size> composeSensorSnapshotGroup(
+        etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
+        const char*                                                    uuid);
+    /**
+     * @brief Composes a JSON string for connecting with Control Unit
+     *
+     * @param su_uuid This Sensor Unit UUID
+     * @return etl::string<json_config::max_small_json_size> a JSON string
+     * @example return string: {"sensor_unit_id":"550e8400-e29b-41d4-a716-446655440000"}
+     */
+    static etl::string<json_config::max_small_json_size> composeConnectRequest(const char* su_uuid);
+    /**
+     * @brief parse a JSON connect response
+     *
+     * @param payload The JSON payload received from the Control Unit
+     * @return ConnectResponse Struct containing connection status and assigned sensor ID
+     *
+     * @example:
+     *   {
+     *     connected = true,
+     *     sensorId = 1
+     *   }
+     */
+    static ConnectResponse
+    parseConnectResponse(etl::string<json_config::max_small_json_size> payload);
+    /**
+     * @brief Parse a JSON response from GET /time
+     *
+     * @param payload The JSON payload received from the Control Unit
+     * @return unsigned long - Unix timestamp with current time
+     */
+    static unsigned long
+    parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload);
+
+  private:
+    static constexpr const char* TAG = "JsonParser";
 };
