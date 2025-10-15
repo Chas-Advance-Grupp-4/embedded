@@ -1,19 +1,20 @@
+/**
+ * @file IRestClient.h
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Interface for Rest Client
+ * @date 2025-10-15
+ *
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ *
+ */
 #pragma once
 #include "constants.h"
 #include <etl/string.h>
 
-// enum class RestClientStatus {
-//     Ok,
-//     WifiNotConnected,
-//     HttpInitFailed,
-//     RequestFailed,
-//     Timeout,
-//     InvalidResponse,
-//     InternalError
-// };
-
 enum RestClientStatus {
-    InvalidResponse      = -5,    
+    BodyOverflow         = -6,
+    InvalidResponse      = -5,
     HttpInitFailed       = -4,
     RequestFailed        = -3,
     Timeout              = -2,
@@ -31,7 +32,7 @@ enum RestClientStatus {
 };
 
 struct RestResponse {
-    int                              status;
+    int                                           status;
     etl::string<json_config::max_small_json_size> payload;
 };
 

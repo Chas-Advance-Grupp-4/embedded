@@ -26,9 +26,13 @@ void setup() {
 
     
     RestResponse response = restClient.getTo("/time");
-
+    
     LOG_INFO("MAIN", "GET response status: %d", response.status);
     LOG_INFO("MAIN", "GET response payload: %s", response.payload.c_str());
+
+    RestResponse postResponse = restClient.postTo("/connect", "\"sensor_unit_id\":\"12345-67890\"");
+    LOG_INFO("MAIN", "POST response status: %d", postResponse.status);
+    LOG_INFO("MAIN", "POST response payload: %s", postResponse.payload.c_str());
 
     ConnectResponse test = JsonParser::parseConnectResponse(R"({"status":"connected","sensor_id": 1}")");
     LOG_INFO("MAIN", "Connected: %s", test.connected ? "true" : "false");

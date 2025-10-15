@@ -1,3 +1,13 @@
+/**
+ * @file RestClient.cpp
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Implementation of RestClient class
+ * @date 2025-10-15
+ * 
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ * 
+ */
 #include "RestClient.h"
 #include "logging.h"
 
@@ -8,31 +18,44 @@ RestClient::RestClient(const char*   baseUrl,
     : m_baseUrl{baseUrl}, m_port{port}, m_jwtToken{jwtToken}, m_timeout{timeoutMs} {}
 
 RestResponse RestClient::getTo(const char* endpoint) {
-    etl::string<64> fullUrl = m_baseUrl;
-    fullUrl.append(endpoint);
 
-    if (!m_client.connect(m_baseUrl.c_str(), 8080)) {
+    LOG_INFO(TAG, "Sending GET request to %s", endpoint);
+    // Open connection
+    if (!m_client.connect(m_baseUrl.c_str(), m_port)) {
         LOG_ERROR(TAG, "Failed to connect to %s", m_baseUrl.c_str());
-        return {-1, ""}; // fixa enumen!!!!
+        return {-1, ""};
     }
 
-    m_client.print("GET ");
-    m_client.print(endpoint);
-    m_client.println(" HTTP/1.1");
-
-    m_client.print("Host: ");
-    m_client.println(m_baseUrl.c_str());
-
-    // if (!m_jwtToken.empty()) {
-    //     m_client.print("Authorization: Bearer ");
-    //     m_client.println(m_jwtToken.c_str());
-    // }
-
-    m_client.println("Connection: close");
-    m_client.println(); // tom rad avslutar headers
+    sendGetHeader(endpoint);
 
     RestResponse response = parseResponse();
 
+    // Close connection
+    m_client.stop();
+
+    return response;
+}
+
+
+RestResponse RestClient::postTo(const char*                                   endpoint,
+                                const etl::string<json_config::max_json_size> payload) {
+    
+    LOG_INFO(TAG, "Sending POST request to %s", endpoint);
+    // Open connection
+    if (!m_client.connect(m_baseUrl.c_str(), m_port)) {
+        LOG_ERROR(TAG, "Failed to connect to %s", m_baseUrl.c_str());
+        return {-1, ""};
+    }
+
+    // Send
+    uint16_t contentLength = payload.size();
+    sendPostHeader(endpoint, contentLength);
+    m_client.print(payload.c_str());
+
+    // Get response
+    RestResponse response = parseResponse();
+
+    // Close connection
     m_client.stop();
 
     return response;
@@ -48,13 +71,42 @@ int RestClient::extractStatusCode(const etl::string<128>& statusLine) {
     return -1;
 }
 
+void RestClient::sendGetHeader(const char* endpoint) {
+    m_client.print("GET ");
+    m_client.print(endpoint);
+    m_client.println(" HTTP/1.1");
+
+    m_client.print("Host: ");
+    m_client.println(m_baseUrl.c_str());
+
+    m_client.println("Connection: close");
+    m_client.println(); /// Empty line ends header
+}
+
+void RestClient::sendPostHeader(const char* endpoint, uint16_t contentLength) {
+    m_client.print("POST ");
+    m_client.print(endpoint);
+    m_client.println(" HTTP/1.1");
+
+    m_client.print("Host: ");
+    m_client.println(m_baseUrl.c_str());
+
+    m_client.println("Content-Type: application/json");
+
+    m_client.print("Content-Length: ");
+    m_client.println(contentLength);
+
+    m_client.println("Connection: close");
+    m_client.println(); /// Empty line ends header
+}
+
 RestResponse RestClient::parseResponse() {
-    RestResponse                                  response;
-    int                                           statusCode{};
-    etl::string<128>                              headerLine;
-    etl::string<json_config::max_small_json_size> body;
-    bool                                          headersEnded = false;
-    unsigned long                                 start        = millis();
+    RestResponse                                   response;
+    int                                            statusCode{};
+    etl::string<json_config::max_header_line_size> headerLine;
+    etl::string<json_config::max_small_json_size>  body;
+    bool                                           headersEnded = false;
+    unsigned long                                  start        = millis();
 
     while (m_client.connected() && (millis() - start < m_timeout)) {
         while (m_client.available()) {
@@ -75,20 +127,22 @@ RestResponse RestClient::parseResponse() {
                         headerLine.push_back(c);
                 }
             } else {
-                if (!body.full())
-                    body.push_back(c);
+                if (!body.full()) {
+                    body.push_back(c);                    
+                } else {
+                    LOG_WARN(TAG, "Response body exceeding max size: %d", json_config::max_small_json_size);
+                    break;
+                }
             }
         }
     }
 
     response.payload = body;
-    response.status  = statusCode; // Fixa detta sedan
-    // response.status = (response.statusCode == 200) ? RestClientStatus::Ok :
-    // RestClientStatus::ServerError;
+    if (body.full()) {
+        response.status = -6;        
+    } else {
+        response.status  = statusCode;
+    }
     return response;
 }
 
-RestResponse RestClient::postTo(const char*                                   endpoint,
-                                const etl::string<json_config::max_json_size> payload) {
-    return RestResponse{-1, ""};
-}
