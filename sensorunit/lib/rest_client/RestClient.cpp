@@ -30,6 +30,8 @@ RestResponse RestClient::getTo(const char* endpoint) {
 
     RestResponse response = parseResponse();
 
+    LOG_INFO(TAG, "GET %s responded with status %d", endpoint, response.status);
+
     // Close connection
     m_client.stop();
 
@@ -54,6 +56,7 @@ RestResponse RestClient::postTo(const char*                                   en
 
     // Get response
     RestResponse response = parseResponse();
+    LOG_INFO(TAG, "POST %s responded with status %d", endpoint, response.status);
 
     // Close connection
     m_client.stop();
