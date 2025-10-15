@@ -3,27 +3,64 @@
 #include "etl/algorithm.h"
 #include "logging.h"
 
-ConnectionManager::ConnectionManager() {}
+ConnectionManager::ConnectionManager(RestClient& restClient) : m_restClient{restClient} {}
 
 void ConnectionManager::init() {
     LOG_INFO(TAG, "Initializing...");
+
     // Initialize WiFi hardware
     if (WiFi.status() == WL_NO_MODULE) {
         LOG_ERROR(TAG, "WiFi module missing");
         return;
     }
 
-    // Check firmware version
+    checkFirmwareVersion();
+
+    WiFi.disconnect();
+    
+    // Restore internal status variables
+    m_isPaired = false;
+
+    LOG_INFO(TAG, "ConnectionManager initialized");
+}
+
+
+
+ConnectResponse ConnectionManager::connect() {
+    LOG_INFO(TAG, "Running connect()");
+    unsigned long       now          = millis();
+    const unsigned long scanInterval = 30'000;
+
+    if (m_candidateSsids.empty() || now - m_latestScan >= scanInterval) {
+        scanForUnits("Zyxel");
+    }
+
+    bool connected = isConnectedToWiFi();
+    if (!connected) {
+        connected = connectToWiFi();
+    }
+
+    return {};
+}
+
+bool ConnectionManager::isConnectedToWiFi() {
+    return WiFi.status() == WL_CONNECTED;
+}
+bool ConnectionManager::isPairedWithControlUnit() {
+    return false;
+}
+
+void ConnectionManager::checkFirmwareVersion() {
     const char* fv = WiFi.firmwareVersion();
 
-    auto parseVersion = [](const char* versionStr) -> fwVersion {
-        fwVersion v{0, 0, 0};
-        sscanf(versionStr, "%d.%d.%d", &v.major, &v.minor, &v.patch);
+    auto parseVersion = [](const char* versionString) -> connection_types::fw_version {
+        connection_types::fw_version v{0, 0, 0};
+        sscanf(versionString, "%d.%d.%d", &v.major, &v.minor, &v.patch);
         return v;
     };
 
-    fwVersion current = parseVersion(fv);
-    fwVersion latest  = parseVersion(WIFI_FIRMWARE_LATEST_VERSION);
+    connection_types::fw_version current = parseVersion(fv);
+    connection_types::fw_version latest  = parseVersion(WIFI_FIRMWARE_LATEST_VERSION);
 
     if ((current.major < latest.major) ||
         (current.major == latest.major && current.minor < latest.minor) ||
@@ -34,34 +71,33 @@ void ConnectionManager::init() {
     } else {
         LOG_INFO(TAG, "Firmware version: %s", fv);
     }
-
-    // Initialize REST client
-    // m_restClient.begin();
-
-    // Restore internal status variables
-    m_isPaired = false;
-    m_ip       = IPAddress();
-
-    LOG_INFO(TAG, "ConnectionManager initialized");
 }
 
-ControlUnitInfo ConnectionManager::connect() {
-    unsigned long now = millis();
-    const unsigned long scanInterval = 30'000;
+bool ConnectionManager::connectToWiFi() {
+    LOG_INFO(TAG, "Connecting to WiFi...");
+    WiFi.disconnect();
+    WiFi.begin(WIFI_SECRET_SSID, WIFI_SECRET_PASS);
 
-    if (m_candidateSsids.empty() || now - m_latestScan >= scanInterval) {
-        scanForUnits("Zyxel");
+    unsigned long startAttemptTime = millis();
+    int           status           = WiFi.status();
+    while (status != WL_CONNECTED && millis() - startAttemptTime < m_timeoutMs) {
+        delay(500);
+        status = WiFi.status();
     }
-    return {};
-}
-bool ConnectionManager::isConnectedToWiFi() {
-    return false;
-}
-bool ConnectionManager::isPairedWithControlUnit() {
-    return false;
-}
-IPAddress ConnectionManager::getIp() {
-    return {};
+
+    bool connected = (status == WL_CONNECTED);
+    if (connected) {
+        IPAddress localIp = WiFi.localIP();
+        LOG_INFO(TAG,
+                 "WiFi connected with IP: %d.%d.%d.%d",
+                 localIp[0],
+                 localIp[1],
+                 localIp[2],
+                 localIp[3]);
+    } else {
+        LOG_WARN(TAG, "WiFi connection failed with status: %d", WiFi.status());
+    }
+    return connected;
 }
 
 void ConnectionManager::scanForUnits(const char* prefix) {
@@ -89,9 +125,11 @@ void ConnectionManager::scanForUnits(const char* prefix) {
     }
     etl::shell_sort(m_candidateSsids.begin(),
                     m_candidateSsids.end(),
-                    [](const Candidate& a, const Candidate& b) { return a.rssi > b.rssi; });
+                    [](const connection_types::cu_candidate& a,
+                       const connection_types::cu_candidate& b) { return a.rssi > b.rssi; });
 }
 
-ControlUnitInfo ConnectionManager::sendConnectRequest(IPAddress ip) {
+
+ConnectResponse                                ConnectionManager::tryToConnectControlUnit(const char* uuid){
     return {};
 }
