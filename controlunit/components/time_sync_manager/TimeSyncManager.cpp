@@ -107,3 +107,7 @@ void TimeSyncManager::resync() {
         m_timeSynced = false;
     }
 }
+
+bool TimeSyncManager::isTimeSynced() {
+    return m_timeSynced;
+}

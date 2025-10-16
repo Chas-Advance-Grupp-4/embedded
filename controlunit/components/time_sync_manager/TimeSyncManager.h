@@ -56,6 +56,7 @@ class TimeSyncManager {
      * updated.
      */
     void resync();
+    bool isTimeSynced();
 
   private:
     std::string m_ntpServer; /**< Address of the NTP server to use. */
