@@ -58,7 +58,8 @@ class TimeSyncManager {
     void resync();
 
   private:
-    std::string m_ntpServer;      /**< Address of the NTP server to use. */
+    std::string m_ntpServer; /**< Address of the NTP server to use. */
+    std::string m_defaultTimezone{"CET-1CEST,M3.5.0,M10.5.0/3"}; /**< Default timezone Europe/Stockholm */
     uint32_t    m_syncIntervalMs; /**< Interval between automatic resyncs in
                                      milliseconds. */
     bool m_timeSynced;    /**< Indicates whether the time has been successfully

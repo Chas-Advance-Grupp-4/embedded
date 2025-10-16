@@ -33,6 +33,10 @@ void TimeSyncManager::start() {
     struct tm timeinfo = {};
     int       retry    = 0;
 
+    // Set time zone
+    setenv("TZ", m_defaultTimezone.c_str(), 1);
+    tzset();
+
     while (!m_timeSynced && retry++ < m_maxRetries) {
         time(&now);
         localtime_r(&now, &timeinfo);
