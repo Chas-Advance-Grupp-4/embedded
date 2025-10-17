@@ -68,7 +68,7 @@ JsonParser::parseConnectResponse(etl::string<json_config::max_small_json_size> p
     return response;
 }
 
-unsigned long
+uint32_t
 JsonParser::parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload) {
 
     const char*                                              json = payload.c_str();
@@ -84,7 +84,7 @@ JsonParser::parseGetTimeResponse(etl::string<json_config::max_small_json_size> p
         return 0;
     }
 
-    unsigned long currentTime = doc["timestamp"].as<unsigned long>();
+    uint32_t currentTime = doc["timestamp"].as<uint32_t>();
 
     return currentTime;
 }

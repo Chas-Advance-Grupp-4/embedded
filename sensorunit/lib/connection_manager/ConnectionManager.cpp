@@ -1,11 +1,12 @@
 #include "ConnectionManager.h"
 #include "JsonParser.h"
-#include "logging.h"
 #include "WiFiS3.h"
 #include "etl/algorithm.h"
+#include "logging.h"
 
-ConnectionManager::ConnectionManager(RestClient& restClient)
-    : m_restClient{restClient}, m_isPaired{false}, m_sensorId{0} {}
+ConnectionManager::ConnectionManager(const char* controlUnitPassword, RestClient& restClient)
+    : m_controlUnitPassword(controlUnitPassword), m_restClient(restClient), m_isPaired(false),
+      m_sensorId(0) {}
 
 void ConnectionManager::init() {
     LOG_INFO(TAG, "Initializing...");
@@ -33,21 +34,12 @@ void ConnectionManager::connect() {
     const unsigned long scanInterval = 30'000;
 
     if (m_candidateSsids.empty() || now - m_latestScan >= scanInterval) {
-        scanForUnits("Zyxel");
-    }
-
-    bool connected = isConnectedToWiFi();
-    if (!connected) {
-        connected = connectToWiFi();
+        scanForUnits();
     }
 
     if (!m_isPaired) {
         tryToConnectControlUnit();
-    }    
-    LOG_INFO(TAG, "WiFi connected: %s, Paired: %s, Sensor ID: %d",
-         connected ? "yes" : "no",
-         m_isPaired ? "yes" : "no",
-         m_sensorId);
+    }
 }
 
 bool ConnectionManager::isConnectedToWiFi() {
@@ -80,10 +72,10 @@ void ConnectionManager::checkFirmwareVersion() {
     }
 }
 
-bool ConnectionManager::connectToWiFi() {
+bool ConnectionManager::connectToWiFi(const char* ssid) {
     LOG_INFO(TAG, "Connecting to WiFi...");
     WiFi.disconnect();
-    WiFi.begin(WIFI_SECRET_SSID, WIFI_SECRET_PASS);
+    WiFi.begin(ssid, WIFI_SECRET_PASS);
 
     unsigned long startAttemptTime = millis();
     int           status           = WiFi.status();
@@ -144,18 +136,36 @@ void ConnectionManager::tryToConnectControlUnit(const char* uuid) {
     // Could probably be defined as constexpr in constants unless we need to add dynamic element
     etl::string<json_config::max_small_json_size> payload = JsonParser::composeConnectRequest(uuid);
 
-    for (auto candidate : m_candidateSsids) {
+    for (const auto& candidate : m_candidateSsids) {
         LOG_INFO(TAG, "Trying to connect to candidate: %s", candidate.ssid.c_str());
+
+        if (!connectToWiFi(candidate.ssid.c_str())) {
+            LOG_WARN(TAG, "Failed to connect to SSID: %s", candidate.ssid.c_str());
+            continue;
+        }
+
         RestResponse restResponse = m_restClient.postTo("/connect", payload);
-        if (restResponse.status == 200) {
-            ConnectResponse response = JsonParser::parseConnectResponse(restResponse.payload);
-            if (response.connected) {
-                m_isPaired = true;
-                m_sensorId = response.sensorId;
-                break;
-            }
+
+        if (restResponse.status != 200) {
+            LOG_WARN(TAG, "REST /connect failed with status: %d", restResponse.status);
+            WiFi.disconnect();
+            continue;
+        }
+
+        ConnectResponse response = JsonParser::parseConnectResponse(restResponse.payload);
+
+        if (response.connected) {
+            LOG_INFO(TAG, "Successfully paired with Control Unit %s. ", candidate.ssid.c_str());
+            LOG_INFO(TAG, "Assigned Sensor ID: %u", response.sensorId);
+            m_isPaired = true;
+            m_sensorId = response.sensorId;
+            break;
+        } else {
+            LOG_INFO(TAG, "Response from Control Unit %s: Not connected", candidate.ssid.c_str());
+            WiFi.disconnect();
         }
     }
+
     if (!m_isPaired) {
         LOG_WARN(TAG, "Failed to connect to any Control Unit");
     }
