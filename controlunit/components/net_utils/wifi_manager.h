@@ -1,12 +1,22 @@
+/**
+ * @file wifi_manager.h
+ * @brief Initializes and manages Wi-Fi connection for ESP32 in station mode.
+ *
+ * Provides a single entry point to configure and connect to a Wi-Fi network
+ * using credentials defined in `wifi_config.h`. Registers event handlers for
+ * IP acquisition and disconnection.
+ *
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @date 2025-10-07
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ */
 #pragma once
-#include "wifi_config.h"
-#include <esp_event.h>
-#include <esp_http_server.h>
-#include <esp_log.h>
-#include <esp_netif.h>
-#include <esp_wifi.h>
-#include <nvs_flash.h>
 
-// static void wifi_event_handler(void *arg, esp_event_base_t event_base,
-//                                int32_t event_id, void *event_data);
+/**
+ * @brief Initializes Wi-Fi and connects to the configured SSID.
+ *
+ * Sets up the network interface, registers event handlers, and starts
+ * the Wi-Fi driver in station mode. Blocks until a connection is established.
+ */
 void init_wifi();

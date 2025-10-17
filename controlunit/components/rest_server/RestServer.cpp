@@ -1,3 +1,17 @@
+/**
+ * @file RestServer.cpp
+ * @brief Implements the RestServer class for managing HTTP server and route handlers.
+ *
+ * Defines the logic for starting and stopping the ESP-IDF HTTP server,
+ * and for registering route handlers via the BaseHandler interface.
+ *
+ * Used to expose REST endpoints for sensor data, configuration, or control.
+ *
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @date 2025-10-07
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ */
 #include "RestServer.h"
 #include "HelloHandler.h"
 #include "PostexampleHandler.h"

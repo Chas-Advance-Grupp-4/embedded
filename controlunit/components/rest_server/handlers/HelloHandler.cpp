@@ -1,27 +1,26 @@
+/**
+ * @file HelloHandler.cpp
+ * @brief Implementation of HelloHandler, a simple GET endpoint that returns a
+ * greeting.
+ *
+ * Defines the logic for responding to HTTP GET requests with a static greeting
+ * message. Inherits from GetHandler and overrides the `process()` method to
+ * send a plain-text response.
+ *
+ * Useful for testing server availability or providing a basic health check.
+ *
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @date 2025-10-07
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ */
 #include "HelloHandler.h"
 
-static const char* TAG = "HelloHandler";
+HelloHandler::HelloHandler(const std::string& uri)
+    : GetHandler(uri), m_greeting("Hello from ESP32 with generic GetHandler") {}
 
-HelloHandler::HelloHandler(const char* uri)
-    : m_greeting("Hello from ESP32 Still in progress") {
-    m_uri = {.uri      = uri,
-             .method   = HTTP_GET,
-             .handler  = HelloHandler::staticHandler,
-             .user_ctx = this};
-}
-
-httpd_uri_t* HelloHandler::getUri() {
-    return &m_uri;
-}
-
-esp_err_t HelloHandler::handle(httpd_req_t* req) {
-    ESP_LOGI(TAG, "Handling /hello request");
+esp_err_t HelloHandler::process(httpd_req_t* req) {
     httpd_resp_set_type(req, "text/plain; charset=utf-8");
     httpd_resp_send(req, m_greeting.c_str(), m_greeting.length());
     return ESP_OK;
-}
-
-esp_err_t HelloHandler::staticHandler(httpd_req_t* req) {
-    auto* self = static_cast<HelloHandler*>(req->user_ctx);
-    return self->handle(req);
 }
