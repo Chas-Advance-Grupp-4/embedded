@@ -1,6 +1,7 @@
 /**
  * @file RestServer.cpp
- * @brief Implements the RestServer class for managing HTTP server and route handlers.
+ * @brief Implements the RestServer class for managing HTTP server and route
+ * handlers.
  *
  * Defines the logic for starting and stopping the ESP-IDF HTTP server,
  * and for registering route handlers via the BaseHandler interface.
@@ -14,13 +15,14 @@
  */
 #include "RestServer.h"
 #include "HelloHandler.h"
-#include "PostexampleHandler.h"
+#include "TimeHandler.h"
 #include "esp_log.h"
 
 static const char* TAG = "RestServer";
 
-RestServer::RestServer()
-    : m_server(nullptr), m_config(HTTPD_DEFAULT_CONFIG()) {}
+RestServer::RestServer(TimeSyncManager& timeSyncManager)
+    : m_server(nullptr), m_config(HTTPD_DEFAULT_CONFIG()),
+      m_timeSyncManager(timeSyncManager) {}
 
 RestServer::~RestServer() {
     stop();
@@ -61,5 +63,5 @@ void RestServer::registerHandler(std::unique_ptr<BaseHandler> handler) {
 
 void RestServer::registerHandlers() {
     registerHandler(std::make_unique<HelloHandler>("/hello"));
-    registerHandler(std::make_unique<PostexampleHandler>("/postexample"));
+    registerHandler(std::make_unique<TimeHandler>("/time", m_timeSyncManager));
 }

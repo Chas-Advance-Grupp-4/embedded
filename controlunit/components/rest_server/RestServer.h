@@ -15,6 +15,7 @@
  */
 #pragma once
 #include "BaseHandler.h"
+#include "TimeSyncManager.h"
 #include "esp_http_server.h"
 #include <memory>
 #include <vector>
@@ -33,7 +34,7 @@ class RestServer {
      *
      * Initializes server configuration and prepares handler list.
      */
-    RestServer();
+    RestServer(TimeSyncManager& timeSyncManager);
     /**
      * @brief Destructor for RestServer.
      *
@@ -53,21 +54,22 @@ class RestServer {
     void stop();
 
   private:
-    httpd_handle_t m_server; /**< Handle to the ESP-IDF HTTP server instance. */
+  /**
+   * @brief Registers a single HTTP handler with the server.
+   * @param handler Unique pointer to a BaseHandler instance.
+   */
+  void registerHandler(std::unique_ptr<BaseHandler> handler);
+
+  /**
+   * @brief Registers all available HTTP handlers.
+   *
+   * Called internally during server startup.
+   */
+  void registerHandlers();
+
+  httpd_handle_t m_server; /**< Handle to the ESP-IDF HTTP server instance. */
     httpd_config_t m_config; /**< Configuration for the HTTP server. */
     std::vector<std::unique_ptr<BaseHandler>>
         m_handlers; /**< List of registered route handlers. */
-
-    /**
-     * @brief Registers a single HTTP handler with the server.
-     * @param handler Unique pointer to a BaseHandler instance.
-     */
-    void registerHandler(std::unique_ptr<BaseHandler> handler);
-
-    /**
-     * @brief Registers all available HTTP handlers.
-     *
-     * Called internally during server startup.
-     */
-    void registerHandlers();
+    TimeSyncManager& m_timeSyncManager; /**< TimeSyncManager dependency used by TimeHandler */
 };

@@ -26,10 +26,10 @@ extern "C" void app_main(void) {
     vTaskDelay(pdMS_TO_TICKS(500));
     nvs_flash_init();
     init_wifi();
-    static TimeSyncManager timeSyncer;
-    timeSyncer.start();
+    static TimeSyncManager timeSyncManager;
+    timeSyncManager.start();
 
-    static RestServer server;
+    static RestServer server(timeSyncManager);
     if (server.start()) {
         // Possible additional LOG message here
     }
