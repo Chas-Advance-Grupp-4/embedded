@@ -75,7 +75,7 @@ void ConnectionManager::checkFirmwareVersion() {
 bool ConnectionManager::connectToWiFi(const char* ssid) {
     LOG_INFO(TAG, "Connecting to WiFi...");
     WiFi.disconnect();
-    WiFi.begin(ssid, WIFI_SECRET_PASS);
+    WiFi.begin(ssid, m_controlUnitPassword);
 
     unsigned long startAttemptTime = millis();
     int           status           = WiFi.status();
