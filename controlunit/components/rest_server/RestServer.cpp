@@ -20,8 +20,8 @@
 
 static const char* TAG = "RestServer";
 
-RestServer::RestServer(TimeSyncManager& timeSyncManager)
-    : m_server(nullptr), m_config(HTTPD_DEFAULT_CONFIG()),
+RestServer::RestServer(uint16_t port, TimeSyncManager& timeSyncManager)
+    : m_server(nullptr), m_config(HTTPD_DEFAULT_CONFIG()), m_port(port),
       m_timeSyncManager(timeSyncManager) {}
 
 RestServer::~RestServer() {
@@ -30,6 +30,8 @@ RestServer::~RestServer() {
 
 bool RestServer::start() {
     ESP_LOGI(TAG, "Starting REST server");
+    m_config.server_port = m_port;
+    
     if (httpd_start(&m_server, &m_config) == ESP_OK) {
         registerHandlers();
         ESP_LOGI(TAG, "Server started");

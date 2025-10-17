@@ -25,11 +25,13 @@ extern "C" void app_main(void) {
     /// Wait for monitor so we don't miss first part of the log
     vTaskDelay(pdMS_TO_TICKS(500));
     nvs_flash_init();
+    esp_wifi_restore();
     init_wifi();
+
     static TimeSyncManager timeSyncManager;
     timeSyncManager.start();
 
-    static RestServer server(timeSyncManager);
+    static RestServer server(CONTROL_UNIT_PORT, timeSyncManager);
     if (server.start()) {
         // Possible additional LOG message here
     }
@@ -41,11 +43,11 @@ extern "C" void app_main(void) {
     static ControlUnitManager manager;
     vTaskDelay(pdMS_TO_TICKS(500));
 
-    static MockDataGenerator mockdataGenerator(manager, 5'000'000);
-    mockdataGenerator.start();
+    // static MockDataGenerator mockdataGenerator(manager, 5'000'000);
+    // mockdataGenerator.start();
     // Wait so we have time to see the first post on the server
-    vTaskDelay(pdMS_TO_TICKS(8000));
+    // vTaskDelay(pdMS_TO_TICKS(8000));
 
-    static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
-    dispatcher.start();
+    // static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
+    // dispatcher.start();
 }

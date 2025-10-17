@@ -34,7 +34,7 @@ class RestServer {
      *
      * Initializes server configuration and prepares handler list.
      */
-    RestServer(TimeSyncManager& timeSyncManager);
+    RestServer(uint16_t port, TimeSyncManager& timeSyncManager);
     /**
      * @brief Destructor for RestServer.
      *
@@ -69,6 +69,7 @@ class RestServer {
 
   httpd_handle_t m_server; /**< Handle to the ESP-IDF HTTP server instance. */
     httpd_config_t m_config; /**< Configuration for the HTTP server. */
+    uint16_t m_port; /**< Port for the HTTP server */
     std::vector<std::unique_ptr<BaseHandler>>
         m_handlers; /**< List of registered route handlers. */
     TimeSyncManager& m_timeSyncManager; /**< TimeSyncManager dependency used by TimeHandler */
