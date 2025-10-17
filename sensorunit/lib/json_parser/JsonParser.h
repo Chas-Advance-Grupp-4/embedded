@@ -66,7 +66,7 @@ class JsonParser {
      * @param payload The JSON payload received from the Control Unit
      * @return unsigned long - Unix timestamp with current time
      */
-    static unsigned long
+    static uint32_t
     parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload);
 
   private:

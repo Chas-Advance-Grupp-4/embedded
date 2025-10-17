@@ -6,13 +6,15 @@
 #include "sensor_data_types.h"
 #include "communication_data_types.h"
 #include "ConnectionManager.h"
+#include "TimeSyncManager.h"
 #include "RestClient.h"
 #include <etl/string.h>
 #include <etl/vector.h>
 
 etl::vector<CaSensorunitReading, json_config::max_batch_size> testReadings;
-RestClient restClient(TEST_SERVER_IP);
-ConnectionManager connectionManager(restClient);
+RestClient restClient(CONTROL_UNIT_IP_ADDR);
+ConnectionManager connectionManager(CONTROL_UNIT_PASSWORD, restClient);
+TimeSyncManager timeSyncManager(restClient);
 
 void setup() {
     testReadings.push_back({ 1726995605, 25, 50 });
@@ -24,19 +26,8 @@ void setup() {
     connectionManager.init();
     connectionManager.connect();
 
-    
-    RestResponse response = restClient.getTo("/time");
-    
-    LOG_INFO("MAIN", "GET response status: %d", response.status);
-    LOG_INFO("MAIN", "GET response payload: %s", response.payload.c_str());
+    timeSyncManager.syncTime();
 
-    RestResponse postResponse = restClient.postTo("/connect", "\"sensor_unit_id\":\"12345-67890\"");
-    LOG_INFO("MAIN", "POST response status: %d", postResponse.status);
-    LOG_INFO("MAIN", "POST response payload: %s", postResponse.payload.c_str());
-
-    ConnectResponse test = JsonParser::parseConnectResponse(R"({"status":"connected","sensor_id": 1}")");
-    LOG_INFO("MAIN", "Connected: %s", test.connected ? "true" : "false");
-    LOG_INFO("MAIN", "Sensor Id: %d", test.sensorId); 
     LOG_INFO("MAIN", "Setup done");
 }
 
