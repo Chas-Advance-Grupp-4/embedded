@@ -36,7 +36,7 @@ void TimeSyncManager::syncTime() {
 }
 
 uint32_t TimeSyncManager::getUnixTimeNow() {
-    if (isTimeSynced) {
+    if (isTimeSynced()) {
         return m_baseTime + (millis() - m_baseMillis) / 1000;
     } else {
         LOG_WARN(TAG, "Time is not synced");
