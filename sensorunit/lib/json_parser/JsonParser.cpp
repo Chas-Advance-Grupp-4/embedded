@@ -47,7 +47,7 @@ ConnectResponse
 JsonParser::parseConnectResponse(etl::string<json_config::max_small_json_size> payload) {
     const char*                                              json = payload.c_str();
     StaticJsonDocument<json_config::max_small_json_doc_size> doc;
-    ConnectResponse response {false, 0};
+    ConnectResponse response {false};
     DeserializationError                                     error = deserializeJson(doc, json);
     if (error) {
         LOG_ERROR(TAG, "DeserializationError: %s", error.c_str());
@@ -56,15 +56,12 @@ JsonParser::parseConnectResponse(etl::string<json_config::max_small_json_size> p
     if (!doc.containsKey("status")) {
         LOG_WARN(TAG, "Missing 'status' field in connect response");
         return response;
-    } else if (!doc.containsKey("sensor_id")) {
-        LOG_WARN(TAG, "Missing 'sensor_id' field in connect response");
-        return response;
-    }
+    } 
 
+    const char* responseStatusText = doc["status"];
+    LOG_INFO(TAG, "Connect response: %s", responseStatusText);
     response.connected = (doc["status"] == "connected");
-    if (response.connected) {
-        response.sensorId = (doc["sensor_id"].as<uint8_t>());
-    }
+
     return response;
 }
 

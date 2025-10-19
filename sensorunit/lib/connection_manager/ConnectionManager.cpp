@@ -4,9 +4,11 @@
 #include "etl/algorithm.h"
 #include "logging.h"
 
-ConnectionManager::ConnectionManager(const char* controlUnitPassword, RestClient& restClient)
-    : m_controlUnitPassword(controlUnitPassword), m_restClient(restClient), m_isPaired(false),
-      m_sensorId(0) {}
+ConnectionManager::ConnectionManager(const char* controlUnitPassword,
+                                     RestClient& restClient,
+                                     const char* sensorUnitId)
+    : m_controlUnitPassword(controlUnitPassword), m_restClient(restClient),
+      m_sensorUnitId(sensorUnitId), m_isPaired(false) {}
 
 void ConnectionManager::init() {
     LOG_INFO(TAG, "Initializing...");
@@ -23,7 +25,6 @@ void ConnectionManager::init() {
 
     // Restore internal status variables
     m_isPaired = false;
-    m_sensorId = 0;
 
     LOG_INFO(TAG, "ConnectionManager initialized");
 }
@@ -128,13 +129,14 @@ void ConnectionManager::scanForUnits(const char* prefix) {
                        const connection_types::cu_candidate& b) { return a.rssi > b.rssi; });
 }
 
-void ConnectionManager::tryToConnectControlUnit(const char* uuid) {
+void ConnectionManager::tryToConnectControlUnit() {
     if (m_candidateSsids.empty()) {
         LOG_WARN(TAG, "No Candidate Control Units available for connection");
         return;
     }
     // Could probably be defined as constexpr in constants unless we need to add dynamic element
-    etl::string<json_config::max_small_json_size> payload = JsonParser::composeConnectRequest(uuid);
+    etl::string<json_config::max_small_json_size> payload =
+        JsonParser::composeConnectRequest(m_sensorUnitId);
 
     for (const auto& candidate : m_candidateSsids) {
         LOG_INFO(TAG, "Trying to connect to candidate: %s", candidate.ssid.c_str());
@@ -143,7 +145,7 @@ void ConnectionManager::tryToConnectControlUnit(const char* uuid) {
             LOG_WARN(TAG, "Failed to connect to SSID: %s", candidate.ssid.c_str());
             continue;
         }
-
+        LOG_DEBUG(TAG, "/connect payload: %s", payload.c_str());
         RestResponse restResponse = m_restClient.postTo("/connect", payload);
 
         if (restResponse.status != 200) {
@@ -156,9 +158,7 @@ void ConnectionManager::tryToConnectControlUnit(const char* uuid) {
 
         if (response.connected) {
             LOG_INFO(TAG, "Successfully paired with Control Unit %s. ", candidate.ssid.c_str());
-            LOG_INFO(TAG, "Assigned Sensor ID: %u", response.sensorId);
             m_isPaired = true;
-            m_sensorId = response.sensorId;
             break;
         } else {
             LOG_INFO(TAG, "Response from Control Unit %s: Not connected", candidate.ssid.c_str());

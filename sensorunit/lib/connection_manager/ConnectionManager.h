@@ -22,22 +22,23 @@ struct cu_candidate {
 
 class ConnectionManager {
   public:
-    ConnectionManager(const char* controlUnitPassword, RestClient& restClient);
-    void    init();
-    void    connect();
-    bool    isConnectedToWiFi();
-    bool    isPairedWithControlUnit();
-    uint8_t getSensorId();
+    ConnectionManager(const char* controlUnitPassword,
+                      RestClient& restClient,
+                      const char* sensorUnitId = SENSOR_UNIT_ID);
+    void init();
+    void connect();
+    bool isConnectedToWiFi();
+    bool isPairedWithControlUnit();
 
   private:
-    void          checkFirmwareVersion();
-    bool          connectToWiFi(const char* ssid);
-    void          scanForUnits(const char* prefix = "CU-");
-    void          tryToConnectControlUnit(const char* uuid = SENSOR_UNIT_ID);
-    bool          m_isPaired;
-    uint8_t       m_sensorId;
-    unsigned long m_latestScan{0};
-    unsigned long m_timeoutMs{10000};
+    void                                           checkFirmwareVersion();
+    bool                                           connectToWiFi(const char* ssid);
+    void                                           scanForUnits(const char* prefix = "CU-");
+    void                                           tryToConnectControlUnit();
+    const char*                                    m_sensorUnitId;
+    bool                                           m_isPaired;
+    unsigned long                                  m_latestScan{0};
+    unsigned long                                  m_timeoutMs{10000};
     etl::vector<connection_types::cu_candidate, 8> m_candidateSsids;
     RestClient&                                    m_restClient;
     const char*                                    m_controlUnitPassword;
