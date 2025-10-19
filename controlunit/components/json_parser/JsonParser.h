@@ -88,6 +88,24 @@ class JsonParser {
                                  const std::string&           controlunit_uuid);
 
     /**
+     * @brief Parses a Connect Request from a Sensor Unit
+     *
+     * @param json - Contains key "sensor_unit_id"
+     * @return std::string - The sensor_unit_id as a string
+     */
+    static Uuid parseSensorunitConnectRequest(const std::string& json);
+
+    /**
+     * @brief Composes a Status Payload to a Sensor Unit
+     *
+     * @param status A string with the status:
+     * Valid status: connected, pending, unvalid
+     * @return std::string JSON payload to send to Sensor Unit
+     */
+    static std::string
+    composeSensorunitStatusPayload(const std::string& status);
+
+    /**
      * @brief Composes a generic error response in JSON format.
      * @param message Error message to include.
      * @param controlunit_uuid UUID of the control unit.
