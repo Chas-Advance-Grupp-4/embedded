@@ -1,12 +1,20 @@
 /**
  * @file wifi_manager.cpp
- * @brief Implementation of Wi-Fi initialization and event handling.
+ * @brief Implementation of Wi-Fi setup and event handling for ESP32 in AP+STA mode.
  *
- * Sets up the ESP32 Wi-Fi stack in station mode, registers event handlers
- * for IP acquisition and disconnection, and connects to the network using
- * credentials from `wifi_config.h`.
+ * Initializes the ESP32 Wi-Fi stack in dual-mode (Access Point + Station),
+ * configures static IP settings for the AP interface, and sets up WPA2
+ * authentication using credentials from `wifi_config.h`.
  *
- * Uses FreeRTOS event groups to wait for successful connection.
+ * Registers event handlers for IP acquisition and disconnection events.
+ * Automatically reconnects the STA interface on disconnect.
+ *
+ * Uses FreeRTOS event groups to wait for successful STA connection and logs
+ * IP, gateway, and netmask information upon acquisition.
+ *
+ * The AP interface allows local devices (e.g. Sensor Units - Arduino clients) to connect
+ * directly to the ESP32, while the STA interface connects to an external
+ * Wi-Fi network for upstream communication.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
