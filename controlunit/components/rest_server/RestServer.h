@@ -16,6 +16,7 @@
 #pragma once
 #include "BaseHandler.h"
 #include "TimeSyncManager.h"
+#include "SensorUnitManager.h"
 #include "esp_http_server.h"
 #include <memory>
 #include <vector>
@@ -34,7 +35,7 @@ class RestServer {
      *
      * Initializes server configuration and prepares handler list.
      */
-    RestServer(uint16_t port, TimeSyncManager& timeSyncManager);
+    RestServer(uint16_t port, TimeSyncManager& timeSyncManager, SensorUnitManager& sensorUnitManager);
     /**
      * @brief Destructor for RestServer.
      *
@@ -73,4 +74,5 @@ class RestServer {
     std::vector<std::unique_ptr<BaseHandler>>
         m_handlers; /**< List of registered route handlers. */
     TimeSyncManager& m_timeSyncManager; /**< TimeSyncManager dependency used by TimeHandler */
+    SensorUnitManager& m_sensorUnitManager; /**< SensorUnitManager dependency used by ConnectHandler */
 };

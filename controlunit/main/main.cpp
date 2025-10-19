@@ -31,7 +31,11 @@ extern "C" void app_main(void) {
     static TimeSyncManager timeSyncManager;
     timeSyncManager.start();
 
-    static RestServer server(CONTROL_UNIT_PORT, timeSyncManager);
+    static SensorUnitManager sensorUnitManager;
+    // Connect Sensor Unit manually
+    sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
+
+    static RestServer server(CONTROL_UNIT_PORT, timeSyncManager, sensorUnitManager);
     if (server.start()) {
         // Possible additional LOG message here
     }
