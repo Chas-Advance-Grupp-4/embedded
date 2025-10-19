@@ -40,8 +40,8 @@ extern "C" void app_main(void) {
                              "eyJhbGciOiJIUzI1NiIs...");
     client.init();
     client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
-    static ControlUnitManager manager;
-    vTaskDelay(pdMS_TO_TICKS(500));
+    // static ControlUnitManager manager;
+    // vTaskDelay(pdMS_TO_TICKS(500));
 
     // static MockDataGenerator mockdataGenerator(manager, 5'000'000);
     // mockdataGenerator.start();
