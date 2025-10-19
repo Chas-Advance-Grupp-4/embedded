@@ -3,9 +3,13 @@
  * @brief Static utility class for parsing and composing JSON related to sensor
  * and connection data.
  *
- * Provides functions for converting between internal data structures and JSON
- * strings, including sensor readings, connection requests/responses, and error
- * messages.
+ * Provides functions for converting to and from internal data structures and JSON
+ * strings 
+ * From Sensor Unit: connect requests/responses, batched sensor readings, 
+ * From Backend: connect requests
+ * To Backend: batched sensor readings, connect responses, error messages
+ * 
+ * All methods are static and stateless, defined in the JsonParser class.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07

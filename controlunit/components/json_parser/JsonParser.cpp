@@ -6,12 +6,14 @@
  * This file defines the logic for converting internal data structures to and
  * from JSON format. It includes support for:
  * - Parsing grouped sensor readings from JSON
- * - Composing sensor and driver connection responses
+ * - Parsing backend connect request
+ * - Composing responses for backend connect requests
+ * - Parsing and composing JSON for Sensor Unit connect requests
  * - Handling error messages in JSON format
  *
- * Used primarily for communication between the embedded system and backend
- * services. All methods are static and stateless, defined in the JsonParser
- * class.
+ * Used for communication between the Control Unit both for backend services
+ * and Sensor Unit. All methods are static and stateless, defined in the 
+ * JsonParser class.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
