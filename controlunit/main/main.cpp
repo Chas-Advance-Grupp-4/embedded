@@ -31,7 +31,11 @@ extern "C" void app_main(void) {
     static TimeSyncManager timeSyncManager;
     timeSyncManager.start();
 
-    static RestServer server(CONTROL_UNIT_PORT, timeSyncManager);
+    static SensorUnitManager sensorUnitManager;
+    // Connect Sensor Unit manually
+    sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
+
+    static RestServer server(CONTROL_UNIT_PORT, timeSyncManager, sensorUnitManager);
     if (server.start()) {
         // Possible additional LOG message here
     }
@@ -40,8 +44,8 @@ extern "C" void app_main(void) {
                              "eyJhbGciOiJIUzI1NiIs...");
     client.init();
     client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
-    static ControlUnitManager manager;
-    vTaskDelay(pdMS_TO_TICKS(500));
+    // static ControlUnitManager manager;
+    // vTaskDelay(pdMS_TO_TICKS(500));
 
     // static MockDataGenerator mockdataGenerator(manager, 5'000'000);
     // mockdataGenerator.start();

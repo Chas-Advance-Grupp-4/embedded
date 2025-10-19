@@ -6,7 +6,7 @@
  * Defines the logic for starting and stopping the ESP-IDF HTTP server,
  * and for registering route handlers via the BaseHandler interface.
  *
- * Used to expose REST endpoints for sensor data, configuration, or control.
+ * Used to expose REST endpoints for units connecting on local AP
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
@@ -14,15 +14,19 @@
  * @license MIT
  */
 #include "RestServer.h"
+#include "ConnectHandler.h"
 #include "HelloHandler.h"
 #include "TimeHandler.h"
 #include "esp_log.h"
 
 static const char* TAG = "RestServer";
 
-RestServer::RestServer(uint16_t port, TimeSyncManager& timeSyncManager)
+RestServer::RestServer(uint16_t           port,
+                       TimeSyncManager&   timeSyncManager,
+                       SensorUnitManager& sensorUnitManager)
     : m_server(nullptr), m_config(HTTPD_DEFAULT_CONFIG()), m_port(port),
-      m_timeSyncManager(timeSyncManager) {}
+      m_timeSyncManager(timeSyncManager),
+      m_sensorUnitManager(sensorUnitManager) {}
 
 RestServer::~RestServer() {
     stop();
@@ -31,7 +35,7 @@ RestServer::~RestServer() {
 bool RestServer::start() {
     ESP_LOGI(TAG, "Starting REST server");
     m_config.server_port = m_port;
-    
+
     if (httpd_start(&m_server, &m_config) == ESP_OK) {
         registerHandlers();
         ESP_LOGI(TAG, "Server started");
@@ -65,5 +69,6 @@ void RestServer::registerHandler(std::unique_ptr<BaseHandler> handler) {
 
 void RestServer::registerHandlers() {
     registerHandler(std::make_unique<HelloHandler>("/hello"));
+    registerHandler(std::make_unique<ConnectHandler>("/connect", m_sensorUnitManager));
     registerHandler(std::make_unique<TimeHandler>("/time", m_timeSyncManager));
 }
