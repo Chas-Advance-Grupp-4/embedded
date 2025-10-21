@@ -2,10 +2,13 @@ idf_component_register(
     SRCS "RestServer.cpp"
          "handlers/BaseHandler.cpp"
          "handlers/PostHandler.cpp"
+         "handlers/GetHandler.cpp"
+         "handlers/TimeHandler.cpp"
+         "handlers/ConnectHandler.cpp"
          "handlers/PostexampleHandler.cpp"
          "handlers/HelloHandler.cpp"
     INCLUDE_DIRS "." "handlers"
-    PRIV_REQUIRES esp_http_server esp_wifi log nvs_flash unity
+    REQUIRES esp_http_server esp_wifi log nvs_flash unity time_sync_manager sensor_unit_manager json_parser
 )
 
 if(CONFIG_UNIT_TEST_ENABLED)

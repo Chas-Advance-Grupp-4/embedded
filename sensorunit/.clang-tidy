@@ -41,5 +41,16 @@ CheckOptions:
     value: k
   - key: readability-identifier-naming.GlobalConstantCase
     value: CamelCase
+  - key: readability-identifier-naming.NamespaceConstantCase
+    value: lower_case
+  - key: readability-identifier-naming.NamespaceConstantPrefix
+    value: ''
   - key: cppcoreguidelines-pro-type-vararg.IgnoreMacros
-    value: 'UNITY_BEGIN,UNITY_END,RUN_TEST,TEST_ASSERT_EQUAL'
+    value: > 
+      UNITY_BEGIN,
+      UNITY_END,
+      RUN_TEST,
+      TEST_ASSERT_EQUAL,
+      TEST_ASSERT_EQUAL_STRING,
+      TEST_ASSERT_FLOAT_WITHIN,
+      TEST_ASSERT_TRUE
