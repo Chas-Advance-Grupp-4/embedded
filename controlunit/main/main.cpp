@@ -25,11 +25,17 @@ extern "C" void app_main(void) {
     /// Wait for monitor so we don't miss first part of the log
     vTaskDelay(pdMS_TO_TICKS(500));
     nvs_flash_init();
+    esp_wifi_restore();
     init_wifi();
-    static TimeSyncManager timeSyncer;
-    timeSyncer.start();
 
-    static RestServer server;
+    static TimeSyncManager timeSyncManager;
+    timeSyncManager.start();
+
+    static SensorUnitManager sensorUnitManager;
+    // Connect Sensor Unit manually
+    sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
+
+    static RestServer server(CONTROL_UNIT_PORT, timeSyncManager, sensorUnitManager);
     if (server.start()) {
         // Possible additional LOG message here
     }
@@ -38,14 +44,14 @@ extern "C" void app_main(void) {
                              "eyJhbGciOiJIUzI1NiIs...");
     client.init();
     client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
-    static ControlUnitManager manager;
-    vTaskDelay(pdMS_TO_TICKS(500));
+    // static ControlUnitManager manager;
+    // vTaskDelay(pdMS_TO_TICKS(500));
 
-    static MockDataGenerator mockdataGenerator(manager, 5'000'000);
-    mockdataGenerator.start();
+    // static MockDataGenerator mockdataGenerator(manager, 5'000'000);
+    // mockdataGenerator.start();
     // Wait so we have time to see the first post on the server
-    vTaskDelay(pdMS_TO_TICKS(8000));
+    // vTaskDelay(pdMS_TO_TICKS(8000));
 
-    static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
-    dispatcher.start();
+    // static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
+    // dispatcher.start();
 }

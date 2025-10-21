@@ -6,12 +6,14 @@
  * This file defines the logic for converting internal data structures to and
  * from JSON format. It includes support for:
  * - Parsing grouped sensor readings from JSON
- * - Composing sensor and driver connection responses
+ * - Parsing backend connect request
+ * - Composing responses for backend connect requests
+ * - Parsing and composing JSON for Sensor Unit connect requests
  * - Handling error messages in JSON format
  *
- * Used primarily for communication between the embedded system and backend
- * services. All methods are static and stateless, defined in the JsonParser
- * class.
+ * Used for communication between the Control Unit both for backend services
+ * and Sensor Unit. All methods are static and stateless, defined in the 
+ * JsonParser class.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
@@ -276,6 +278,42 @@ JsonParser::composeDriverConnectResponse(const DriverConnectResponse& response,
     cJSON_Delete(root);
     return result;
 }
+
+Uuid JsonParser::parseSensorunitConnectRequest(const std::string& json){
+    
+    cJSON* root = cJSON_Parse(json.c_str());
+    if (!root) {
+        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
+        return Uuid("");
+    }
+    
+    cJSON* uuidItem = cJSON_GetObjectItem(root, "sensor_unit_id");
+    if (!cJSON_IsString(uuidItem) || !uuidItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'sensor_unit_id'");
+        cJSON_Delete(root);
+        return Uuid("");
+    }
+
+    Uuid sensorUnitId(uuidItem->valuestring);
+    ESP_LOGI(TAG, "Parsed Sensor Unit Id:%s ", sensorUnitId.toString().c_str());
+    return sensorUnitId;
+}
+
+std::string JsonParser::composeSensorunitStatusPayload(const std::string& status) {
+
+    cJSON* root = cJSON_CreateObject();
+    cJSON_AddStringToObject(root, "status", status.c_str());
+    
+    char*       jsonStr = cJSON_PrintUnformatted(root);
+    std::string payload(jsonStr);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+    
+    ESP_LOGI(TAG, "Json Payload created with status %s", status.c_str());
+    return payload;
+
+}
+
 
 std::string
 JsonParser::composeErrorResponse(const std::string& message,

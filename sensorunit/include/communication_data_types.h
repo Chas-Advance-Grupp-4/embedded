@@ -8,5 +8,4 @@ struct ControlUnitInfo {
 
 struct ConnectResponse {
     bool connected;
-    uint8_t sensorId;
 };

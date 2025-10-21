@@ -1,12 +1,20 @@
 /**
  * @file wifi_manager.cpp
- * @brief Implementation of Wi-Fi initialization and event handling.
+ * @brief Implementation of Wi-Fi setup and event handling for ESP32 in AP+STA mode.
  *
- * Sets up the ESP32 Wi-Fi stack in station mode, registers event handlers
- * for IP acquisition and disconnection, and connects to the network using
- * credentials from `wifi_config.h`.
+ * Initializes the ESP32 Wi-Fi stack in dual-mode (Access Point + Station),
+ * configures static IP settings for the AP interface, and sets up WPA2
+ * authentication using credentials from `wifi_config.h`.
  *
- * Uses FreeRTOS event groups to wait for successful connection.
+ * Registers event handlers for IP acquisition and disconnection events.
+ * Automatically reconnects the STA interface on disconnect.
+ *
+ * Uses FreeRTOS event groups to wait for successful STA connection and logs
+ * IP, gateway, and netmask information upon acquisition.
+ *
+ * The AP interface allows local devices (e.g. Sensor Units - Arduino clients) to connect
+ * directly to the ESP32, while the STA interface connects to an external
+ * Wi-Fi network for upstream communication.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
@@ -137,25 +145,32 @@ void init_wifi() {
         ESP_LOGE(WIFI_TAG, "STA Password too long");
     }
 
+    sta_config.sta.listen_interval = 3; // DTIMs
     esp_wifi_set_config(WIFI_IF_STA, &sta_config);
 
     // Configure AP
     wifi_config_t ap_config   = {};
+    memset(&ap_config, 0, sizeof(ap_config));
     std::string   ap_ssid     = CONTROL_UNIT_SSID;
     std::string   ap_password = CONTROL_UNIT_PASSWORD;
 
     ap_config.ap.max_connection = 4;
-    ap_config.ap.authmode       = WIFI_AUTH_WPA2_PSK;
+    ap_config.ap.beacon_interval = 100; // maybe not needed
+    ap_config.ap.channel = 6; // 1, 6 and 9 good for Arduino. But maybe not needed.
 
+    // Set SSID    
     std::copy(ap_ssid.begin(), ap_ssid.end(), ap_config.ap.ssid);
     ap_config.ap.ssid[ap_ssid.size()] = '\0';
     ap_config.ap.ssid_len = ap_ssid.size();
-
+    
+    ap_config.ap.authmode       = WIFI_AUTH_WPA2_PSK;
     std::copy(ap_password.begin(), ap_password.end(), ap_config.ap.password);
     ap_config.ap.password[ap_password.size()] = '\0';
 
     ESP_LOGI(WIFI_TAG, "AP SSID: %s", CONTROL_UNIT_SSID);
     ESP_LOGI(WIFI_TAG, "AP IP: %s", CONTROL_UNIT_IP_ADDR);
+    ESP_LOGI(WIFI_TAG, "Auth mode: %d", ap_config.ap.authmode);
+    ESP_LOGI(WIFI_TAG, "AP channes: %d", ap_config.ap.channel );
 
     esp_wifi_set_config(WIFI_IF_AP, &ap_config);
 
