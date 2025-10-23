@@ -9,6 +9,7 @@
 #include "TimeSyncManager.h"
 #include "RestClient.h"
 #include "Scheduler.h"
+#include "SensorReader.h"
 #include <etl/string.h>
 #include <etl/vector.h>
 
@@ -17,6 +18,7 @@ RestClient restClient(CONTROL_UNIT_IP_ADDR);
 ConnectionManager connectionManager(CONTROL_UNIT_PASSWORD, restClient);
 TimeSyncManager timeSyncManager(restClient);
 Scheduler scheduler(timeSyncManager);
+SensorReader sensorReader;
 
 void setup() {
     testReadings.push_back({ 1726995605, 25, 50 });
@@ -24,6 +26,8 @@ void setup() {
 
     Serial.begin(115200);
     delay(2000);
+
+    sensorReader.init();
 
     connectionManager.init();
     connectionManager.connect();
@@ -40,6 +44,9 @@ void loop() {
     }
     if (triggers.readingTrigger) {
         // Trigger reading
+        // Test with raw readings:
+        RawSensorReading rawReading = sensorReader.read();
+        LOG_INFO("MAIN loop", "Temperature: %.2f°C Humidity: %.0f%%", rawReading.temperature, rawReading.humidity);
     }
     if (triggers.dispatchTrigger) {
         // Dispatch readings
