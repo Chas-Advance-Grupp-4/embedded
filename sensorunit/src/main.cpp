@@ -1,37 +1,31 @@
-#include <Arduino.h>
-#include "logging.h"
-#include "JsonParser.h"
-#include "constants.h"
-#include "config.h"
-#include "sensor_data_types.h"
-#include "communication_data_types.h"
 #include "ConnectionManager.h"
-#include "TimeSyncManager.h"
+#include "ReadingProcessor.h"
+#include "ReadingsDispatcher.h"
 #include "RestClient.h"
 #include "Scheduler.h"
 #include "SensorReader.h"
-#include <etl/string.h>
-#include <etl/vector.h>
+#include "TimeSyncManager.h"
+#include "config.h"
+#include "constants.h"
+#include "logging.h"
+#include <Arduino.h>
 
-etl::vector<CaSensorunitReading, json_config::max_batch_size> testReadings;
-RestClient restClient(CONTROL_UNIT_IP_ADDR);
-ConnectionManager connectionManager(CONTROL_UNIT_PASSWORD, restClient);
-TimeSyncManager timeSyncManager(restClient);
-Scheduler scheduler(timeSyncManager);
-SensorReader sensorReader;
+RestClient         restClient(CONTROL_UNIT_IP_ADDR);
+ConnectionManager  connectionManager(CONTROL_UNIT_PASSWORD, restClient);
+TimeSyncManager    timeSyncManager(restClient);
+Scheduler          scheduler(timeSyncManager);
+SensorReader       sensorReader;
+ReadingBuffer      readingBuffer;
+ReadingProcessor   readingProcessor(sensorReader, timeSyncManager, readingBuffer);
+ReadingsDispatcher readingsDispatcher(restClient, readingBuffer);
 
 void setup() {
-    testReadings.push_back({ 1726995605, 25, 50 });
-    testReadings.push_back({ 1726995610, 30, 55 });
-
     Serial.begin(115200);
     delay(2000);
 
     sensorReader.init();
-
     connectionManager.init();
     connectionManager.connect();
-
     timeSyncManager.syncTime();
 
     LOG_INFO("MAIN", "Setup done");
@@ -43,13 +37,10 @@ void loop() {
         connectionManager.connect();
     }
     if (triggers.readingTrigger) {
-        // Trigger reading
-        // Test with raw readings:
-        RawSensorReading rawReading = sensorReader.read();
-        LOG_INFO("MAIN loop", "Temperature: %.2f°C Humidity: %.0f%%", rawReading.temperature, rawReading.humidity);
+        readingProcessor.process();
     }
     if (triggers.dispatchTrigger) {
-        // Dispatch readings
+        readingsDispatcher.dispatch();
     }
     if (triggers.resyncTrigger) {
         timeSyncManager.syncTime();

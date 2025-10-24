@@ -1,3 +1,14 @@
+/**
+ * @file ReadingBuffer.cpp
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Implementation of the ReadingBuffer class
+ *
+ * @date 2025-10-24
+ *
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ *
+ */
 #include "ReadingBuffer.h"
 #include "logging.h"
 
