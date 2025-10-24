@@ -1,5 +1,6 @@
 #include "ConnectionManager.h"
 #include "ReadingProcessor.h"
+#include "ReadingsDispatcher.h"
 #include "RestClient.h"
 #include "Scheduler.h"
 #include "SensorReader.h"
@@ -9,13 +10,14 @@
 #include "logging.h"
 #include <Arduino.h>
 
-RestClient        restClient(CONTROL_UNIT_IP_ADDR);
-ConnectionManager connectionManager(CONTROL_UNIT_PASSWORD, restClient);
-TimeSyncManager   timeSyncManager(restClient);
-Scheduler         scheduler(timeSyncManager);
-SensorReader      sensorReader;
-ReadingBuffer     readingBuffer;
-ReadingProcessor  readingProcessor(sensorReader, timeSyncManager, readingBuffer);
+RestClient         restClient(CONTROL_UNIT_IP_ADDR);
+ConnectionManager  connectionManager(CONTROL_UNIT_PASSWORD, restClient);
+TimeSyncManager    timeSyncManager(restClient);
+Scheduler          scheduler(timeSyncManager);
+SensorReader       sensorReader;
+ReadingBuffer      readingBuffer;
+ReadingProcessor   readingProcessor(sensorReader, timeSyncManager, readingBuffer);
+ReadingsDispatcher readingsDispatcher(restClient, readingBuffer);
 
 void setup() {
     Serial.begin(115200);
@@ -38,7 +40,7 @@ void loop() {
         readingProcessor.process();
     }
     if (triggers.dispatchTrigger) {
-        // Dispatch readings
+        readingsDispatcher.dispatch();
     }
     if (triggers.resyncTrigger) {
         timeSyncManager.syncTime();
