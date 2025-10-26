@@ -15,11 +15,12 @@
 #include "wifi_config.h"
 #include "wifi_manager.h"
 #include <esp_event.h>
-#include <esp_http_server.h>
+// #include <esp_http_server.h>
 #include <esp_log.h>
 #include <esp_netif.h>
 #include <esp_wifi.h>
 #include <nvs_flash.h>
+#include "mbedtls/debug.h"
 
 extern "C" void app_main(void) {
     /// Wait for monitor so we don't miss first part of the log
@@ -35,7 +36,12 @@ extern "C" void app_main(void) {
     // Connect Sensor Unit manually
     sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
 
-    static RestServer server(CONTROL_UNIT_PORT, timeSyncManager, sensorUnitManager);
+    mbedtls_debug_set_threshold(4);
+    esp_log_level_set("esp-tls", ESP_LOG_DEBUG);
+    esp_log_level_set("mbedtls", ESP_LOG_DEBUG);
+    esp_log_level_set("esp-tls-mbedtls", ESP_LOG_DEBUG);    
+
+    static RestServer server(timeSyncManager, sensorUnitManager, CONTROL_UNIT_PORT);
     if (server.start()) {
         // Possible additional LOG message here
     }

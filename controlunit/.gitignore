@@ -2,3 +2,7 @@ build/
 sdkconfig
 sdkconfig.old
 wifi_config.h
+server_key.pem
+server_key.h
+server_cert.pem
+server_cert.h

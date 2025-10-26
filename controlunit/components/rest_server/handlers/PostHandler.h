@@ -1,10 +1,10 @@
 /**
  * @file PostHandler.h
- * @brief Abstract base class for handling HTTP POST requests in the REST
+ * @brief Abstract base class for handling HTTPS POST requests in the REST
  * server.
  *
  * Provides a reusable structure for defining POST endpoints using the ESP-IDF
- * HTTP server. Subclasses must implement `processBody()` to handle incoming
+ * HTTPS server. Subclasses must implement `processBody()` to handle incoming
  * request payloads.
  *
  * Used by RestServer to register and route POST-based endpoints.
@@ -16,12 +16,12 @@
  */
 #pragma once
 #include "BaseHandler.h"
-#include "esp_http_server.h"
+#include "esp_https_server.h"
 #include <string>
 
 /**
  * @class PostHandler
- * @brief Abstract base class for HTTP POST route handlers.
+ * @brief Abstract base class for HTTPS POST route handlers.
  *
  * Inherits from BaseHandler and provides a framework for handling POST
  * requests. Subclasses must implement `processBody()` to define how the request
@@ -34,7 +34,7 @@ class PostHandler : public BaseHandler {
     /**
      * @brief Returns the URI configuration for this POST handler.
      *
-     * Used by RestServer to register the route with the HTTP server.
+     * Used by RestServer to register the route with the HTTPS server.
      * @return Pointer to an `httpd_uri_t` structure.
      */
     httpd_uri_t* getUri() override;
@@ -51,7 +51,7 @@ class PostHandler : public BaseHandler {
      *
      * Must be implemented by subclasses to define custom logic for handling the
      * payload.
-     * @param req Pointer to the HTTP request object.
+     * @param req Pointer to the HTTPS request object.
      * @param body Parsed request body as a string.
      * @return ESP_OK on success, or an appropriate error code.
      */
@@ -66,14 +66,14 @@ class PostHandler : public BaseHandler {
      * @brief Static entry point for the POST handler.
      *
      * Forwards the request to the instance-specific `handle()` method.
-     * @param req Pointer to the HTTP request object.
+     * @param req Pointer to the HTTPS request object.
      * @return ESP_OK on success, or an appropriate error code.
      */
     static esp_err_t staticHandler(httpd_req_t* req);
     /**
      * @brief Internal method that reads the request body and calls
      * `processBody()`.
-     * @param req Pointer to the HTTP request object.
+     * @param req Pointer to the HTTPS request object.
      * @return ESP_OK on success, or an appropriate error code.
      */
     esp_err_t handle(httpd_req_t* req);

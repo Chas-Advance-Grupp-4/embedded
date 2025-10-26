@@ -1,6 +1,6 @@
 /**
  * @file PostHandler.cpp
- * @brief Implementation of the PostHandler base class for HTTP POST request handling.
+ * @brief Implementation of the PostHandler base class for HTTPS POST request handling.
  *
  * Defines the logic for routing POST requests to a subclass-defined `processBody()` method.
  * Includes static and instance-level handlers for reading the request body and invoking

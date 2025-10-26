@@ -1,7 +1,7 @@
 /**
  * @file ConnectHandler.h
  * @author Erik Dahl (erik@iunderlandet.se)
- * @brief HTTP POST handler for processing sensor unit connection requests.
+ * @brief HTTPS POST handler for processing sensor unit connection requests.
  *
  * Defines the ConnectHandler class, which handles incoming POST requests
  * containing sensor unit identifiers. It determines their connection status
@@ -20,7 +20,7 @@
 
 /**
  * @class ConnectHandler
- * @brief Handles HTTP POST requests for sensor unit connection status.
+ * @brief Handles HTTPS POST requests for sensor unit connection status.
  *
  * This handler processes incoming POST requests containing sensor unit identifiers
  * and determines their connection status based on the SensorUnitManager.
@@ -41,13 +41,13 @@ public:
 
 protected:
     /**
-     * @brief Processes the body of an HTTP POST request.
+     * @brief Processes the body of an HTTPS POST request.
      *
      * Parses the incoming JSON payload to extract a sensor unit ID,
      * checks its validity and connection status, and responds with
      * a JSON-formatted status message.
      *
-     * @param req Pointer to the HTTP request object.
+     * @param req Pointer to the HTTPS request object.
      * @param body The raw POST body as a string.
      * @return ESP_OK on success, or ESP_FAIL if the input is invalid.
      */

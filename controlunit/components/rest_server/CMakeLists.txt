@@ -8,8 +8,10 @@ idf_component_register(
          "handlers/PostexampleHandler.cpp"
          "handlers/HelloHandler.cpp"
     INCLUDE_DIRS "." "handlers"
-    REQUIRES esp_http_server esp_wifi log nvs_flash unity time_sync_manager sensor_unit_manager json_parser
-)
+    REQUIRES esp_https_server esp_wifi log nvs_flash unity time_sync_manager sensor_unit_manager json_parser
+    EMBED_TXTFILES "server_cert.pem"
+                   "server_key.pem"
+    )
 
 if(CONFIG_UNIT_TEST_ENABLED)
     set(TEST_SRCS handlers/test/test_hello_handler.cpp)

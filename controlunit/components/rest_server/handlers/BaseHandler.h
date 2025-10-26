@@ -1,6 +1,6 @@
 /**
  * @file BaseHandler.h
- * @brief Abstract base class for HTTP route handlers used by RestServer.
+ * @brief Abstract base class for HTTPS route handlers used by RestServer.
  *
  * Defines a common interface for registering URI handlers with the ESP-IDF HTTP
  * server. Each subclass must implement `getUri()` to provide its own route
@@ -15,15 +15,15 @@
  */
 #pragma once
 
-#include "esp_http_server.h"
+#include "esp_https_server.h"
 
 /**
  * @class BaseHandler
- * @brief Abstract interface for HTTP route handlers.
+ * @brief Abstract interface for HTTPS route handlers.
  *
  * Provides a virtual method for returning a pointer to an `httpd_uri_t`
  * structure, which defines the URI, method, and callback function for a
- * specific HTTP endpoint.
+ * specific HTTPS endpoint.
  *
  * Subclasses must implement `getUri()` to register themselves with the server.
  */

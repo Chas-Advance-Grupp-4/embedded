@@ -1,7 +1,7 @@
 /**
  * @file ConnectHandler.cpp
  * @author Erik Dahl (erik@iunderlandet.se)
- * @brief Implementation of HTTP POST handler for sensor unit connection requests.
+ * @brief Implementation of HTTPS POST handler for sensor unit connection requests.
  *
  * Defines the logic for processing incoming POST requests containing sensor unit IDs.
  * Parses the request body, validates the identifier, checks connection status via

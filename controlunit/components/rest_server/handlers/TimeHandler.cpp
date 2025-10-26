@@ -1,13 +1,9 @@
 /**
- * @file HelloHandler.cpp
- * @brief Implementation of HelloHandler, a simple GET endpoint that returns a
- * greeting.
+ * @file TimeHandler.cpp
+ * @brief Implementation of GET /time handler that return JSON with a Unix timestamp 
  *
- * Defines the logic for responding to HTTP GET requests with a static greeting
- * message. Inherits from GetHandler and overrides the `process()` method to
- * send a plain-text response.
- *
- * Useful for testing server availability or providing a basic health check.
+ * The function uses a timeSyncManager to check if time has been synced 
+ * and if so composes a quick and easy JSON response with a Unix timestamp
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07

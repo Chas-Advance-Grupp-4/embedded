@@ -1,8 +1,8 @@
 /**
  * @file RestServer.h
- * @brief Declares the RestServer class for managing an embedded HTTP server.
+ * @brief Declares the RestServer class for managing an embedded HTTPS server.
  *
- * The RestServer class wraps the ESP-IDF HTTP server and provides a mechanism
+ * The RestServer class wraps the ESP-IDF HTTPS server and provides a mechanism
  * for registering request handlers via the BaseHandler interface.
  *
  * It is responsible for starting and stopping the server, and for installing
@@ -17,16 +17,16 @@
 #include "BaseHandler.h"
 #include "TimeSyncManager.h"
 #include "SensorUnitManager.h"
-#include "esp_http_server.h"
+#include "esp_https_server.h"
 #include <memory>
 #include <vector>
 
 /**
  * @class RestServer
- * @brief Manages the lifecycle and routing of an ESP-IDF HTTP server.
+ * @brief Manages the lifecycle and routing of an ESP-IDF HTTPS server.
  *
  * Provides methods to start and stop the server, and registers handlers
- * for incoming HTTP requests using the BaseHandler abstraction.
+ * for incoming HTTPS requests using the BaseHandler abstraction.
  */
 class RestServer {
   public:
@@ -35,7 +35,7 @@ class RestServer {
      *
      * Initializes server configuration and prepares handler list.
      */
-    RestServer(uint16_t port, TimeSyncManager& timeSyncManager, SensorUnitManager& sensorUnitManager);
+    RestServer(TimeSyncManager& timeSyncManager, SensorUnitManager& sensorUnitManager, uint16_t port = 443);
     /**
      * @brief Destructor for RestServer.
      *
@@ -44,33 +44,33 @@ class RestServer {
     ~RestServer();
 
     /**
-     * @brief Starts the HTTP server and registers all handlers.
+     * @brief Starts the HTTPS server and registers all handlers.
      * @return true if the server started successfully, false otherwise.
      */
     bool start();
 
     /**
-     * @brief Stops the HTTP server and releases resources.
+     * @brief Stops the HTTPS server and releases resources.
      */
     void stop();
 
   private:
   /**
-   * @brief Registers a single HTTP handler with the server.
+   * @brief Registers a single HTTPS handler with the server.
    * @param handler Unique pointer to a BaseHandler instance.
    */
   void registerHandler(std::unique_ptr<BaseHandler> handler);
 
   /**
-   * @brief Registers all available HTTP handlers.
+   * @brief Registers all available HTTPS handlers.
    *
    * Called internally during server startup.
    */
   void registerHandlers();
 
-  httpd_handle_t m_server; /**< Handle to the ESP-IDF HTTP server instance. */
-    httpd_config_t m_config; /**< Configuration for the HTTP server. */
-    uint16_t m_port; /**< Port for the HTTP server */
+  httpd_handle_t m_server; /**< Handle to the ESP-IDF HTTPS server instance. */
+    httpd_ssl_config_t m_config; /**< Configuration for the HTTPS server. */
+    uint16_t m_port; /**< Port for the HTTPS server */
     std::vector<std::unique_ptr<BaseHandler>>
         m_handlers; /**< List of registered route handlers. */
     TimeSyncManager& m_timeSyncManager; /**< TimeSyncManager dependency used by TimeHandler */

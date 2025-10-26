@@ -18,7 +18,7 @@
 
 /**
  * @class TimeHandler
- * @brief HTTP GET /time handler that return JSON with a Unix timestamp 
+ * @brief HTTPS GET /time handler that return JSON with a Unix timestamp 
  *
  */
 class TimeHandler : public GetHandler {
@@ -34,7 +34,7 @@ class TimeHandler : public GetHandler {
      * @brief The handler implementation that gets called by handle. 
      * GET /time - If internal time is synced it dispatches a JSON 
      * with current time as a Unix timestamp 
-     * @param req Pointer to the HTTP request object.
+     * @param req Pointer to the HTTPS request object.
      * @return ESP_OK on success, else ESP_FAIL with error description
      */
     esp_err_t process(httpd_req_t* req) override;

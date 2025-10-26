@@ -1,9 +1,9 @@
 /**
  * @file RestServer.cpp
- * @brief Implements the RestServer class for managing HTTP server and route
+ * @brief Implements the RestServer class for managing HTTPS server and route
  * handlers.
  *
- * Defines the logic for starting and stopping the ESP-IDF HTTP server,
+ * Defines the logic for starting and stopping the ESP-IDF HTTPS server,
  * and for registering route handlers via the BaseHandler interface.
  *
  * Used to expose REST endpoints for units connecting on local AP
@@ -18,13 +18,15 @@
 #include "HelloHandler.h"
 #include "TimeHandler.h"
 #include "esp_log.h"
+#include "server_cert.h"
+#include "server_key.h"
 
 static const char* TAG = "RestServer";
 
-RestServer::RestServer(uint16_t           port,
-                       TimeSyncManager&   timeSyncManager,
-                       SensorUnitManager& sensorUnitManager)
-    : m_server(nullptr), m_config(HTTPD_DEFAULT_CONFIG()), m_port(port),
+RestServer::RestServer(TimeSyncManager&   timeSyncManager,
+                       SensorUnitManager& sensorUnitManager,
+                       uint16_t           port)
+    : m_server(nullptr), m_config(HTTPD_SSL_CONFIG_DEFAULT()), m_port(port),
       m_timeSyncManager(timeSyncManager),
       m_sensorUnitManager(sensorUnitManager) {}
 
@@ -34,9 +36,27 @@ RestServer::~RestServer() {
 
 bool RestServer::start() {
     ESP_LOGI(TAG, "Starting REST server");
-    m_config.server_port = m_port;
+    m_config.transport_mode = HTTPD_SSL_TRANSPORT_SECURE;
+    m_config.port_secure = m_port;
 
-    if (httpd_start(&m_server, &m_config) == ESP_OK) {
+    extern const unsigned char servercert_start[] asm("_binary_server_cert_pem_start");
+    extern const unsigned char servercert_end[]   asm("_binary_server_cert_pem_end");
+    m_config.servercert = servercert_start;
+    m_config.servercert_len = servercert_end - servercert_start;
+
+    extern const unsigned char prvtkey_pem_start[] asm("_binary_server_key_pem_start");
+    extern const unsigned char prvtkey_pem_end[]   asm("_binary_server_key_pem_end");
+    m_config.prvtkey_pem = prvtkey_pem_start;
+    m_config.prvtkey_len = prvtkey_pem_end - prvtkey_pem_start;
+
+    // m_config.servercert     = reinterpret_cast<const unsigned char*>(server_cert_pem_string.c_str());
+    // m_config.servercert_len = server_cert_pem_string.length();
+
+    // m_config.prvtkey_pem = server_key_pem;
+    // m_config.prvtkey_len = server_key_pem_len;
+    // m_config.user_cb
+ 
+    if (httpd_ssl_start(&m_server, &m_config) == ESP_OK) {
         registerHandlers();
         ESP_LOGI(TAG, "Server started");
         return true;
@@ -47,7 +67,7 @@ bool RestServer::start() {
 
 void RestServer::stop() {
     if (m_server) {
-        httpd_stop(m_server);
+        httpd_ssl_stop(m_server);
         m_server = nullptr;
         ESP_LOGI(TAG, "Server stopped");
     }
@@ -68,7 +88,8 @@ void RestServer::registerHandler(std::unique_ptr<BaseHandler> handler) {
 }
 
 void RestServer::registerHandlers() {
-    registerHandler(std::make_unique<HelloHandler>("/hello"));
-    registerHandler(std::make_unique<ConnectHandler>("/connect", m_sensorUnitManager));
+    // registerHandler(std::make_unique<HelloHandler>("/hello"));
+    registerHandler(
+        std::make_unique<ConnectHandler>("/connect", m_sensorUnitManager));
     registerHandler(std::make_unique<TimeHandler>("/time", m_timeSyncManager));
 }

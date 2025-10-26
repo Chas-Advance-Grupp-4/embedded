@@ -1,6 +1,6 @@
 /**
  * @file GetHandler.cpp
- * @brief Implementation of the GetHandler base class for HTTP GET request handling.
+ * @brief Implementation of the GetHandler base class for HTTPS GET request handling.
  *
  * Defines the logic for routing GET requests to a subclass-defined `process()` method.
  * Includes static and instance-level handlers for invoking custom response logic.
