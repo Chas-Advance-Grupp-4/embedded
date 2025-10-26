@@ -1,3 +1,15 @@
+/**
+ * @file ConnectionManager.cpp
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Implementation of ConnectionManager
+ * Class for connecting Sensor Unit to a Control Unit
+ * 
+ * @date 2025-10-26
+ * 
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ * 
+ */
 #include "ConnectionManager.h"
 #include "JsonParser.h"
 #include "WiFiS3.h"
@@ -35,7 +47,11 @@ void ConnectionManager::connect() {
     const unsigned long scanInterval = 30'000;
 
     if (m_candidateSsids.empty() || now - m_latestScan >= scanInterval) {
+        #ifdef SU_TEST_NETWORK
+        scanForUnits(SU_TEST_NETWORK);
+        #else
         scanForUnits();
+        #endif
     }
 
     if (!m_isPaired) {
@@ -43,9 +59,6 @@ void ConnectionManager::connect() {
     }
 }
 
-bool ConnectionManager::isConnectedToWiFi() {
-    return WiFi.status() == WL_CONNECTED;
-}
 bool ConnectionManager::isPairedWithControlUnit() {
     return m_isPaired;
 }
