@@ -35,7 +35,11 @@ void ConnectionManager::connect() {
     const unsigned long scanInterval = 30'000;
 
     if (m_candidateSsids.empty() || now - m_latestScan >= scanInterval) {
-        scanForUnits("Zyxel");
+        #ifdef SU_TEST_NETWORK
+        scanForUnits(SU_TEST_NETWORK);
+        #else
+        scanForUnits();
+        #endif
     }
 
     if (!m_isPaired) {
@@ -101,7 +105,7 @@ bool ConnectionManager::connectToWiFi(const char* ssid) {
 }
 
 void ConnectionManager::scanForUnits(const char* prefix) {
-    LOG_INFO(TAG, "Scanning for Units...");
+    LOG_INFO(TAG, "Scanning for Units with prefix %s", prefix);
     m_latestScan = millis();
     m_candidateSsids.clear();
 
