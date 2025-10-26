@@ -16,6 +16,11 @@
 #include "ReadingBuffer.h"
 #include "config.h"
 
+struct DispatchResponse {
+    int restStatus;
+    bool connected;
+};
+
 class ReadingsDispatcher : public IReadingsDispatcher {
   public:
     /**
@@ -30,21 +35,25 @@ class ReadingsDispatcher : public IReadingsDispatcher {
                        const char*    sensorUnitId = SENSOR_UNIT_ID);
     /**
      * @brief Function for dispatching sensor readings
-     * Max batch size is set in ReadingBuffer.h 
-     * If buffer is larger than that dispatch will POST 
+     * Max batch size is set in ReadingBuffer.h
+     * If buffer is larger than that dispatch will POST
      * several batches of max_batch_size until buffer is empty
-     * 
+     *
+     * @returns false if response payload disconnected
+     * @returns true otherwise
      */
-    void dispatch() override;
+    bool dispatch() override;
 
   private:
     /**
      * @brief Dispatch a single batch of max_batch_size
      * max_natch_size is set in ReadingBuffer.h
-     * 
-     * @return int RestResponse status, 200 means successful POST
+     *
+     * @return ConnectResponse with restStatus
+     * restStatus 200 means successful POST
+     * bool connected used for passing on disconnect message from backend
      */
-    int                          dispatchBatch();
+    DispatchResponse             dispatchBatch();
     IRestClient&                 m_restClient;
     ReadingBuffer&               m_readingBuffer;
     const char*                  m_sensorUnitId;

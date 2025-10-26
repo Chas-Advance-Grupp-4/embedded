@@ -74,6 +74,11 @@ class ConnectionManager {
      */
     void connect();
     /**
+     * @brief Disconnects Sensor Unit by running init
+     * 
+     */
+    void disconnect();
+    /**
      * @brief Helper function for checking if Sensor Unit is paired
      *
      * @return true when Sensor Unit is paired with a Control Unit

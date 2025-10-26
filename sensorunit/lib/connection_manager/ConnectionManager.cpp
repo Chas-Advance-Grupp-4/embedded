@@ -59,6 +59,11 @@ void ConnectionManager::connect() {
     }
 }
 
+void ConnectionManager::disconnect() {
+    LOG_INFO(TAG, "Disconnecting unit..");
+    init();
+}
+
 bool ConnectionManager::isPairedWithControlUnit() {
     return m_isPaired;
 }

@@ -40,7 +40,10 @@ void loop() {
         readingProcessor.process();
     }
     if (triggers.dispatchTrigger) {
-        readingsDispatcher.dispatch();
+        bool stillConnected = readingsDispatcher.dispatch();
+        if (!stillConnected) {
+            connectionManager.disconnect();
+        }
     }
     if (triggers.resyncTrigger) {
         timeSyncManager.syncTime();
