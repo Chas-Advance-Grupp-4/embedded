@@ -35,7 +35,7 @@ void ConnectionManager::connect() {
     const unsigned long scanInterval = 30'000;
 
     if (m_candidateSsids.empty() || now - m_latestScan >= scanInterval) {
-        scanForUnits();
+        scanForUnits("Zyxel");
     }
 
     if (!m_isPaired) {

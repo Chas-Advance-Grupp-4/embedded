@@ -3,10 +3,10 @@
  * @author Erik Dahl (erik@iunderlandet.se)
  * @brief Implementation of RestClient class
  * @date 2025-10-15
- * 
+ *
  * @copyright Copyright (c) 2025 Erik Dahl
  * @license MIT
- * 
+ *
  */
 #include "RestClient.h"
 #include "logging.h"
@@ -38,10 +38,9 @@ RestResponse RestClient::getTo(const char* endpoint) {
     return response;
 }
 
-
 RestResponse RestClient::postTo(const char*                                   endpoint,
                                 const etl::string<json_config::max_json_size> payload) {
-    
+
     LOG_INFO(TAG, "Sending POST request to %s", endpoint);
     // Open connection
     if (!m_client.connect(m_baseUrl.c_str(), m_port)) {
@@ -131,9 +130,11 @@ RestResponse RestClient::parseResponse() {
                 }
             } else {
                 if (!body.full()) {
-                    body.push_back(c);                    
+                    body.push_back(c);
                 } else {
-                    LOG_WARN(TAG, "Response body exceeding max size: %d", json_config::max_small_json_size);
+                    LOG_WARN(TAG,
+                             "Response body exceeding max size: %d",
+                             json_config::max_small_json_size);
                     break;
                 }
             }
@@ -142,10 +143,9 @@ RestResponse RestClient::parseResponse() {
 
     response.payload = body;
     if (body.full()) {
-        response.status = -6;        
+        response.status = -6;
     } else {
-        response.status  = statusCode;
+        response.status = statusCode;
     }
     return response;
 }
-

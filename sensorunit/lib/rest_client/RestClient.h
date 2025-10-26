@@ -10,13 +10,15 @@
  */
 #pragma once
 #include "IRestClient.h"
-#include <WiFiClient.h>
+#include "config.h"
+#include <WiFiSSLClient.h>
 #include <WiFiS3.h>
+// #include <WiFiClient.h>
 
 class RestClient : public IRestClient {
   public:
     RestClient(const char*   baseUrl,
-               uint16_t      port      = 8080,
+               uint16_t      port      = CONTROL_UNIT_PORT,
                const char*   jwtToken  = "currently_not_used",
                unsigned long timeoutMs = 5000);
 
@@ -30,7 +32,7 @@ class RestClient : public IRestClient {
 
     /**
      * @brief Send POST request to the server
-     * 
+     *
      * @param endpoint should include slash, example: "/connect"
      * @param payload a formated json string
      * @return RestResponse struct with status and payload
@@ -46,7 +48,7 @@ class RestClient : public IRestClient {
     etl::string<32>              m_baseUrl;
     etl::string<64>              m_jwtToken;
     uint16_t                     m_port;
-    WiFiClient                   m_client;
-    unsigned long                m_timeout; /**< Timeout for HTTP requests in milliseconds. */
+    WiFiSSLClient                m_client;
+    unsigned long                m_timeout; /**< Timeout for HTTPS requests in milliseconds. */
     static constexpr const char* TAG = "RestClient";
 };
