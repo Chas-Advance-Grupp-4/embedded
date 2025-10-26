@@ -5,12 +5,14 @@
  * This class provides functionality for registering sensor units,
  * storing incoming sensor readings, and grouping them by timestamp
  * for batch processing or transmission.
+ * 
+ * It uses a FreeRTOS mutex for protecting resource shared between tasks
  *
- * Typical usage:
+ * Class functionality:
  * - Add or remove sensor units using their UUIDs.
  * - Store readings as they arrive.
  * - Retrieve grouped readings for backend dispatch.
- * - Clear stored readings when no longer needed.
+ * - Clear stored readings when succesfully dispatched.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
@@ -22,6 +24,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "freertos/FreeRTOS.h"
 
 /**
  * @class SensorUnitManager
@@ -32,6 +35,17 @@
  */
 class SensorUnitManager {
   public:
+    /**
+     * @brief Default constructor added just for clarity
+     * 
+     */
+    SensorUnitManager() = default;
+    /**
+     * @brief Class needs to run init in app_main to create the 
+     * FreeRTOR mutex needed to protect shared resources
+     * 
+     */
+    void init();
     /**
      * @brief Registers a sensor unit by UUID.
      * @param uuid Unique identifier of the sensor unit.
@@ -68,8 +82,10 @@ class SensorUnitManager {
     void clearReadings();
 
   private:
+    mutable SemaphoreHandle_t m_readingsMutex = nullptr;
     std::map<Uuid, std::shared_ptr<Uuid>>
         m_active_units; /**< Registered sensor units by UUID. */
     std::vector<ca_sensorunit_snapshot>
         m_all_readings; /**< All stored sensor readings. */
+    static constexpr const char* TAG = "SensorUnitManager";
 };

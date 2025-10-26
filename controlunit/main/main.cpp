@@ -32,6 +32,7 @@ extern "C" void app_main(void) {
     timeSyncManager.start();
 
     static SensorUnitManager sensorUnitManager;
+    sensorUnitManager.init();
     // Connect Sensor Unit manually
     sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
 
@@ -44,14 +45,14 @@ extern "C" void app_main(void) {
                              "eyJhbGciOiJIUzI1NiIs...");
     client.init();
     client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
-    // static ControlUnitManager manager;
-    // vTaskDelay(pdMS_TO_TICKS(500));
+    static ControlUnitManager manager(sensorUnitManager);
+    vTaskDelay(pdMS_TO_TICKS(500));
 
-    // static MockDataGenerator mockdataGenerator(manager, 5'000'000);
-    // mockdataGenerator.start();
-    // Wait so we have time to see the first post on the server
-    // vTaskDelay(pdMS_TO_TICKS(8000));
+    static MockDataGenerator mockdataGenerator(manager, 5'000'000);
+    mockdataGenerator.start();
 
-    // static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
-    // dispatcher.start();
+    vTaskDelay(pdMS_TO_TICKS(200));
+
+    static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
+    dispatcher.start();
 }
