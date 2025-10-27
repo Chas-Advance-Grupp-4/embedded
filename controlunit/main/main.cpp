@@ -5,7 +5,7 @@
  * @date 2025-10-07
  * @copyright Copyright (c) 2025 Erik Dahl
  * @license MIT
- * 
+ *
  */
 #include "MockDataGenerator.h"
 #include "ReadingsDispatcher.h"
@@ -32,26 +32,34 @@ extern "C" void app_main(void) {
     timeSyncManager.start();
 
     static SensorUnitManager sensorUnitManager;
+    sensorUnitManager.init();
     // Connect Sensor Unit manually
     sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
 
-    static RestServer server(CONTROL_UNIT_PORT, timeSyncManager, sensorUnitManager);
+    static RestServer server(
+        CONTROL_UNIT_PORT, timeSyncManager, sensorUnitManager);
     if (server.start()) {
-        // Possible additional LOG message here
     }
 
-    static RestClient client(CLIENT_URL,
-                             "eyJhbGciOiJIUzI1NiIs...");
+    static RestClient client(CLIENT_URL, "eyJhbGciOiJIUzI1NiIs...");
     client.init();
     client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
-    // static ControlUnitManager manager;
-    // vTaskDelay(pdMS_TO_TICKS(500));
+    static ControlUnitManager manager(sensorUnitManager);
+    vTaskDelay(pdMS_TO_TICKS(500));
 
     // static MockDataGenerator mockdataGenerator(manager, 5'000'000);
     // mockdataGenerator.start();
-    // Wait so we have time to see the first post on the server
-    // vTaskDelay(pdMS_TO_TICKS(8000));
 
-    // static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
-    // dispatcher.start();
+    vTaskDelay(pdMS_TO_TICKS(200));
+
+    static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
+    dispatcher.start();
+
+    vTaskDelay(pdMS_TO_TICKS(60000));
+    ESP_LOGI("Main", "Removing Sensor Unit");
+    sensorUnitManager.removeUnit(Uuid(TEST_SENSOR_UNIT_ID));
+
+    vTaskDelay(pdMS_TO_TICKS(30000));
+    ESP_LOGI("Main", "Adding Sensor Unit");
+    sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
 }

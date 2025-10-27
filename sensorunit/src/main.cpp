@@ -25,8 +25,6 @@ void setup() {
 
     sensorReader.init();
     connectionManager.init();
-    connectionManager.connect();
-    timeSyncManager.syncTime();
 
     LOG_INFO("MAIN", "Setup done");
 }
@@ -35,12 +33,18 @@ void loop() {
     SchedulerResult triggers = scheduler.tick(connectionManager.isPairedWithControlUnit());
     if (triggers.connectTrigger) {
         connectionManager.connect();
+        // if (connectionManager.isPairedWithControlUnit()) {
+        //     timeSyncManager.syncTime();
+        // }
     }
     if (triggers.readingTrigger) {
         readingProcessor.process();
     }
     if (triggers.dispatchTrigger) {
-        readingsDispatcher.dispatch();
+        bool stillConnected = readingsDispatcher.dispatch();
+        if (!stillConnected) {
+            connectionManager.disconnect();
+        }
     }
     if (triggers.resyncTrigger) {
         timeSyncManager.syncTime();

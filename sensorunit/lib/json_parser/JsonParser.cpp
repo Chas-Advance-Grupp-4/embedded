@@ -65,6 +65,28 @@ JsonParser::parseConnectResponse(etl::string<json_config::max_small_json_size> p
     return response;
 }
 
+bool
+JsonParser::parseDispatchResponse(etl::string<json_config::max_small_json_size> payload) {
+    const char*                                              json = payload.c_str();
+    StaticJsonDocument<json_config::max_small_json_doc_size> doc;
+    bool response {false};
+    DeserializationError                                     error = deserializeJson(doc, json);
+    if (error) {
+        LOG_ERROR(TAG, "DeserializationError: %s", error.c_str());
+        return response;
+    }
+    if (!doc.containsKey("status")) {
+        LOG_WARN(TAG, "Missing 'status' field in dispatch response");
+        return response;
+    } 
+
+    const char* responseStatusText = doc["status"];
+    LOG_INFO(TAG, "Dispatch response: %s", responseStatusText);
+    response = (doc["status"] != "disconnected");
+
+    return response;
+}
+
 uint32_t
 JsonParser::parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload) {
 

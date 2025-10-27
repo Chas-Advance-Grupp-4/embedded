@@ -18,21 +18,27 @@ ReadingsDispatcher::ReadingsDispatcher(IRestClient&   restClient,
                                        const char*    sensorUnitId)
     : m_restClient(restClient), m_readingBuffer(readingBuffer), m_sensorUnitId(sensorUnitId) {}
 
-void ReadingsDispatcher::dispatch() {
+bool ReadingsDispatcher::dispatch() {
     LOG_INFO(TAG, "Dispatching readings...");
+    DispatchResponse dispatchResponse;
     while (m_readingBuffer.hasReadings()) {
-        int restResponse = dispatchBatch();
-        if (restResponse != 200) {
-            LOG_WARN(TAG, "Rest Server error %d, Aborting dispatch", restResponse);
-            break;
+        dispatchResponse = dispatchBatch();
+        
+        if (dispatchResponse.restStatus != 200) {
+            LOG_WARN(TAG, "Rest Server error %d, Aborting dispatch", (dispatchResponse.restStatus));
+            return true;
         }
     }
+    if (!dispatchResponse.connected) {
+        LOG_INFO(TAG, "Sensor Unit received disconnect status");
+    }
+    return dispatchResponse.connected;
 }
 
-int ReadingsDispatcher::dispatchBatch() {
+DispatchResponse ReadingsDispatcher::dispatchBatch() {
     if (!m_readingBuffer.hasReadings()) {
         LOG_WARN(TAG, "Reading buffer already empty. Aborting dispatchBatch");
-        return -7;
+        return { -7, true };
     }
     etl::vector<CaSensorunitReading, buffer_config::max_batch_size> batch =
         m_readingBuffer.getBatch();
@@ -42,14 +48,16 @@ int ReadingsDispatcher::dispatchBatch() {
         JsonParser::composeSensorSnapshotGroup(batch, m_sensorUnitId);
 
     LOG_INFO(TAG, "Dispatching batch with %zu readings", batchSize);
-    RestResponse response = m_restClient.postTo("/readings", payload);
+    RestResponse restResponse = m_restClient.postTo("/readings", payload);
+    DispatchResponse response { restResponse.status, true } ;
 
-    if (response.status != 200) {
-        LOG_WARN(TAG, "Posting batch to /readings failed with status code %d", response.status);
+    if (restResponse.status != 200) {
+        LOG_WARN(TAG, "Posting batch to /readings failed with status code %d", restResponse.status);
     } else {
         m_readingBuffer.removeBatch(batchSize);
         LOG_INFO(TAG, "%zu readings dispatched and removed from buffer", batchSize);
-    }
+        response.connected = JsonParser::parseDispatchResponse(restResponse.payload);
+    } 
 
-    return response.status;
+    return response;
 }

@@ -13,6 +13,6 @@
 
 class IReadingsDispatcher {
   public:
-    virtual void dispatch() = 0;
+    virtual bool dispatch() = 0;
     virtual ~IReadingsDispatcher() = default;
 };
