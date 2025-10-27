@@ -22,6 +22,12 @@ RestClient::RestClient(const std::string& baseUrl,
     : m_baseUrl(baseUrl), m_jwtToken{jwtToken}, m_timeout(timeoutMs) {}
 
 esp_err_t RestClient::init() {
+
+    m_mutex = xSemaphoreCreateMutex();
+    if (m_mutex == nullptr) {
+        ESP_LOGE(TAG, "Failed to create mutex");
+    }
+
     esp_http_client_config_t config = {};
     config.url                      = m_baseUrl.c_str();
     config.timeout_ms               = m_timeout;
@@ -44,9 +50,16 @@ esp_err_t RestClient::init() {
 
 esp_err_t RestClient::postTo(const std::string& endpoint,
                              const std::string& payload) {
-    if (!m_client)
+    if (!m_client || !m_mutex){
         return ESP_ERR_INVALID_STATE;
+    }
 
+    // Mutex protected
+    ESP_LOGI(TAG, "Taking mutex for POST to %s", endpoint.c_str());
+    if (xSemaphoreTake(m_mutex, portMAX_DELAY) != pdTRUE) {
+        // This will almost never happen since portMAX_DELAY waits forever
+        return ESP_ERR_TIMEOUT;     
+    }
     ESP_LOGI(TAG, "Free heap: %u", esp_get_free_heap_size());
     std::string full_url = m_baseUrl + endpoint;
     esp_http_client_set_url(m_client, full_url.c_str());
@@ -55,12 +68,14 @@ esp_err_t RestClient::postTo(const std::string& endpoint,
 
     esp_err_t err = esp_http_client_perform(m_client);
     esp_http_client_close(m_client);    // Close the socket but not the client itself
+    xSemaphoreGive(m_mutex);
+
     if (err == ESP_OK) {
         int status = esp_http_client_get_status_code(m_client);
-        ESP_LOGI(TAG, "Svar %d från %s", status, endpoint.c_str());
+        ESP_LOGI(TAG, "Response %d from %s", status, endpoint.c_str());
     } else {
         ESP_LOGE(TAG,
-                 "Fel vid POST till %s: %s",
+                 "Error at POST to %s: %s",
                  endpoint.c_str(),
                  esp_err_to_name(err));
     }
