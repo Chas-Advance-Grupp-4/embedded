@@ -150,7 +150,6 @@ JsonParser::parseSensorConnectRequest(const std::string& json,
     }
 
     // UUID
-    // ? Add check if uuid is valid ?
     cJSON* uuidItem = cJSON_GetObjectItem(root, "sensor_unit_id");
     if (!cJSON_IsString(uuidItem) || !uuidItem->valuestring) {
         ESP_LOGE(TAG, "Missing or invalid 'sensor_unit_id'");
@@ -206,78 +205,6 @@ JsonParser::composeSensorConnectResponse(const SensorConnectResponse& response,
     return result;
 }
 
-DriverConnectRequest
-JsonParser::parseDriverConnectRequest(const std::string& json,
-                                      requestType        type) {
-    DriverConnectRequest request;
-
-    cJSON* root = cJSON_Parse(json.c_str());
-    if (!root) {
-        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
-        return request;
-    }
-
-    // DriverId
-    const cJSON* driverIdItem = cJSON_GetObjectItem(root, "driver_id");
-    if (!cJSON_IsNumber(driverIdItem)) {
-        ESP_LOGE(TAG, "Missing or invalid 'driver_id'");
-        cJSON_Delete(root);
-        return request;
-    }
-    double rawValue = driverIdItem->valuedouble;
-    if (rawValue < 0 || rawValue > std::numeric_limits<uint32_t>::max()) {
-        ESP_LOGE(TAG, "'driver_id' out of range");
-        cJSON_Delete(root);
-        return request;
-    }
-    uint32_t driverId = static_cast<uint32_t>(rawValue);
-
-    // Token
-    const cJSON* tokenItem = cJSON_GetObjectItem(root, "token");
-    if (!cJSON_IsString(tokenItem) || !tokenItem->valuestring) {
-        ESP_LOGE(TAG, "Missing or invalid 'token'");
-        cJSON_Delete(root);
-        return request;
-    }
-    std::string token{tokenItem->valuestring};
-
-    request.driverId = driverId;
-    request.token    = token;
-    request.request  = type;
-
-    cJSON_Delete(root);
-    return request;
-}
-
-std::string
-JsonParser::composeDriverConnectResponse(const DriverConnectResponse& response,
-                                         const std::string& control_unit_id) {
-
-    cJSON* root = cJSON_CreateObject();
-
-    // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(root, "control_unit_id", control_unit_id.c_str());
-
-    // Driver ID
-    if (response.driverId != 0) {
-        cJSON_AddNumberToObject(root, "driver_id", response.driverId);
-    } else {
-        ESP_LOGE(TAG, "Missing or invalid 'driver_id'");
-        cJSON_AddNullToObject(root, "driver_id");
-    }
-
-    // Connection Status
-    cJSON_AddStringToObject(root,
-                            "connection_status",
-                            connectionStatusToString(response.status).c_str());
-
-    // Convert to string and clean up
-    char*       jsonStr = cJSON_PrintUnformatted(root);
-    std::string result(jsonStr);
-    cJSON_free(jsonStr);
-    cJSON_Delete(root);
-    return result;
-}
 
 Uuid JsonParser::parseSensorunitConnectRequest(const std::string& json){
     
