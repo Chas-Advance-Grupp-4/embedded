@@ -1,9 +1,19 @@
+/**
+ * @file TimeSyncManager.cpp
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Implementation of TimeSyncManager for time sync through REST api
+ * @date 2025-10-27
+ * 
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ * 
+ */
 #include "TimeSyncManager.h"
 #include "JsonParser.h"
 #include "logging.h"
 #include "time.h"
 
-TimeSyncManager::TimeSyncManager(RestClient& restClient) : m_restClient{restClient} {}
+TimeSyncManager::TimeSyncManager(IRestClient& restClient) : m_restClient{restClient} {}
 
 bool TimeSyncManager::isTimeSynced() {
     return m_isTimeSynced;
