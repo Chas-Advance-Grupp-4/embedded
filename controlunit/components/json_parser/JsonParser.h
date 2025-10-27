@@ -3,12 +3,11 @@
  * @brief Static utility class for parsing and composing JSON related to sensor
  * and connection data.
  *
- * Provides functions for converting to and from internal data structures and JSON
- * strings 
- * From Sensor Unit: connect requests/responses, batched sensor readings, 
- * From Backend: connect requests
- * To Backend: batched sensor readings, connect responses, error messages
- * 
+ * Provides functions for converting to and from internal data structures and
+ * JSON strings From Sensor Unit: connect requests/responses, batched sensor
+ * readings, From Backend: connect requests To Backend: batched sensor readings,
+ * connect responses, error messages
+ *
  * All methods are static and stateless, defined in the JsonParser class.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
@@ -89,6 +88,16 @@ class JsonParser {
      */
     static std::string
     composeSensorunitStatusPayload(const std::string& status);
+
+    /**
+     * @brief Composes a JSON payload containing a Unix timestamp.
+     *
+     * Example: {"timestamp": <Unixtimestamp> }
+     *
+     * @param now The current time as a Unix timestamp (time_t).
+     * @return A JSON-formatted string containing the timestamp.
+     */
+    static std::string composeTimestampPayload(time_t now);
 
     /**
      * @brief Composes a generic error response in JSON format. (Unused)
