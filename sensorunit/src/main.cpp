@@ -33,9 +33,9 @@ void loop() {
     SchedulerResult triggers = scheduler.tick(connectionManager.isPairedWithControlUnit());
     if (triggers.connectTrigger) {
         connectionManager.connect();
-        // if (connectionManager.isPairedWithControlUnit()) {
-        //     timeSyncManager.syncTime();
-        // }
+        if (connectionManager.isPairedWithControlUnit()) {
+            timeSyncManager.syncTime();
+        }
     }
     if (triggers.readingTrigger) {
         readingProcessor.process();
