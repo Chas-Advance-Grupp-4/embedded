@@ -12,7 +12,7 @@
  * - Handling error messages in JSON format
  *
  * Used for communication between the Control Unit both for backend services
- * and Sensor Unit. All methods are static and stateless, defined in the 
+ * and Sensor Unit. All methods are static and stateless, defined in the
  * JsonParser class.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
@@ -99,7 +99,7 @@ std::string JsonParser::composeGroupedReadings(
     } else {
         ESP_LOGI(
             TAG, "Composing JSON with %zu timestamp groups", readings.size());
-     }
+    }
     for (const auto& [timestamp, snapshots] : readings) {
         cJSON* groupObj = cJSON_CreateObject();
         cJSON_AddNumberToObject(
@@ -109,8 +109,9 @@ std::string JsonParser::composeGroupedReadings(
         for (const auto& snapshot : snapshots) {
             cJSON* unitObj = cJSON_CreateObject();
             if (snapshot.uuid && snapshot.uuid->isValid()) {
-                cJSON_AddStringToObject(
-                    unitObj, "sensor_unit_id", snapshot.uuid->toString().c_str());
+                cJSON_AddStringToObject(unitObj,
+                                        "sensor_unit_id",
+                                        snapshot.uuid->toString().c_str());
             } else {
                 cJSON_AddStringToObject(unitObj, "sensor_unit_id", "unknown");
             }
@@ -205,15 +206,14 @@ JsonParser::composeSensorConnectResponse(const SensorConnectResponse& response,
     return result;
 }
 
+Uuid JsonParser::parseSensorunitConnectRequest(const std::string& json) {
 
-Uuid JsonParser::parseSensorunitConnectRequest(const std::string& json){
-    
     cJSON* root = cJSON_Parse(json.c_str());
     if (!root) {
         ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
         return Uuid("");
     }
-    
+
     cJSON* uuidItem = cJSON_GetObjectItem(root, "sensor_unit_id");
     if (!cJSON_IsString(uuidItem) || !uuidItem->valuestring) {
         ESP_LOGE(TAG, "Missing or invalid 'sensor_unit_id'");
@@ -226,21 +226,35 @@ Uuid JsonParser::parseSensorunitConnectRequest(const std::string& json){
     return sensorUnitId;
 }
 
-std::string JsonParser::composeSensorunitStatusPayload(const std::string& status) {
+std::string
+JsonParser::composeSensorunitStatusPayload(const std::string& status) {
 
     cJSON* root = cJSON_CreateObject();
     cJSON_AddStringToObject(root, "status", status.c_str());
-    
+
     char*       jsonStr = cJSON_PrintUnformatted(root);
     std::string payload(jsonStr);
     cJSON_free(jsonStr);
     cJSON_Delete(root);
-    
+
     ESP_LOGI(TAG, "Json Payload created with status %s", status.c_str());
     return payload;
-
 }
 
+std::string JsonParser::composeTimestampPayload(time_t now) {
+
+    cJSON* root      = cJSON_CreateObject();
+    double timestamp = static_cast<double>(now);
+    cJSON_AddNumberToObject(root, "timestamp", timestamp);
+
+    char*       jsonStr = cJSON_PrintUnformatted(root);
+    std::string payload(jsonStr);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+
+    ESP_LOGI(TAG, "Json Payload created with timestamp %.0f", timestamp);
+    return payload;
+}
 
 std::string
 JsonParser::composeErrorResponse(const std::string& message,
