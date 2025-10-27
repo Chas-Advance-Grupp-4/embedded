@@ -18,6 +18,7 @@
 #include "esp_http_client.h"
 #include "esp_log.h"
 #include <string>
+#include "esp_crt_bundle.h"
 
 /**
  * @class RestClient

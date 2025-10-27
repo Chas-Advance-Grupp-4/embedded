@@ -25,7 +25,8 @@ esp_err_t RestClient::init() {
     config.url                      = m_baseUrl.c_str();
     config.timeout_ms               = m_timeout;
     config.keep_alive_enable        = true;
-    // config.transport_type           = HTTP_TRANSPORT_OVER_SSL;
+    config.transport_type = HTTP_TRANSPORT_OVER_SSL;
+    config.crt_bundle_attach = esp_crt_bundle_attach;
 
     m_client = esp_http_client_init(&config);
     if (!m_client) {
