@@ -73,25 +73,6 @@ class JsonParser {
                                  const std::string&           controlunit_uuid);
 
     /**
-     * @brief Parses a driver connection request from JSON.
-     * @param json JSON-formatted string representing the request.
-     * @param type Type of request (e.g., connect, disconnect).
-     * @return Parsed DriverConnectRequest object.
-     */
-    static DriverConnectRequest
-    parseDriverConnectRequest(const std::string& json, requestType type);
-
-    /**
-     * @brief Composes a JSON response for a driver connection.
-     * @param response Response data to be sent.
-     * @param controlunit_uuid UUID of the control unit.
-     * @return JSON-formatted string representing the response.
-     */
-    static std::string
-    composeDriverConnectResponse(const DriverConnectResponse& response,
-                                 const std::string&           controlunit_uuid);
-
-    /**
      * @brief Parses a Connect Request from a Sensor Unit
      *
      * @param json - Contains key "sensor_unit_id"
@@ -110,12 +91,10 @@ class JsonParser {
     composeSensorunitStatusPayload(const std::string& status);
 
     /**
-     * @brief Composes a generic error response in JSON format.
+     * @brief Composes a generic error response in JSON format. (Unused)
      * @param message Error message to include.
      * @param controlunit_uuid UUID of the control unit.
      * @return JSON-formatted string representing the error response.
-     *
-     * TODO: Discuss error handling with backend and expected responses
      */
     static std::string
     composeErrorResponse(const std::string& message,

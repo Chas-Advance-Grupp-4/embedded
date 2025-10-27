@@ -13,7 +13,7 @@
 #include "sensor_data_types.h"
 
 /**
- * @brief Valid request for connecting a Driver as well as Sensor Unit
+ * @brief Valid request for connecting/disconnecting a Sensor Unit
  * 
  */
 enum class requestType { CONNECT, DISCONNECT };
@@ -37,18 +37,8 @@ struct SensorConnectRequest {
 };
 
 /**
- * @brief Struct used for composing a Driver Connect Request
- * 
- */
-struct DriverConnectRequest {
-    uint32_t    driverId {};
-    requestType request;
-    std::string token;
-};
-
-/**
  * @brief Valid status for communicating connection status
- * for both Sensor Unit and Driver
+ * for Sensor Unit
  * 
  */
 enum class connectionStatus {
@@ -73,13 +63,4 @@ std::string connectionStatusToString(connectionStatus status);
 struct SensorConnectResponse {
     std::shared_ptr<Uuid> sensorUuid;
     connectionStatus      status;
-};
-
-/**
- * @brief Struct used for composing a Driver Connect Response
- * 
- */
-struct DriverConnectResponse {
-    uint32_t         driverId;
-    connectionStatus status;
 };
