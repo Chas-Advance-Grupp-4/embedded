@@ -54,4 +54,12 @@ extern "C" void app_main(void) {
 
     static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
     dispatcher.start();
+
+    vTaskDelay(pdMS_TO_TICKS(60000));
+    ESP_LOGI("Main", "Removing Sensor Unit");
+    sensorUnitManager.removeUnit(Uuid(TEST_SENSOR_UNIT_ID));
+
+    vTaskDelay(pdMS_TO_TICKS(30000));
+    ESP_LOGI("Main", "Adding Sensor Unit");
+    sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
 }
