@@ -5,6 +5,7 @@ idf_component_register(
          "handlers/GetHandler.cpp"
          "handlers/TimeHandler.cpp"
          "handlers/ConnectHandler.cpp"
+         "handlers/ReadingsHandler.cpp"         
     INCLUDE_DIRS "." "handlers"
     REQUIRES esp_http_server esp_wifi log nvs_flash unity time_sync_manager sensor_unit_manager json_parser
 )

@@ -16,6 +16,7 @@
 #include "RestServer.h"
 #include "ConnectHandler.h"
 #include "TimeHandler.h"
+#include "ReadingsHandler.h"
 #include "esp_log.h"
 
 static const char* TAG = "RestServer";
@@ -69,4 +70,5 @@ void RestServer::registerHandler(std::unique_ptr<BaseHandler> handler) {
 void RestServer::registerHandlers() {
     registerHandler(std::make_unique<ConnectHandler>("/connect", m_sensorUnitManager));
     registerHandler(std::make_unique<TimeHandler>("/time", m_timeSyncManager));
+    registerHandler(std::make_unique<ReadingsHandler>("/readings", m_sensorUnitManager));
 }

@@ -5,7 +5,7 @@
  * @date 2025-10-07
  * @copyright Copyright (c) 2025 Erik Dahl
  * @license MIT
- * 
+ *
  */
 #include "MockDataGenerator.h"
 #include "ReadingsDispatcher.h"
@@ -36,20 +36,19 @@ extern "C" void app_main(void) {
     // Connect Sensor Unit manually
     sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
 
-    static RestServer server(CONTROL_UNIT_PORT, timeSyncManager, sensorUnitManager);
+    static RestServer server(
+        CONTROL_UNIT_PORT, timeSyncManager, sensorUnitManager);
     if (server.start()) {
-        // Possible additional LOG message here
     }
 
-    static RestClient client(CLIENT_URL,
-                             "eyJhbGciOiJIUzI1NiIs...");
+    static RestClient client(CLIENT_URL, "eyJhbGciOiJIUzI1NiIs...");
     client.init();
     client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
     static ControlUnitManager manager(sensorUnitManager);
     vTaskDelay(pdMS_TO_TICKS(500));
 
-    static MockDataGenerator mockdataGenerator(manager, 5'000'000);
-    mockdataGenerator.start();
+    // static MockDataGenerator mockdataGenerator(manager, 5'000'000);
+    // mockdataGenerator.start();
 
     vTaskDelay(pdMS_TO_TICKS(200));
 
