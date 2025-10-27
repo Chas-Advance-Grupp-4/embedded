@@ -15,7 +15,6 @@
  */
 #include "RestServer.h"
 #include "ConnectHandler.h"
-#include "HelloHandler.h"
 #include "TimeHandler.h"
 #include "esp_log.h"
 
@@ -68,7 +67,6 @@ void RestServer::registerHandler(std::unique_ptr<BaseHandler> handler) {
 }
 
 void RestServer::registerHandlers() {
-    registerHandler(std::make_unique<HelloHandler>("/hello"));
     registerHandler(std::make_unique<ConnectHandler>("/connect", m_sensorUnitManager));
     registerHandler(std::make_unique<TimeHandler>("/time", m_timeSyncManager));
 }
