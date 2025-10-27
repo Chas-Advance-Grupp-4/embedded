@@ -1,11 +1,12 @@
 /**
  * @file RestClient.cpp
  * @author Erik Dahl (erik@iunderlandet.se)
- * @brief Lightweight HTTP client for posting JSON data to a remote endpoint.
+ * @brief Lightweight HTTPS client for posting JSON data to a remote endpoint.
  *
  * This class wraps the ESP-IDF HTTP client and provides simplified methods
  * for initialization and sending POST requests. It supports configurable
- * base URL, JWT token (optional), and timeout settings
+ * base URL, TLS, JWT token, and timeout settings
+ * It uses the bundled TLS certificates that ESP-IDF provides
  * 
  * @date 2025-10-07
  * 
@@ -25,7 +26,8 @@ esp_err_t RestClient::init() {
     config.url                      = m_baseUrl.c_str();
     config.timeout_ms               = m_timeout;
     config.keep_alive_enable        = true;
-    // config.transport_type           = HTTP_TRANSPORT_OVER_SSL;
+    config.transport_type = HTTP_TRANSPORT_OVER_SSL;
+    config.crt_bundle_attach = esp_crt_bundle_attach;
 
     m_client = esp_http_client_init(&config);
     if (!m_client) {
@@ -33,8 +35,8 @@ esp_err_t RestClient::init() {
         return ESP_FAIL;
     }
 
-    // esp_http_client_set_header(
-    //     m_client, "Authorization", ("Bearer " + m_jwtToken).c_str());
+    esp_http_client_set_header(
+         m_client, "Authorization", ("Bearer " + m_jwtToken).c_str());
     esp_http_client_set_header(m_client, "Content-Type", "application/json");
 
     return ESP_OK;

@@ -59,7 +59,7 @@ ReadingDispatchTask::ReadingDispatchTask(RestClient&         client,
 
 void ReadingDispatchTask::start() {
     ESP_LOGI(TAG, "Starting task...");
-    xTaskCreate(taskEntry, "ReadingDispatchTask", 4096, this, 5, &m_taskHandle);
+    xTaskCreate(taskEntry, "ReadingDispatchTask", 8192, this, 5, &m_taskHandle);
     ESP_LOGI(TAG, "Task created, handle: %p", m_taskHandle);
 }
 
@@ -79,7 +79,7 @@ void ReadingDispatchTask::run() {
         std::string json = JsonParser::composeGroupedReadings(
             m_manager.sensorManager.getGroupedReadings(),
             m_manager.getControlunitUuidString());
-        m_httpClient.postTo("/api/v1/control-unit/readings", json);
+        m_httpClient.postTo("/api/v1/control-unit", json);
     }
 }
 
