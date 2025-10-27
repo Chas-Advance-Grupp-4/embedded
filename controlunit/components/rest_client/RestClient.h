@@ -18,6 +18,7 @@
 #include "esp_crt_bundle.h"
 #include "esp_http_client.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
 #include <string>
 
 /**
@@ -56,6 +57,8 @@ class RestClient {
      * transport. The client is initialized with keep-alive enabled and uses the
      * default certificate bundle. Adds required headers for JWT-based
      * authorization and JSON content type.
+     * 
+     * It also creates/initializes the mutex used by postTo
      *
      * This method must be called before sending any HTTP requests.
      *
@@ -69,6 +72,8 @@ class RestClient {
      *
      * Constructs the full URL by appending the endpoint to the base URL,
      * sets the request method and payload, and performs the HTTP transaction.
+     * 
+     * Mutex protected for safe calling from different tasks
      *
      * @param endpoint Relative path to the target endpoint.
      * @param payload JSON-formatted string to be sent in the request body.
@@ -83,6 +88,7 @@ class RestClient {
     esp_http_client_handle_t
         m_client;  /**< Handle to the ESP-IDF HTTP client. */
     int m_timeout; /**< Timeout for HTTP requests in milliseconds. */
+    mutable SemaphoreHandle_t m_mutex = nullptr;
     static constexpr const char* TAG =
         "RestClient"; /**< Logging tag for ESP_LOG macros. */
 };
