@@ -34,6 +34,10 @@
  */
 class JsonParser {
   public:
+    static std::string composeStatusRequest(const std::string& controlUnitId);
+  
+    static std::vector<SensorConnectRequest> parseStatusResponse(const std::string& json);
+
     /**
      * @brief Parses a JSON string containing grouped sensor snapshots.
      * @param json JSON-formatted string representing sensor readings.

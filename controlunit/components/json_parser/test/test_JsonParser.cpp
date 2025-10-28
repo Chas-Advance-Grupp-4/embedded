@@ -1,8 +1,8 @@
 /**
  * @brief Tests for JsonParser.cpp
- * 
+ *
  * @author Erik Dahl (erik@iunderlandet.se)
- * 
+ *
  */
 extern "C" {
 #include "unity.h"
@@ -10,6 +10,62 @@ extern "C" {
 #include "JsonParser.h"
 #include "esp_log.h"
 #include <cstring>
+
+extern "C" void
+when_passed_a_uuid_composeStatusRequest_generates_valid_json(void) {
+    std::string controlUnitId = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
+    std::string json          = JsonParser::composeStatusRequest(controlUnitId);
+    ESP_LOGD("TEST", "%s", json.c_str());
+    TEST_ASSERT_NOT_EQUAL(
+        std::string::npos,
+        json.find(
+            "\"control_unit_id\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\""));
+}
+
+extern "C" void
+when_passed_empty_string_composeStatusRequest_returns_empty_string(void) {
+    std::string json = JsonParser::composeStatusRequest("");
+    TEST_ASSERT_EQUAL_STRING("", json.c_str());
+}
+
+extern "C" void
+when_given_valid_json_parseStatusResponse_returns_correct_response(void) {
+    std::string json = R"({ 
+  "sensor_unit_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "in_transit" 
+  })";
+
+    std::vector<SensorConnectRequest> request =
+        JsonParser::parseStatusResponse(json);
+    TEST_ASSERT_EQUAL_UINT(1, request.size());
+    TEST_ASSERT_TRUE(request.at(0).request == requestType::CONNECT);
+    TEST_ASSERT_EQUAL_STRING("550e8400-e29b-41d4-a716-446655440000", request.at(0).sensorUuid->toString().c_str());    
+    }
+
+    extern "C" void
+when_given_valid_delivered_parseStatusResponse_returns_disconnect_response(void) {
+    std::string json = R"({ 
+  "sensor_unit_id": "550e8400-e29b-41d4-a716-446655440000",
+  "status": "delivered" 
+  })";
+
+    std::vector<SensorConnectRequest> request =
+        JsonParser::parseStatusResponse(json);
+    TEST_ASSERT_EQUAL_UINT(1, request.size());
+    TEST_ASSERT_TRUE(request.at(0).request == requestType::DISCONNECT);
+    TEST_ASSERT_EQUAL_STRING("550e8400-e29b-41d4-a716-446655440000", request.at(0).sensorUuid->toString().c_str());    
+    }
+
+    extern "C" void
+when_given_invalid_json_parseStatusResponse_returns_empty_vector(void) {
+    std::string invalidJson = R"({ 
+  "sensor_unit_id": "550e8400-e29b-41d4-a716-446655440000",
+  })";
+    std::vector<SensorConnectRequest> request =
+        JsonParser::parseStatusResponse(invalidJson);
+    TEST_ASSERT_EQUAL_UINT(0, request.size());
+
+}
 
 extern "C" void
 when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots(
@@ -49,7 +105,7 @@ when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_jso
 
     // Construct an object to test
     std::string controlunit_uuid = "f47ac10b-58cc-4372-a567-0e02b2c3d479";
-    
+
     std::map<time_t, std::vector<ca_sensorunit_snapshot>> readings;
 
     time_t ts1 = 1726995600;
@@ -62,20 +118,32 @@ when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_jso
 
     readings[ts2] = {{uuid1, ts2, 22.6, 45.1}, {uuid2, ts2, 21.9, 46.8}};
 
-    std::string json = JsonParser::composeGroupedReadings(readings, controlunit_uuid);
+    std::string json =
+        JsonParser::composeGroupedReadings(readings, controlunit_uuid);
 
     ESP_LOGD("TEST", "%s", json.c_str());
     // check that the values match
     TEST_ASSERT_NOT_EQUAL(0, json.length());
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"control_unit_id\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\""));
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"timestamp\":1726995600") );
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"timestamp\":1726995605") );
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"sensor_unit_id\":\"550e8400-e29b-41d4-a716-446655440000\"") );
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"sensor_unit_id\":\"123e4567-e89b-12d3-a456-426614174000\"") );
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"temperature\":22.5") );
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"humidity\":45.2") );
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"temperature\":21.9") );
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"humidity\":46.8") );
+    TEST_ASSERT_NOT_EQUAL(
+        std::string::npos,
+        json.find(
+            "\"control_unit_id\":\"f47ac10b-58cc-4372-a567-0e02b2c3d479\""));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos,
+                          json.find("\"timestamp\":1726995600"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos,
+                          json.find("\"timestamp\":1726995605"));
+    TEST_ASSERT_NOT_EQUAL(
+        std::string::npos,
+        json.find(
+            "\"sensor_unit_id\":\"550e8400-e29b-41d4-a716-446655440000\""));
+    TEST_ASSERT_NOT_EQUAL(
+        std::string::npos,
+        json.find(
+            "\"sensor_unit_id\":\"123e4567-e89b-12d3-a456-426614174000\""));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"temperature\":22.5"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"humidity\":45.2"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"temperature\":21.9"));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"humidity\":46.8"));
 }
 
 extern "C" void
@@ -151,11 +219,14 @@ when_valid_sensor_response_is_given_then_composeSensorConnectResponse_returns_ex
 
     std::string expected_controlunit_uuid =
         "\"control_unit_id\":\"" + controlunit_uuid + "\"";
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find(expected_controlunit_uuid));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos,
+                          json.find(expected_controlunit_uuid));
     TEST_ASSERT_NOT_EQUAL(
         std::string::npos,
-        json.find("\"sensor_unit_id\":\"123e4567-e89b-12d3-a456-426614174000\""));
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"connection_status\":\"connected\""));
+        json.find(
+            "\"sensor_unit_id\":\"123e4567-e89b-12d3-a456-426614174000\""));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos,
+                          json.find("\"connection_status\":\"connected\""));
 }
 
 extern "C" void
@@ -169,7 +240,8 @@ when_sensor_uuid_is_missing_then_composeSensorConnectResponse_sets_uuid_to_unkno
     std::string json =
         JsonParser::composeSensorConnectResponse(response, controlunit_uuid);
 
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"sensor_unit_id\":\"unknown\""));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos,
+                          json.find("\"sensor_unit_id\":\"unknown\""));
     TEST_ASSERT_NOT_EQUAL(std::string::npos,
                           json.find("\"connection_status\":\"unavailable\""));
 }
@@ -188,8 +260,10 @@ when_connection_status_is_pending_then_composeSensorConnectResponse_serializes_s
 
     TEST_ASSERT_NOT_EQUAL(
         std::string::npos,
-        json.find("\"sensor_unit_id\":\"987e6543-e21b-12d3-a456-426614174999\""));
-    TEST_ASSERT_NOT_EQUAL(std::string::npos, json.find("\"connection_status\":\"pending\""));
+        json.find(
+            "\"sensor_unit_id\":\"987e6543-e21b-12d3-a456-426614174999\""));
+    TEST_ASSERT_NOT_EQUAL(std::string::npos,
+                          json.find("\"connection_status\":\"pending\""));
 }
 
 extern "C" void
