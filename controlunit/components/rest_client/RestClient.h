@@ -35,7 +35,7 @@ class RestClient {
      * @brief Constructs a RestClient with base URL, JWT token, and timeout.
      *
      * @param base_url Base URL of the remote server.
-     * @param jwt_token JWT token for authorization (currently unused).
+     * @param jwt_token JWT token for authorization
      * @param timeout_ms Timeout for HTTPS requests in milliseconds.
      */
     RestClient(const std::string& base_url,
