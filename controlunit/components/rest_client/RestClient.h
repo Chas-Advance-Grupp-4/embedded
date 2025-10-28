@@ -21,6 +21,11 @@
 #include "freertos/FreeRTOS.h"
 #include <string>
 
+struct RestClientResponse {
+  esp_err_t err;
+  std::string payload;
+};
+
 /**
  * @class RestClient
  * @brief Lightweight HTTPS client for posting JSON data to a remote endpoint.
@@ -72,14 +77,18 @@ class RestClient {
      *
      * Constructs the full URL by appending the endpoint to the base URL,
      * sets the request method and payload, and performs the HTTP transaction.
+     * If the response body is small enough, it is read into a buffer and returned 
+     * as a string. If no body is present or an error occurs during reading, 
+     * the response string will be empty.
      * 
      * Mutex protected for safe calling from different tasks
      *
      * @param endpoint Relative path to the target endpoint.
      * @param payload JSON-formatted string to be sent in the request body.
-     * @return esp_err_t ESP_OK on success, or an error code on failure.
+     * @return RestClientResponse containing the result code, ESP_OK on success, 
+     * and response body (if any).
      */
-    esp_err_t postTo(const std::string& endpoint, const std::string& payload);
+    RestClientResponse postTo(const std::string& endpoint, const std::string& payload);
 
   private:
     std::string m_baseUrl; /**< Base URL of the remote server. */
@@ -89,6 +98,8 @@ class RestClient {
         m_client;  /**< Handle to the ESP-IDF HTTP client. */
     int m_timeout; /**< Timeout for HTTP requests in milliseconds. */
     mutable SemaphoreHandle_t m_mutex = nullptr;
+    std::string m_responseBody;
+    static esp_err_t httpEventHandler(esp_http_client_event_t *evt);
     static constexpr const char* TAG =
         "RestClient"; /**< Logging tag for ESP_LOG macros. */
 };
