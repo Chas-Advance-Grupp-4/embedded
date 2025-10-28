@@ -91,6 +91,7 @@ class RestClient {
     RestClientResponse postTo(const std::string& endpoint, const std::string& payload);
 
   private:
+  static esp_err_t httpEventHandler(esp_http_client_event_t *evt);
     std::string m_baseUrl; /**< Base URL of the remote server. */
     std::string
         m_jwtToken; /**< JWT token for authorization */
@@ -99,7 +100,6 @@ class RestClient {
     int m_timeout; /**< Timeout for HTTP requests in milliseconds. */
     mutable SemaphoreHandle_t m_mutex = nullptr;
     std::string m_responseBody;
-    static esp_err_t httpEventHandler(esp_http_client_event_t *evt);
     static constexpr const char* TAG =
         "RestClient"; /**< Logging tag for ESP_LOG macros. */
 };
