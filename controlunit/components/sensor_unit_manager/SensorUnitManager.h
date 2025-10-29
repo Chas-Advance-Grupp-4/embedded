@@ -80,6 +80,11 @@ class SensorUnitManager {
      * @brief Clears all stored sensor readings.
      */
     void clearReadings();
+    /**
+     * @brief Clears a given amount of stored sensor readings.
+     * @param amount the number of readings to clear from the buffer
+     */
+    void clearReadings(size_t amount);
 
   private:
     mutable SemaphoreHandle_t m_readingsMutex = nullptr;
