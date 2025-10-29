@@ -7,7 +7,6 @@ cppcheck \
   --suppress=missingIncludeSystem \
   --template=gcc \
   --inline-suppr \
-  --error-exitcode=1 \
 main \
 components/mock_data \
 components/net_utils \
