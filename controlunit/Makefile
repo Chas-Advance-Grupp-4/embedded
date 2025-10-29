@@ -1,5 +1,5 @@
 # Convenience commands for long build commands in this ESP-IDF project
-.PHONY: help merge build flash test testflash size
+.PHONY: help merge build flash test testflash size lint
 
 .DEFAULT_GOAL := help
 
@@ -11,6 +11,7 @@ help:
 	@echo "  make testflash   - Flash and monitor test file"
 	@echo "  make merge       - Merge compile_commands.json for Intellisense"
 	@echo "  make size        - Print Size Table for latest build"
+	@echo "  make lint        - Run cppcheck linting for controlunit folders"
 
 # Merge compile_commands.json for correct Intellisense path
 merge:
@@ -39,3 +40,6 @@ MAP_FILE := build/$(PROJECT_NAME).map
 
 size:
 	$(ESP_PYTHON) $(IDF_SIZE) $(MAP_FILE)
+
+lint:
+	bash helpers/cu_cppcheck.sh
