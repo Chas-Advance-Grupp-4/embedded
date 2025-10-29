@@ -20,16 +20,21 @@
 #pragma once
 
 /**
- * @brief Initializes Wi-Fi in dual-mode (AP + STA) and connects to the configured networks.
+ * @brief Initializes the ESP32 Wi-Fi stack in dual-mode (Access Point + Station).
  *
- * Sets up the ESP32 Wi-Fi stack in both Access Point (AP) and Station (STA) modes.
- * Configures static IP settings and WPA2 authentication for the AP interface using
- * credentials from `wifi_config.h`. Initializes the STA interface with SSID and password,
- * and attempts to connect to the external network.
+ * This function sets up the ESP32 Wi-Fi stack in both Access Point (AP) and Station (STA) modes.
+ * It restores any saved Wi-Fi configuration from NVS using `esp_wifi_restore()` and initializes
+ * the network interfaces and event loop.
  *
- * Registers event handlers for IP acquisition and disconnection, and uses FreeRTOS
- * event groups to wait for successful STA connection.
+ * For the AP interface, it configures a static IP address, gateway, and netmask, and sets up WPA2
+ * authentication using credentials defined in `wifi_config.h`. The STA interface is configured with
+ * SSID and password, and attempts to connect to the external network.
  *
- * This function blocks until the STA interface has acquired an IP address.
+ * Event handlers are registered for IP acquisition, connection, and disconnection events.
+ * FreeRTOS event groups are used to wait for successful STA connection, and IP information is logged
+ * upon acquisition.
+ *
+ * This function is intended to be called only once during system startup.
+ * It blocks until the STA interface has successfully acquired an IP address.
  */
 void init_wifi();

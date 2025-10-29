@@ -15,18 +15,14 @@
 #include "TimeSyncManager.h"
 #include "wifi_config.h"
 #include "wifi_manager.h"
-#include <esp_event.h>
 #include <esp_http_server.h>
 #include <esp_log.h>
-#include <esp_netif.h>
-#include <esp_wifi.h>
 #include <nvs_flash.h>
 
 extern "C" void app_main(void) {
     /// Wait for monitor so we don't miss first part of the log
     vTaskDelay(pdMS_TO_TICKS(500));
     nvs_flash_init();
-    esp_wifi_restore();
     init_wifi();
 
     static TimeSyncManager timeSyncManager;
@@ -34,8 +30,10 @@ extern "C" void app_main(void) {
 
     static SensorUnitManager sensorUnitManager;
     sensorUnitManager.init();
-    // Connect Sensor Unit manually
+
+#ifdef MANUALLY_ADD_SENSORUNIT_FOR_TESTING
     sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
+#endif
 
     static RestServer server(
         CONTROL_UNIT_PORT, timeSyncManager, sensorUnitManager);
@@ -44,16 +42,23 @@ extern "C" void app_main(void) {
 
     static RestClient client(CLIENT_URL, SECRET_JWT);
     client.init();
-    client.postTo("/post", "{\"content\":\"Hello from ESP32\"}");
-    static ControlUnitManager manager(sensorUnitManager);
+
+    #ifdef CONTROL_UNIT_ID
+    static ControlUnitManager controlUnitManager(sensorUnitManager, CONTROL_UNIT_ID);
+    #else
+    static ControlUnitManager controlUnitManager(sensorUnitManager);
+    #endif
+
     vTaskDelay(pdMS_TO_TICKS(500));
 
-    static MockDataGenerator mockdataGenerator(manager, 5'000'000);
+#ifdef GENERATE_MOCKED_SENSOR_DATA
+    static MockDataGenerator mockdataGenerator(controlUnitManager, 5'000'000);
     mockdataGenerator.start();
+#endif
 
     vTaskDelay(pdMS_TO_TICKS(200));
 
-    static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
+    static ReadingsDispatcher dispatcher(client, controlUnitManager, 30'000'000);
     dispatcher.start();
 
     vTaskDelay(pdMS_TO_TICKS(200));
@@ -61,11 +66,13 @@ extern "C" void app_main(void) {
         client, sensorUnitManager, 8'000'000, "Uuid");
     statusPoller.start();
 
-    // vTaskDelay(pdMS_TO_TICKS(60000));
-    // ESP_LOGI("Main", "Removing Sensor Unit");
-    // sensorUnitManager.removeUnit(Uuid(TEST_SENSOR_UNIT_ID));
+#ifdef REMOVE_AND_ADD_SENSORUNIT_WITH_DELAY_FOR_TESTING
+    vTaskDelay(pdMS_TO_TICKS(60000));
+    ESP_LOGI("Main", "Removing Sensor Unit");
+    sensorUnitManager.removeUnit(Uuid(TEST_SENSOR_UNIT_ID));
 
-    // vTaskDelay(pdMS_TO_TICKS(30000));
-    // ESP_LOGI("Main", "Adding Sensor Unit");
-    // sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
+    vTaskDelay(pdMS_TO_TICKS(30000));
+    ESP_LOGI("Main", "Adding Sensor Unit");
+    sensorUnitManager.addUnit(Uuid(TEST_SENSOR_UNIT_ID));
+#endif
 }
