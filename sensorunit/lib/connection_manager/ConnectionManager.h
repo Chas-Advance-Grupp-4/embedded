@@ -90,13 +90,13 @@ class ConnectionManager {
     bool          connectToWiFi(const char* ssid);
     void          scanForUnits(const char* prefix = "CU-");
     void          tryToConnectControlUnit();
+    const char*                  m_controlUnitPassword; /**< Control Unit Password */
+    RestClient&                  m_restClient;     /**< Reference to Rest Client */
     const char*   m_sensorUnitId;     /**< Sensor Unit UUID */
     bool          m_isPaired;         /**< true if Sensor Unit is paired*/
     unsigned long m_latestScan{0};    /**< Latest scan. Used by connect to rescan for units */
     unsigned long m_timeoutMs{10000}; /**< Timeout in Ms for WiFi connection */
     etl::vector<connection_types::cu_candidate, 8>
-                                 m_candidateSsids; /**< Vector with SSID candidates. Max nr is 8 */
-    RestClient&                  m_restClient;     /**< Reference to Rest Client */
-    const char*                  m_controlUnitPassword; /**< Control Unit Password */
+    m_candidateSsids; /**< Vector with SSID candidates. Max nr is 8 */
     static constexpr const char* TAG = "ConnectionManager";
 };
