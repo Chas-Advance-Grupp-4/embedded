@@ -10,7 +10,8 @@ help:
 	@echo "  make token       - Generate a JWT token in the terminal to be copied to secret config file"
 
 id:
-	touch control_unit_id
+	@printf "00000000-0000-0000-0000-000000000000" > control_unit_id
+	@echo "control_unit_id created. Paste your Control Unit Id into the file"
 
 # Generate a secret.key file
 key:
