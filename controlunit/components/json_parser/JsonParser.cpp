@@ -86,8 +86,42 @@ JsonParser::parseStatusResponse(const std::string& json) {
     ESP_LOGI(TAG, "Received backend command: Sensor ID %s ", sensorId->toString().c_str());
     ESP_LOGI(TAG, "Received backend command: %s ", requestString.c_str());
 
+    cJSON_Delete(root);
     return result;
 }
+
+size_t JsonParser::parseBackendReadingsResponse(const std::string& json){
+    cJSON* root = cJSON_Parse(json.c_str());
+    if (!root) {
+        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
+        return 0;
+    }
+    cJSON* statusItem = cJSON_GetObjectItem(root, "status");
+    if (!cJSON_IsString(statusItem) || !statusItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'status'");
+        cJSON_Delete(root);
+        return 0;
+    }
+    std::string status = statusItem->valuestring;
+
+    if (status != "ok") {
+        ESP_LOGW(TAG, "Returned 'status' not ok, status: %s", status.c_str());
+        cJSON_Delete(root);
+        return 0;
+    }
+
+    cJSON* savedItem = cJSON_GetObjectItem(root, "saved");
+    if (!cJSON_IsNumber(savedItem) || savedItem->valuedouble < 0) {
+        ESP_LOGE(TAG, "Missing or invalid 'saved'");
+        cJSON_Delete(root);
+        return 0;
+    }
+
+    size_t savedReadings = static_cast<size_t>(savedItem->valuedouble);
+    cJSON_Delete(root);
+    return savedReadings;
+}
+
 
 std::vector<ca_sensorunit_snapshot>
 JsonParser::parseSensorSnapshotGroup(const std::string& json) {

@@ -73,3 +73,19 @@ void SensorUnitManager::clearReadings() {
         xSemaphoreGive(m_readingsMutex);
     }
 }
+
+void SensorUnitManager::clearReadings(size_t amount) {
+    ESP_LOGI(TAG, "Clearing %zu readings, mutex protected", amount);
+    if (xSemaphoreTake(m_readingsMutex, portMAX_DELAY) == pdTRUE) {
+        if (amount > m_all_readings.size()) {
+            ESP_LOGW(TAG, "Trying to delete %zu readings but only %zu present buffer", amount, m_all_readings.size());
+            ESP_LOGI(TAG, "Clearing buffer");
+            m_all_readings.clear();
+        } else {
+            ESP_LOGI(TAG, "Clearing %zu readings", amount);
+            m_all_readings.erase(m_all_readings.begin(), m_all_readings.begin() + amount);
+        }
+        ESP_LOGI(TAG, "Remaining readings: %zu", m_all_readings.size());
+        xSemaphoreGive(m_readingsMutex);
+    }
+}

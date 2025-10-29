@@ -30,12 +30,17 @@ void when_storing_multiple_readings_with_same_timestamp_then_grouped_together(
 void when_storing_readings_with_different_timestamps_then_grouped_separately(
     void);
 void after_clearing_readings_grouped_readings_is_empty(void);
+void after_clearing_one_reading_grouped_readings_contains_correct_amount(void);
 // JsonParser
 void when_passed_a_uuid_composeStatusRequest_generates_valid_json(void);
 void when_passed_empty_string_composeStatusRequest_returns_empty_string(void);
 void when_given_valid_json_parseStatusResponse_returns_correct_response(void);
 void when_given_valid_delivered_parseStatusResponse_returns_disconnect_response(void);
 void when_given_invalid_json_parseStatusResponse_returns_empty_vector(void);
+void when_given_valid_json_parseBackendReadingsResponse_returns_correct_value(void);
+void when_given_invalid_json_parseBackendReadingsResponse_returns_zero(void);
+void when_status_not_ok_parseBackendReadingsResponse_returns_zero(void);
+
 void when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots(
     void);
 void when_grouped_readings_are_given_then_composeGroupedReadings_returns_expected_json(
@@ -89,6 +94,7 @@ extern "C" void app_main() {
     RUN_TEST(
         when_storing_readings_with_different_timestamps_then_grouped_separately);
     RUN_TEST(after_clearing_readings_grouped_readings_is_empty);
+    RUN_TEST(after_clearing_one_reading_grouped_readings_contains_correct_amount);
 
     LOG_TEST_GROUP("JsonParser");
     RUN_TEST(when_passed_a_uuid_composeStatusRequest_generates_valid_json);
@@ -96,6 +102,9 @@ extern "C" void app_main() {
     RUN_TEST(when_given_valid_json_parseStatusResponse_returns_correct_response);
     RUN_TEST(when_given_valid_delivered_parseStatusResponse_returns_disconnect_response);
     RUN_TEST(when_given_invalid_json_parseStatusResponse_returns_empty_vector);
+    RUN_TEST(when_given_valid_json_parseBackendReadingsResponse_returns_correct_value);
+    RUN_TEST(when_given_invalid_json_parseBackendReadingsResponse_returns_zero);
+    RUN_TEST(when_status_not_ok_parseBackendReadingsResponse_returns_zero);
     RUN_TEST(
         when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots);
     RUN_TEST(

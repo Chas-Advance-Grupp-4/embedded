@@ -135,3 +135,18 @@ extern "C" void after_clearing_readings_grouped_readings_is_empty(void) {
     auto grouped_after = manager.getGroupedReadings();
     TEST_ASSERT_EQUAL(0, grouped_after.size());
 }
+
+extern "C" void after_clearing_one_reading_grouped_readings_contains_correct_amount(void) {
+    SensorUnitManager manager;
+    manager.init();
+    manager.addUnit(Uuid{"abcde"});
+    manager.storeReading(makeSnapshot("qwe", 1000, 25, 50));
+    manager.storeReading(makeSnapshot("qwe", 2000, 30, 60));
+
+    auto grouped_before = manager.getGroupedReadings();
+    TEST_ASSERT_EQUAL_UINT(2, grouped_before.size());
+
+    manager.clearReadings(1);
+    auto grouped_after = manager.getGroupedReadings();
+    TEST_ASSERT_EQUAL_UINT(1, grouped_after.size());
+}
