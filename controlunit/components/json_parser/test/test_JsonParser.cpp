@@ -67,6 +67,27 @@ when_given_invalid_json_parseStatusResponse_returns_empty_vector(void) {
 
 }
 
+extern "C" void when_given_valid_json_parseBackendReadingsResponse_returns_correct_value(void) {
+    std::string json = R"({"status":"ok","saved":6})";
+    size_t savedReadings = JsonParser::parseBackendReadingsResponse(json);
+    TEST_ASSERT_EQUAL_UINT(6, savedReadings);
+
+}
+
+extern "C" void when_given_invalid_json_parseBackendReadingsResponse_returns_zero(void) {
+    std::string json = R"({"status":"ok",)";
+    size_t savedReadings = JsonParser::parseBackendReadingsResponse(json);
+    TEST_ASSERT_EQUAL_UINT(0, savedReadings);
+
+}
+
+extern "C" void when_status_not_ok_parseBackendReadingsResponse_returns_zero(void) {
+    std::string json = R"({"status":"error","saved":12})";
+    size_t savedReadings = JsonParser::parseBackendReadingsResponse(json);
+    TEST_ASSERT_EQUAL_UINT(0, savedReadings);
+}
+
+
 extern "C" void
 when_readings_are_present_then_parseSensorSnapshotGroup_returns_all_snapshots(
     void) {
