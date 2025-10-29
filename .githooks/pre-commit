@@ -108,7 +108,11 @@ if [ "$REPO_NAME" = "embedded" ]; then
 
   if git diff --cached --name-only | grep -q '^controlunit/'; then
   	echo "Running cppcheck for controlunit..."
-  	bash "$REPO_ROOT/controlunit/helpers/cu_cppcheck.sh"
+	cd "$REPO_ROOT/controlunit" || {
+      echo "Failed to enter controlunit directory"
+      exit 1
+    }
+  	bash helpers/cu_cppcheck.sh
 	if [ $? -ne 0 ]; then
       echo "Cppcheck failed for controlunit. Commit aborted."
       exit 1
@@ -117,7 +121,11 @@ if [ "$REPO_NAME" = "embedded" ]; then
 
   if git diff --cached --name-only | grep -q '^sensorunit/'; then
     echo "Running cppcheck for sensorunit..."
-    bash "$REPO_ROOT/sensorunit/helpers/su_cppcheck.sh"
+	cd "$REPO_ROOT/sensorunit" || {
+      echo "Failed to enter sensorunit directory"
+      exit 1
+    }
+    bash helpers/su_cppcheck.sh
 	if [ $? -ne 0 ]; then
       echo "Cppcheck failed for sensorunit. Commit aborted."
       exit 1
