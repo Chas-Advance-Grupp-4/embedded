@@ -73,15 +73,22 @@ void ReadingDispatchTask::run() {
         std::string json = JsonParser::composeGroupedReadings(
             m_manager.sensorManager.getGroupedReadings(),
             m_manager.getControlunitUuidString());
-        RestClientResponse response = m_httpClient.postTo("/api/v1/control-unit", json);
+        RestClientResponse response =
+            m_httpClient.postTo("/api/v1/control-unit", json);
         if (response.err != ESP_OK) {
             ESP_LOGW(TAG, "POST to /api/v1/control-unit failed");
         } else {
-            ESP_LOGI(TAG, "Successful posting. Clearing readings buffer");
-            // NOTE: We need to check number of readings posted and
-            // proved a clearReadings(int amount) to avoid
-            // losing readings if RestServer posts while dispatching
-            m_manager.sensorManager.clearReadings();
+            size_t savedReadings =
+                JsonParser::parseBackendReadingsResponse(response.payload);
+            if (savedReadings == 0) {
+                ESP_LOGW(TAG, "Successful posting but saved readings 0");
+            } else {
+                ESP_LOGI(
+                    TAG,
+                    "Successful posting. Clearing %zu readings from buffer",
+                    savedReadings);
+                m_manager.sensorManager.clearReadings(savedReadings);
+            }
         }
     }
 }
