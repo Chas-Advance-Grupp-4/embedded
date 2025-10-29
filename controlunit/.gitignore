@@ -5,3 +5,4 @@ wifi_config.h
 secret.key
 *.jwt
 control_unit_id
+cppcheck_output.txt
