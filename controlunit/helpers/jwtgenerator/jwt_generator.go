@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -15,12 +16,19 @@ func main() {
 		panic(err)
 	}
 
+	unitIdBytes, err := os.ReadFile("control_unit_id")
+	if err != nil {
+		panic(err)
+	}
+	unitId := strings.TrimSpace(string(unitIdBytes)) // Ingen base64!
+
 	// Create claims
 	claims := jwt.MapClaims{
-		"sub":  "controlunits",
-		"role": "sensorgateway",
-		"iat":  time.Now().Unix(),
-		"exp":  time.Now().Add(30 * time.Minute).Unix(),
+		"sub":     "controlunits",
+		"role":    "sensorgateway",
+		"unit_id": unitId,
+		"iat":     time.Now().Unix(),
+		"exp":     time.Now().Add(365 * 24 * time.Hour).Unix(),
 	}
 
 	// Create token

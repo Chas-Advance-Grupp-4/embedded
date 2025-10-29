@@ -35,6 +35,43 @@
 class JsonParser {
   public:
     /**
+     * @brief Composes a JSON-formatted status request containing the control
+     * unit identifier.
+     *
+     * Example output:
+     * @code
+     * {
+     *   "control_unit_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+     * }
+     * @endcode
+     *
+     * @param controlUnitId A non-empty string representing the UUID of the
+     * control unit.
+     * @return A JSON string containing the control unit ID, or an empty string
+     * if input is empty.
+     */
+    static std::string composeStatusRequest(const std::string& controlUnitId);
+
+    /**
+     * @brief Parses a JSON-formatted status response and extracts a sensor
+     * connection command.   
+     *
+     * Note: This implementation only handles a single command per response.
+     * Future versions may support arrays of commands.
+     *
+     * Accepted status values:
+     * - `"in_transit"`returns `CONNECT`
+     * - `"delivered"` returns `DISCONNECT`
+     * - Any other value returns `DISCONNECT`
+     *
+     * @param json A JSON string containing the backend command.
+     * @return A vector of `SensorConnectRequest` objects. Empty if parsing
+     * fails or fields are invalid.
+     */
+    static std::vector<SensorConnectRequest>
+    parseStatusResponse(const std::string& json);
+
+    /**
      * @brief Parses a JSON string containing grouped sensor snapshots.
      * @param json JSON-formatted string representing sensor readings.
      * @return Vector of parsed sensor snapshots.

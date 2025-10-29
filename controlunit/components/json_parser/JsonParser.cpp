@@ -27,6 +27,68 @@
 
 static const char* TAG = "JsonParser";
 
+std::string JsonParser::composeStatusRequest(const std::string& controlUnitId) {
+    if (controlUnitId.empty()) {
+        return {};
+    }
+    cJSON* root = cJSON_CreateObject();
+
+    // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
+    cJSON_AddStringToObject(root, "control_unit_id", controlUnitId.c_str());
+
+    char*       jsonStr = cJSON_PrintUnformatted(root);
+    std::string result(jsonStr);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+    return result;
+}
+
+std::vector<SensorConnectRequest>
+JsonParser::parseStatusResponse(const std::string& json) {
+
+    std::vector<SensorConnectRequest> result;
+    cJSON* root = cJSON_Parse(json.c_str());
+    if (!root) {
+        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
+        return result;
+    }
+
+    // Simplified - future implementations should loop through an array of commands
+    // This version only ever does one push_back to result vector 
+    cJSON* sensorIdItem = cJSON_GetObjectItem(root, "sensor_unit_id");
+    if (!cJSON_IsString(sensorIdItem) || !sensorIdItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'sensor_unit_id'");
+        cJSON_Delete(root);
+        return result;
+    }
+    std::shared_ptr<Uuid> sensorId =
+        std::make_shared<Uuid>(sensorIdItem->valuestring);
+  
+    cJSON* statusItem = cJSON_GetObjectItem(root, "status");
+    if (!cJSON_IsString(statusItem) || !statusItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'status'");
+        cJSON_Delete(root);
+        return result;
+    }
+    std::string requestString = statusItem->valuestring;
+    requestType      request;
+    if (requestString == "in_transit") {
+        request = requestType::CONNECT;
+    } else if (requestString == "delivered") {
+        request = requestType::DISCONNECT;
+    } else {
+        request = requestType::DISCONNECT;
+    }
+    std::string token {};   // Token is currently not used
+    SensorConnectRequest command ( sensorId, request, token );
+    result.push_back(command);
+
+    ESP_LOGI(TAG, "Received backend command: Sensor ID %s ", sensorId->toString().c_str());
+    ESP_LOGI(TAG, "Received backend command: %s ", requestString.c_str());
+
+    return result;
+}
+
 std::vector<ca_sensorunit_snapshot>
 JsonParser::parseSensorSnapshotGroup(const std::string& json) {
     std::vector<ca_sensorunit_snapshot> snapshots;

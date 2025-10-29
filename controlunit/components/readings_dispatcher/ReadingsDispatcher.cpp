@@ -47,12 +47,6 @@ void ReadingsDispatcher::stop() {
     // Task not stopped immediately. Can be added if necessary
 }
 
-// ! restart not yet implemented
-// esp_err_t ReadingsDispatcher::restart(uint64_t new_interval_us) {
-//     if (!m_trigger) return ESP_ERR_INVALID_STATE;
-//     return m_trigger->restart(new_interval_us);
-// }
-
 ReadingDispatchTask::ReadingDispatchTask(RestClient&         client,
                                          ControlUnitManager& manager)
     : m_httpClient{client}, m_manager{manager}, m_taskHandle{nullptr} {}
@@ -79,7 +73,16 @@ void ReadingDispatchTask::run() {
         std::string json = JsonParser::composeGroupedReadings(
             m_manager.sensorManager.getGroupedReadings(),
             m_manager.getControlunitUuidString());
-        m_httpClient.postTo("/api/v1/control-unit", json);
+        RestClientResponse response = m_httpClient.postTo("/api/v1/control-unit", json);
+        if (response.err != ESP_OK) {
+            ESP_LOGW(TAG, "POST to /api/v1/control-unit failed");
+        } else {
+            ESP_LOGI(TAG, "Successful posting. Clearing readings buffer");
+            // NOTE: We need to check number of readings posted and
+            // proved a clearReadings(int amount) to avoid
+            // losing readings if RestServer posts while dispatching
+            m_manager.sensorManager.clearReadings();
+        }
     }
 }
 

@@ -11,6 +11,7 @@
 #include "ReadingsDispatcher.h"
 #include "RestClient.h"
 #include "RestServer.h"
+#include "SensorUnitLinkSyncer.h"
 #include "TimeSyncManager.h"
 #include "wifi_config.h"
 #include "wifi_manager.h"
@@ -54,6 +55,11 @@ extern "C" void app_main(void) {
 
     static ReadingsDispatcher dispatcher(client, manager, 30'000'000);
     dispatcher.start();
+
+    vTaskDelay(pdMS_TO_TICKS(200));
+    static SensorUnitLinkSyncer statusPoller(
+        client, sensorUnitManager, 8'000'000, "Uuid");
+    statusPoller.start();
 
     // vTaskDelay(pdMS_TO_TICKS(60000));
     // ESP_LOGI("Main", "Removing Sensor Unit");
