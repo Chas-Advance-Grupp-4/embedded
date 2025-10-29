@@ -94,31 +94,36 @@ if [ -d "mobile" ]; then
   cd - > /dev/null || exit 1
 fi
 
-# --- Embedded placeholder ---
-if [ -d "embedded" ]; then
+# --- Embedded ---
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
+REPO_ROOT=$(git rev-parse --show-toplevel)
+if [ "$REPO_NAME" = "embedded" ]; then
   echo "Embedded detected. Tests/checks can be added here later."
+  
   # Allow commit if only cppcheck scripts or this hook are staged
   if git diff --cached --name-only | grep -qE '^(\.githooks/pre-commit|controlunit/helpers/cu_cppcheck\.sh|sensorunit/helpers/su_cppcheck\.sh)$'; then
   echo "Only cppcheck scripts or hook modified. Commit allowed."
   exit 0
-  fi  
+  fi 
 
-  echo "Running cppcheck for controlunit..."
-  cd controlunit
-  bash helpers/cu_cppcheck.sh
-  if [ $? -ne 0 ]; then
-    echo "Cppcheck failed for controlunit. Commit aborted."
-    exit 1
+  if git diff --cached --name-only | grep -q '^controlunit/'; then
+  	echo "Running cppcheck for controlunit..."
+  	bash "$REPO_ROOT/controlunit/helpers/cu_cppcheck.sh"
+	if [ $? -ne 0 ]; then
+      echo "Cppcheck failed for controlunit. Commit aborted."
+      exit 1
+    fi
   fi
-  cd ..
 
-  echo "Running cppcheck for sensorunit..."
-  cd sensorunit
-  bash helpers/su_cppcheck.sh
-  if [ $? -ne 0 ]; then
-    echo "Cppcheck failed for sensorunit. Commit aborted."
-    exit 1
+  if git diff --cached --name-only | grep -q '^sensorunit/'; then
+    echo "Running cppcheck for sensorunit..."
+    bash "$REPO_ROOT/sensorunit/helpers/su_cppcheck.sh"
+	if [ $? -ne 0 ]; then
+      echo "Cppcheck failed for sensorunit. Commit aborted."
+      exit 1
+    fi
   fi
+
 fi
 
 echo "All pre-commit checks passed."
