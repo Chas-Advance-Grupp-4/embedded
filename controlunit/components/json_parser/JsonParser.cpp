@@ -77,6 +77,9 @@ JsonParser::parseStatusResponse(const std::string& json) {
     } else if (requestString == "delivered") {
         request = requestType::DISCONNECT;
     } else {
+        // possible other values also triggering DISCONNECT for know
+        // logic for deciding and sending connect/disconnect should be in backend
+        ESP_LOGI(TAG, "Generic request interpreted as DISCONNECT, status: %s", requestString.c_str());
         request = requestType::DISCONNECT;
     }
     std::string token {};   // Token is currently not used
@@ -182,11 +185,11 @@ JsonParser::parseSensorSnapshotGroup(const std::string& json) {
 
 std::string JsonParser::composeGroupedReadings(
     const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings,
-    const std::string& controlunit_uuid) {
+    const std::string& controlUnitId) {
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(root, "control_unit_id", controlunit_uuid.c_str());
+    cJSON_AddStringToObject(root, "control_unit_id", controlUnitId.c_str());
 
     // Timestamp Groups
     cJSON* timestampGroups = cJSON_CreateArray();
@@ -275,11 +278,11 @@ JsonParser::parseSensorConnectRequest(const std::string& json,
 
 std::string
 JsonParser::composeSensorConnectResponse(const SensorConnectResponse& response,
-                                         const std::string& control_unit_id) {
+                                         const std::string& controlUnitId) {
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(root, "control_unit_id", control_unit_id.c_str());
+    cJSON_AddStringToObject(root, "control_unit_id", controlUnitId.c_str());
 
     // Sensor UUID
     if (response.sensorUuid && response.sensorUuid->isValid()) {
@@ -354,11 +357,11 @@ std::string JsonParser::composeTimestampPayload(time_t now) {
 
 std::string
 JsonParser::composeErrorResponse(const std::string& message,
-                                 const std::string& control_unit_id) {
+                                 const std::string& controlUnitId) {
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(root, "control_unit_id", control_unit_id.c_str());
+    cJSON_AddStringToObject(root, "control_unit_id", controlUnitId.c_str());
     cJSON_AddStringToObject(root, "status", "error");
     cJSON_AddStringToObject(root, "message", message.c_str());
 

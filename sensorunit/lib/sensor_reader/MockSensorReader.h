@@ -15,7 +15,7 @@
 
 class MockSensorReader : public ISensorReader {
   public:
-    MockSensorReader(float temperature = 22.5f, float humidity = 45.0f);
+    explicit MockSensorReader(float temperature = 22.5f, float humidity = 45.0f);
     RawSensorReading read() override; 
   private:
     float m_temperature;

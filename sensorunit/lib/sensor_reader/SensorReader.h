@@ -30,7 +30,7 @@ class SensorReader : public ISensorReader {
      * 
      * @param dht11Pin The Arduino Digital Pin the sensor is connected to. Default value = 2
      */
-    SensorReader(int dht11Pin = DHT11_PIN);
+    explicit SensorReader(int dht11Pin = DHT11_PIN);
     /**
      * @brief The sensor needs to be initialized in setup using this function
      */

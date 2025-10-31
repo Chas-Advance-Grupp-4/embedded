@@ -7,9 +7,6 @@
 # Ignore VS Code config folder
 .vscode/
 
-# Ignore githooks
-.githooks/
-
 # Ignore platformIO folder including local dependencies and build files
 .pio/
 

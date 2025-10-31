@@ -50,8 +50,8 @@ class SensorUnitLinkSyncer {
      * and interval.
      *
      * @param client Reference to the REST client used for posting data.
-     * @param sensorUnitManager Reference to the control unit manager providing sensor
-     * data.
+     * @param sensorUnitManager Reference to the control unit manager providing
+     * sensor data.
      * @param intervalUs Timer interval in microseconds.
      * @param controlUnitId The Control Unit Uuid of this particular unit.
      * Included in the HTTP POST
@@ -59,7 +59,7 @@ class SensorUnitLinkSyncer {
     SensorUnitLinkSyncer(RestClient&        client,
                          SensorUnitManager& sensorUnitManager,
                          uint64_t           intervalUs,
-                         std::string        controlUnitId);
+                         const std::string& controlUnitId);
 
     /**
      * @brief Starts the Sensor Unit Link Syncer by launching the task and
@@ -82,7 +82,8 @@ class SensorUnitLinkSyncer {
   private:
     RestClient&
         m_client; /**< Reference to the REST client used for posting data. */
-    SensorUnitManager& m_sensorUnitManager; /**< Reference to the sensor unit manager. */
+    SensorUnitManager&
+        m_sensorUnitManager; /**< Reference to the sensor unit manager. */
     std::unique_ptr<SensorUnitLinkSyncTask>
         m_task; /**< Task responsible for data dispatch. */
     std::unique_ptr<SensorUnitLinkSyncTrigger>
@@ -109,9 +110,10 @@ class SensorUnitLinkSyncTask {
      * unit manager.
      *
      * @param client Reference to the REST client used for posting data.
-     * @param sensorUnitManager Reference to the sensor unit manager providing sensor
-     * @param controlUnitId Uuid of the ControlUnit. Important to match with unit_id 
-     * in JWT token 
+     * @param sensorUnitManager Reference to the sensor unit manager providing
+     * sensor
+     * @param controlUnitId Uuid of the ControlUnit. Important to match with
+     * unit_id in JWT token
      */
     SensorUnitLinkSyncTask(RestClient&        client,
                            SensorUnitManager& sensorUnitManager,
@@ -154,8 +156,8 @@ class SensorUnitLinkSyncTask {
 
     RestClient& m_httpClient; /**< Reference to the REST client used for HTTP
                                  communication. */
-    SensorUnitManager& m_sensorUnitManager; /**< Reference to the sensor unit manager
-                                      providing sensor data. */
+    SensorUnitManager& m_sensorUnitManager; /**< Reference to the sensor unit
+                                      manager providing sensor data. */
     std::string  m_controlUnitId;
     TaskHandle_t m_taskHandle; /**< Handle to the created FreeRTOS task. */
 

@@ -1,9 +1,10 @@
 /**
  * @file SensorUnitManager.cpp
- * @brief Implementation of SensorUnitManager for managing sensor units and their readings.
+ * @brief Implementation of SensorUnitManager for managing sensor units and
+ * their readings.
  *
- * Defines the logic for adding/removing units, storing readings, and grouping them
- * for backend dispatch. Uses ESP-IDF logging for diagnostics.
+ * Defines the logic for adding/removing units, storing readings, and grouping
+ * them for backend dispatch. Uses ESP-IDF logging for diagnostics.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
@@ -13,7 +14,7 @@
 #include "SensorUnitManager.h"
 #include <esp_log.h>
 
-void SensorUnitManager::init() {
+void SensorUnitManager::init() const {
     ESP_LOGI(TAG, "Initializing Sensor Unit Manager");
     m_readingsMutex = xSemaphoreCreateMutex();
     if (m_readingsMutex == nullptr) {
@@ -78,12 +79,17 @@ void SensorUnitManager::clearReadings(size_t amount) {
     ESP_LOGI(TAG, "Clearing %zu readings, mutex protected", amount);
     if (xSemaphoreTake(m_readingsMutex, portMAX_DELAY) == pdTRUE) {
         if (amount > m_all_readings.size()) {
-            ESP_LOGW(TAG, "Trying to delete %zu readings but only %zu present buffer", amount, m_all_readings.size());
+            ESP_LOGW(
+                TAG,
+                "Trying to delete %zu readings but only %zu present buffer",
+                amount,
+                m_all_readings.size());
             ESP_LOGI(TAG, "Clearing buffer");
             m_all_readings.clear();
         } else {
             ESP_LOGI(TAG, "Clearing %zu readings", amount);
-            m_all_readings.erase(m_all_readings.begin(), m_all_readings.begin() + amount);
+            m_all_readings.erase(m_all_readings.begin(),
+                                 m_all_readings.begin() + amount);
         }
         ESP_LOGI(TAG, "Remaining readings: %zu", m_all_readings.size());
         xSemaphoreGive(m_readingsMutex);

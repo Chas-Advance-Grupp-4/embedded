@@ -1,0 +1,24 @@
+cppcheck \
+  --enable=warning,style,performance,portability \
+  --inconclusive \
+  --std=c++23 \
+  --force \
+  --quiet \
+  --suppress=missingIncludeSystem \
+  --suppress=normalCheckLevelMaxBranches \
+  --template=gcc \
+  --inline-suppr \
+  --error-exitcode=1 \
+main \
+components/mock_data \
+components/net_utils \
+components/sensor_unit_manager \
+components/sensor_unit_link_syncer \
+components/rest_client \
+components/readings_dispatcher \
+components/json_parser \
+components/control_unit_manager \
+components/connection_data \
+components/rest_server \
+components/time_sync_manager \
+components/sensor_data

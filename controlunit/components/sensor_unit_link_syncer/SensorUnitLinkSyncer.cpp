@@ -31,7 +31,7 @@
 SensorUnitLinkSyncer::SensorUnitLinkSyncer(RestClient&        client,
                                            SensorUnitManager& sensorUnitManager,
                                            uint64_t           intervalUs,
-                                           std::string        controlUnitId)
+                                           const std::string& controlUnitId)
     : m_client(client), m_sensorUnitManager(sensorUnitManager),
       m_interval(intervalUs), m_controlUnitId(controlUnitId) {}
 

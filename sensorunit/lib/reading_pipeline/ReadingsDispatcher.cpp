@@ -20,7 +20,7 @@ ReadingsDispatcher::ReadingsDispatcher(IRestClient&   restClient,
 
 bool ReadingsDispatcher::dispatch() {
     LOG_INFO(TAG, "Dispatching readings...");
-    DispatchResponse dispatchResponse;
+    DispatchResponse dispatchResponse {};
     while (m_readingBuffer.hasReadings()) {
         dispatchResponse = dispatchBatch();
         

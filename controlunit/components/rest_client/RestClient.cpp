@@ -44,8 +44,10 @@ esp_err_t RestClient::init() {
     }
 
     esp_http_client_set_header(m_client, "Content-Type", "application/json");
+
+    std::string authHeader = "Bearer " + m_jwtToken;
     esp_err_t auth_err = esp_http_client_set_header(
-        m_client, "Authorization", ("Bearer " + m_jwtToken).c_str());
+        m_client, "Authorization", authHeader.c_str());
     if (auth_err != ESP_OK) {
         ESP_LOGW(TAG,
                  "Set Authorization Header failed: %s",
@@ -95,6 +97,7 @@ RestClientResponse RestClient::postTo(const std::string& endpoint,
     std::string full_url = m_baseUrl + endpoint;
     esp_http_client_set_method(m_client, HTTP_METHOD_POST);
     esp_http_client_set_url(m_client, full_url.c_str());
+
     esp_http_client_set_post_field(m_client, payload.c_str(), payload.length());
 
     esp_err_t   err            = esp_http_client_perform(m_client);

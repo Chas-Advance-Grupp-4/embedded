@@ -84,12 +84,12 @@ class JsonParser {
     /**
      * @brief Composes a JSON string from grouped sensor readings.
      * @param readings Map of timestamp to vector of sensor snapshots.
-     * @param controlunit_uuid UUID of the control unit sending the data.
+     * @param controlUnitId UUID of the control unit sending the data.
      * @return JSON-formatted string representing the grouped readings.
      */
     static std::string composeGroupedReadings(
         const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings,
-        const std::string& controlunit_uuid);
+        const std::string& controlUnitId);
 
     /**
      * @brief Parses a sensor connection request from JSON.
@@ -103,12 +103,12 @@ class JsonParser {
     /**
      * @brief Composes a JSON response for a sensor connection.
      * @param response Response data to be sent.
-     * @param controlunit_uuid UUID of the control unit.
+     * @param controlUnitId UUID of the control unit.
      * @return JSON-formatted string representing the response.
      */
     static std::string
     composeSensorConnectResponse(const SensorConnectResponse& response,
-                                 const std::string&           controlunit_uuid);
+                                 const std::string&           controlUnitId);
 
     /**
      * @brief Parses a Connect Request from a Sensor Unit
@@ -141,10 +141,10 @@ class JsonParser {
     /**
      * @brief Composes a generic error response in JSON format. (Unused)
      * @param message Error message to include.
-     * @param controlunit_uuid UUID of the control unit.
+     * @param controlUnitId UUID of the control unit.
      * @return JSON-formatted string representing the error response.
      */
     static std::string
     composeErrorResponse(const std::string& message,
-                         const std::string& controlunit_uuid);
+                         const std::string& controlUnitId);
 };
