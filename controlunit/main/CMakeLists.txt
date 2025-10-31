@@ -12,4 +12,5 @@ idf_component_register(
         log 
         nvs_flash
         time_sync_manager
+        sensor_unit_link_syncer
 )

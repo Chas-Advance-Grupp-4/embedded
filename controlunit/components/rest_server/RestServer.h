@@ -15,8 +15,8 @@
  */
 #pragma once
 #include "BaseHandler.h"
-#include "TimeSyncManager.h"
 #include "SensorUnitManager.h"
+#include "TimeSyncManager.h"
 #include "esp_http_server.h"
 #include <memory>
 #include <vector>
@@ -35,7 +35,9 @@ class RestServer {
      *
      * Initializes server configuration and prepares handler list.
      */
-    RestServer(uint16_t port, TimeSyncManager& timeSyncManager, SensorUnitManager& sensorUnitManager);
+    RestServer(uint16_t           port,
+               TimeSyncManager&   timeSyncManager,
+               SensorUnitManager& sensorUnitManager);
     /**
      * @brief Destructor for RestServer.
      *
@@ -55,24 +57,27 @@ class RestServer {
     void stop();
 
   private:
-  /**
-   * @brief Registers a single HTTP handler with the server.
-   * @param handler Unique pointer to a BaseHandler instance.
-   */
-  void registerHandler(std::unique_ptr<BaseHandler> handler);
+    /**
+     * @brief Registers a single HTTP handler with the server.
+     * @param handler Unique pointer to a BaseHandler instance.
+     */
+    void registerHandler(std::unique_ptr<BaseHandler> handler);
 
-  /**
-   * @brief Registers all available HTTP handlers.
-   *
-   * Called internally during server startup.
-   */
-  void registerHandlers();
+    /**
+     * @brief Registers all available HTTP handlers.
+     *
+     * Called internally during server startup.
+     */
+    void registerHandlers();
 
-  httpd_handle_t m_server; /**< Handle to the ESP-IDF HTTP server instance. */
+    httpd_handle_t m_server; /**< Handle to the ESP-IDF HTTP server instance. */
     httpd_config_t m_config; /**< Configuration for the HTTP server. */
-    uint16_t m_port; /**< Port for the HTTP server */
+    uint16_t       m_port;   /**< Port for the HTTP server */
     std::vector<std::unique_ptr<BaseHandler>>
-        m_handlers; /**< List of registered route handlers. */
-    TimeSyncManager& m_timeSyncManager; /**< TimeSyncManager dependency used by TimeHandler */
-    SensorUnitManager& m_sensorUnitManager; /**< SensorUnitManager dependency used by ConnectHandler */
+                     m_handlers; /**< List of registered route handlers. */
+    TimeSyncManager& m_timeSyncManager; /**< TimeSyncManager dependency used by
+                                           TimeHandler */
+    SensorUnitManager&
+        m_sensorUnitManager; /**< SensorUnitManager dependency used by
+                                ConnectHandler and ReadingsHandler */
 };

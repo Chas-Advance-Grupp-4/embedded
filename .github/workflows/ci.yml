@@ -1,44 +1,45 @@
-# DOES NOT WORK. REMOVED UNTIL TIME PERMITS
-# name: Embedded CI Pipeline
+name: Chas Advance Group4 embedded CI Pipeline
 
-# on:
-#    push:
-#        branches: [main]
-#    pull_request:
-#        branches: [main]
-#    workflow_dispatch:
+on:
+   push:
+       branches: [main]
+   pull_request:
+       branches: [main]
+   workflow_dispatch:
 
-# jobs:
-#    controlunit-build:
-#        name: controlunit (ESP-IDF)
-#        runs-on: ubuntu-latest
-#        defaults:
-#            run:
-#                working-directory: controlunit
-#        steps:
-#            - name: Checkout repository
-#              uses: actions/checkout@v4
-#
-#            - name: Set up ESP-IDF environment
-#              uses: espressif/setup-idf@latest
-#              with:
-#                  esp_idf_version: v5.5.1
+jobs:
+   controlunit-build:
+       name: controlunit (ESP-IDF)
+       runs-on: ubuntu-latest
+       defaults:
+           run:
+               working-directory: controlunit
+       steps:
+           - name: Checkout repository
+             uses: actions/checkout@v4
 
-#            - name: Echo from controlunit
-#              run: echo "Building controlunit with ESP-IDF for ESP32-S3-Zero"
+           - name: Set up ESP-IDF environment
+             uses: espressif/install-esp-idf-action@v1
+             with:
+               version: "v5.5.1"
 
-#    sensorunit-build:
-#        name: sensorunit (PlatformIO Arduino)
-#        runs-on: ubuntu-latest
-#        defaults:
-#            run:
-#                working-directory: sensorunit
-#        steps:
-#            - name: Checkout repository
-#              uses: actions/checkout@v4
+           - name: Echo from controlunit
+             run: echo "Building controlunit with ESP-IDF for ESP32-S3-Zero"
 
-#            - name: Set up PlatformIO
-#              uses: platformio/action-core@latest
+   sensorunit-build:
+       name: sensorunit (PlatformIO Arduino)
+       runs-on: ubuntu-latest
+       defaults:
+           run:
+               working-directory: sensorunit
+       steps:
+           - name: Checkout repository
+             uses: actions/checkout@v4
 
-#            - name: Echo from sensorunit
-#              run: echo "Building sensorunit with PlatformIO for Arduino UNO R4 Wifi"
+           - name: Set up PlatformIO
+             uses: n-vr/setup-platformio-action@v1
+             with:
+               platformio-version: "6.1.18"
+
+           - name: Echo from sensorunit
+             run: echo "Building sensorunit with PlatformIO for Arduino UNO R4 Wifi"

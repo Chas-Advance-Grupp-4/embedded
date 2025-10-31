@@ -21,45 +21,6 @@ ControlUnitManager::ControlUnitManager(SensorUnitManager& sensorUnitManager,
     : sensorManager{sensorUnitManager}, m_controlunitUuid{controlunitUuid} {}
 
 /**
- * @brief Query if a driver is connected
- *
- * @return true
- * @return false
- */
-bool ControlUnitManager::isDriverConnected() {
-    return m_isDriverConnected;
-}
-
-/**
- * @brief Connect a driver to Control Unit
- *
- * TODO: implement
- */
-void ControlUnitManager::connectDriver() {}
-
-/**
- * @brief Disconnect a driver to Control Unit
- *
- * TODO: implement
- */
-void ControlUnitManager::disconnectDriver() {}
-
-/**
- * @brief Get connected driver_id
- *
- * TODO: Refactor to use UUID
- *
- * @return uint32_t
- */
-uint32_t ControlUnitManager::getDriverId() {
-    if (m_isDriverConnected) {
-        return m_driverId;
-    } else {
-        return 0;
-    }
-}
-
-/**
  * @brief Get the Control Unit UUID as a string
  *
  * @return std::string

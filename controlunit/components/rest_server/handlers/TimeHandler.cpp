@@ -1,20 +1,17 @@
 /**
- * @file HelloHandler.cpp
- * @brief Implementation of HelloHandler, a simple GET endpoint that returns a
- * greeting.
+ * @file TimeHandler.cpp
+ * @brief Implementation of GET /time endpoint
  *
- * Defines the logic for responding to HTTP GET requests with a static greeting
- * message. Inherits from GetHandler and overrides the `process()` method to
- * send a plain-text response.
- *
- * Useful for testing server availability or providing a basic health check.
+ * Has a reference to TimeSyncManager. If time is synced it sends
+ * a Unix Timestamp in JSON with key "timestamp"
  *
  * @author Erik Dahl (erik@iunderlandet.se)
- * @date 2025-10-07
+ * @date 2025-10-16
  * @copyright Copyright (c) 2025 Erik Dahl
  * @license MIT
  */
 #include "TimeHandler.h"
+#include "JsonParser.h"
 #include "esp_log.h"
 #include "time.h"
 
@@ -32,12 +29,10 @@ esp_err_t TimeHandler::process(httpd_req_t* req) {
     time_t now;
     time(&now);
     ESP_LOGI(TAG,"Control Unit timestamp: %lld", static_cast<long long>(now));    
-
-    char response[64];
-    uint32_t truncatedTimestamp = static_cast<uint32_t>(now);
-    snprintf(response, sizeof(response), "{\"timestamp\": %lu}", truncatedTimestamp);
+    
+    std::string payload = JsonParser::composeTimestampPayload(now);
     httpd_resp_set_type(req, "application/json");
-    httpd_resp_send(req, response, HTTPD_RESP_USE_STRLEN);
-    ESP_LOGI(TAG, "Sending Control Unit timestamp as uint32_t: %lu", truncatedTimestamp);
+    httpd_resp_send(req, payload.c_str(), HTTPD_RESP_USE_STRLEN);
+    ESP_LOGI(TAG, "Sending Control Unit timestamp as double: %.0f", static_cast<double>(now));
     return ESP_OK;
 }

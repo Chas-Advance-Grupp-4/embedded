@@ -1,5 +1,5 @@
 # Convenience commands for long build commands in this Arduino project
-.PHONY: help build flash test clean monitor
+.PHONY: help build flash test clean monitor lint
 
 .DEFAULT_GOAL := help
 
@@ -10,6 +10,7 @@ help:
 	@echo "  make test        - Build and flash the test file"
 	@echo "  make clean       - Clean PlatformIO cache"
 	@echo "  make monitor     - Open monitor"
+	@echo "  make lint        - run cppcheck for sensorunit folder"
 
 # build and run merge command
 build:
@@ -26,3 +27,6 @@ clean:
 
 monitor:
 	pio device monitor --raw
+
+lint:
+	bash helpers/su_cppcheck.sh

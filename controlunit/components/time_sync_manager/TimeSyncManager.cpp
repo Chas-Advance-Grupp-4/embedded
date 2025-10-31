@@ -50,7 +50,9 @@ void TimeSyncManager::start() {
     }
 
     if (retry < m_maxRetries) {
-        ESP_LOGI(TAG, "Time synced: %s", asctime(&timeinfo));
+        char time_str[64];
+        strftime(time_str, sizeof(time_str), "%c", &timeinfo);
+        ESP_LOGI(TAG, "Time synced: %s", time_str);
         enableAutoResync();
     } else {
         ESP_LOGW(TAG, "Could not sync time");
@@ -99,7 +101,9 @@ void TimeSyncManager::resync() {
     localtime_r(&now, &timeinfo);
 
     if ((timeinfo.tm_year + 1900) >= 2020) {
-        ESP_LOGI(TAG, "Resync successful: %s", asctime(&timeinfo));
+        char time_str[64];
+        strftime(time_str, sizeof(time_str), "%c", &timeinfo);
+        ESP_LOGI(TAG, "Resync successful: %s", time_str);
         ESP_LOGI(TAG, "Resync interval is set to %d ms", m_syncIntervalMs);
         m_timeSynced = true;
     } else {
@@ -108,6 +112,6 @@ void TimeSyncManager::resync() {
     }
 }
 
-bool TimeSyncManager::isTimeSynced() {
+bool TimeSyncManager::isTimeSynced() const {
     return m_timeSynced;
 }

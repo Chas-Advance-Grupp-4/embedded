@@ -12,7 +12,7 @@
  * - Handling error messages in JSON format
  *
  * Used for communication between the Control Unit both for backend services
- * and Sensor Unit. All methods are static and stateless, defined in the 
+ * and Sensor Unit. All methods are static and stateless, defined in the
  * JsonParser class.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
@@ -26,6 +26,105 @@
 #include <memory>
 
 static const char* TAG = "JsonParser";
+
+std::string JsonParser::composeStatusRequest(const std::string& controlUnitId) {
+    if (controlUnitId.empty()) {
+        return {};
+    }
+    cJSON* root = cJSON_CreateObject();
+
+    // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
+    cJSON_AddStringToObject(root, "control_unit_id", controlUnitId.c_str());
+
+    char*       jsonStr = cJSON_PrintUnformatted(root);
+    std::string result(jsonStr);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+    return result;
+}
+
+std::vector<SensorConnectRequest>
+JsonParser::parseStatusResponse(const std::string& json) {
+
+    std::vector<SensorConnectRequest> result;
+    cJSON* root = cJSON_Parse(json.c_str());
+    if (!root) {
+        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
+        return result;
+    }
+
+    // Simplified - future implementations should loop through an array of commands
+    // This version only ever does one push_back to result vector 
+    cJSON* sensorIdItem = cJSON_GetObjectItem(root, "sensor_unit_id");
+    if (!cJSON_IsString(sensorIdItem) || !sensorIdItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'sensor_unit_id'");
+        cJSON_Delete(root);
+        return result;
+    }
+    std::shared_ptr<Uuid> sensorId =
+        std::make_shared<Uuid>(sensorIdItem->valuestring);
+  
+    cJSON* statusItem = cJSON_GetObjectItem(root, "status");
+    if (!cJSON_IsString(statusItem) || !statusItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'status'");
+        cJSON_Delete(root);
+        return result;
+    }
+    std::string requestString = statusItem->valuestring;
+    requestType      request;
+    if (requestString == "in_transit") {
+        request = requestType::CONNECT;
+    } else if (requestString == "delivered") {
+        request = requestType::DISCONNECT;
+    } else {
+        // possible other values also triggering DISCONNECT for know
+        // logic for deciding and sending connect/disconnect should be in backend
+        ESP_LOGI(TAG, "Generic request interpreted as DISCONNECT, status: %s", requestString.c_str());
+        request = requestType::DISCONNECT;
+    }
+    std::string token {};   // Token is currently not used
+    SensorConnectRequest command ( sensorId, request, token );
+    result.push_back(command);
+
+    ESP_LOGI(TAG, "Received backend command: Sensor ID %s ", sensorId->toString().c_str());
+    ESP_LOGI(TAG, "Received backend command: %s ", requestString.c_str());
+
+    cJSON_Delete(root);
+    return result;
+}
+
+size_t JsonParser::parseBackendReadingsResponse(const std::string& json){
+    cJSON* root = cJSON_Parse(json.c_str());
+    if (!root) {
+        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
+        return 0;
+    }
+    cJSON* statusItem = cJSON_GetObjectItem(root, "status");
+    if (!cJSON_IsString(statusItem) || !statusItem->valuestring) {
+        ESP_LOGE(TAG, "Missing or invalid 'status'");
+        cJSON_Delete(root);
+        return 0;
+    }
+    std::string status = statusItem->valuestring;
+
+    if (status != "ok") {
+        ESP_LOGW(TAG, "Returned 'status' not ok, status: %s", status.c_str());
+        cJSON_Delete(root);
+        return 0;
+    }
+
+    cJSON* savedItem = cJSON_GetObjectItem(root, "saved");
+    if (!cJSON_IsNumber(savedItem) || savedItem->valuedouble < 0) {
+        ESP_LOGE(TAG, "Missing or invalid 'saved'");
+        cJSON_Delete(root);
+        return 0;
+    }
+
+    size_t savedReadings = static_cast<size_t>(savedItem->valuedouble);
+    cJSON_Delete(root);
+    return savedReadings;
+}
+
 
 std::vector<ca_sensorunit_snapshot>
 JsonParser::parseSensorSnapshotGroup(const std::string& json) {
@@ -86,11 +185,11 @@ JsonParser::parseSensorSnapshotGroup(const std::string& json) {
 
 std::string JsonParser::composeGroupedReadings(
     const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings,
-    const std::string& controlunit_uuid) {
+    const std::string& controlUnitId) {
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(root, "control_unit_id", controlunit_uuid.c_str());
+    cJSON_AddStringToObject(root, "control_unit_id", controlUnitId.c_str());
 
     // Timestamp Groups
     cJSON* timestampGroups = cJSON_CreateArray();
@@ -99,7 +198,7 @@ std::string JsonParser::composeGroupedReadings(
     } else {
         ESP_LOGI(
             TAG, "Composing JSON with %zu timestamp groups", readings.size());
-     }
+    }
     for (const auto& [timestamp, snapshots] : readings) {
         cJSON* groupObj = cJSON_CreateObject();
         cJSON_AddNumberToObject(
@@ -109,8 +208,9 @@ std::string JsonParser::composeGroupedReadings(
         for (const auto& snapshot : snapshots) {
             cJSON* unitObj = cJSON_CreateObject();
             if (snapshot.uuid && snapshot.uuid->isValid()) {
-                cJSON_AddStringToObject(
-                    unitObj, "sensor_unit_id", snapshot.uuid->toString().c_str());
+                cJSON_AddStringToObject(unitObj,
+                                        "sensor_unit_id",
+                                        snapshot.uuid->toString().c_str());
             } else {
                 cJSON_AddStringToObject(unitObj, "sensor_unit_id", "unknown");
             }
@@ -150,7 +250,6 @@ JsonParser::parseSensorConnectRequest(const std::string& json,
     }
 
     // UUID
-    // ? Add check if uuid is valid ?
     cJSON* uuidItem = cJSON_GetObjectItem(root, "sensor_unit_id");
     if (!cJSON_IsString(uuidItem) || !uuidItem->valuestring) {
         ESP_LOGE(TAG, "Missing or invalid 'sensor_unit_id'");
@@ -179,11 +278,11 @@ JsonParser::parseSensorConnectRequest(const std::string& json,
 
 std::string
 JsonParser::composeSensorConnectResponse(const SensorConnectResponse& response,
-                                         const std::string& control_unit_id) {
+                                         const std::string& controlUnitId) {
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(root, "control_unit_id", control_unit_id.c_str());
+    cJSON_AddStringToObject(root, "control_unit_id", controlUnitId.c_str());
 
     // Sensor UUID
     if (response.sensorUuid && response.sensorUuid->isValid()) {
@@ -206,87 +305,14 @@ JsonParser::composeSensorConnectResponse(const SensorConnectResponse& response,
     return result;
 }
 
-DriverConnectRequest
-JsonParser::parseDriverConnectRequest(const std::string& json,
-                                      requestType        type) {
-    DriverConnectRequest request;
+Uuid JsonParser::parseSensorunitConnectRequest(const std::string& json) {
 
-    cJSON* root = cJSON_Parse(json.c_str());
-    if (!root) {
-        ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
-        return request;
-    }
-
-    // DriverId
-    const cJSON* driverIdItem = cJSON_GetObjectItem(root, "driver_id");
-    if (!cJSON_IsNumber(driverIdItem)) {
-        ESP_LOGE(TAG, "Missing or invalid 'driver_id'");
-        cJSON_Delete(root);
-        return request;
-    }
-    double rawValue = driverIdItem->valuedouble;
-    if (rawValue < 0 || rawValue > std::numeric_limits<uint32_t>::max()) {
-        ESP_LOGE(TAG, "'driver_id' out of range");
-        cJSON_Delete(root);
-        return request;
-    }
-    uint32_t driverId = static_cast<uint32_t>(rawValue);
-
-    // Token
-    const cJSON* tokenItem = cJSON_GetObjectItem(root, "token");
-    if (!cJSON_IsString(tokenItem) || !tokenItem->valuestring) {
-        ESP_LOGE(TAG, "Missing or invalid 'token'");
-        cJSON_Delete(root);
-        return request;
-    }
-    std::string token{tokenItem->valuestring};
-
-    request.driverId = driverId;
-    request.token    = token;
-    request.request  = type;
-
-    cJSON_Delete(root);
-    return request;
-}
-
-std::string
-JsonParser::composeDriverConnectResponse(const DriverConnectResponse& response,
-                                         const std::string& control_unit_id) {
-
-    cJSON* root = cJSON_CreateObject();
-
-    // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(root, "control_unit_id", control_unit_id.c_str());
-
-    // Driver ID
-    if (response.driverId != 0) {
-        cJSON_AddNumberToObject(root, "driver_id", response.driverId);
-    } else {
-        ESP_LOGE(TAG, "Missing or invalid 'driver_id'");
-        cJSON_AddNullToObject(root, "driver_id");
-    }
-
-    // Connection Status
-    cJSON_AddStringToObject(root,
-                            "connection_status",
-                            connectionStatusToString(response.status).c_str());
-
-    // Convert to string and clean up
-    char*       jsonStr = cJSON_PrintUnformatted(root);
-    std::string result(jsonStr);
-    cJSON_free(jsonStr);
-    cJSON_Delete(root);
-    return result;
-}
-
-Uuid JsonParser::parseSensorunitConnectRequest(const std::string& json){
-    
     cJSON* root = cJSON_Parse(json.c_str());
     if (!root) {
         ESP_LOGE(TAG, "Failed to parse JSON: %s", json.c_str());
         return Uuid("");
     }
-    
+
     cJSON* uuidItem = cJSON_GetObjectItem(root, "sensor_unit_id");
     if (!cJSON_IsString(uuidItem) || !uuidItem->valuestring) {
         ESP_LOGE(TAG, "Missing or invalid 'sensor_unit_id'");
@@ -299,29 +325,43 @@ Uuid JsonParser::parseSensorunitConnectRequest(const std::string& json){
     return sensorUnitId;
 }
 
-std::string JsonParser::composeSensorunitStatusPayload(const std::string& status) {
+std::string
+JsonParser::composeSensorunitStatusPayload(const std::string& status) {
 
     cJSON* root = cJSON_CreateObject();
     cJSON_AddStringToObject(root, "status", status.c_str());
-    
+
     char*       jsonStr = cJSON_PrintUnformatted(root);
     std::string payload(jsonStr);
     cJSON_free(jsonStr);
     cJSON_Delete(root);
-    
+
     ESP_LOGI(TAG, "Json Payload created with status %s", status.c_str());
     return payload;
-
 }
 
+std::string JsonParser::composeTimestampPayload(time_t now) {
+
+    cJSON* root      = cJSON_CreateObject();
+    double timestamp = static_cast<double>(now);
+    cJSON_AddNumberToObject(root, "timestamp", timestamp);
+
+    char*       jsonStr = cJSON_PrintUnformatted(root);
+    std::string payload(jsonStr);
+    cJSON_free(jsonStr);
+    cJSON_Delete(root);
+
+    ESP_LOGI(TAG, "Json Payload created with timestamp %.0f", timestamp);
+    return payload;
+}
 
 std::string
 JsonParser::composeErrorResponse(const std::string& message,
-                                 const std::string& control_unit_id) {
+                                 const std::string& controlUnitId) {
     cJSON* root = cJSON_CreateObject();
 
     // Control Unit UUID — Test with: f47ac10b-58cc-4372-a567-0e02b2c3d479
-    cJSON_AddStringToObject(root, "control_unit_id", control_unit_id.c_str());
+    cJSON_AddStringToObject(root, "control_unit_id", controlUnitId.c_str());
     cJSON_AddStringToObject(root, "status", "error");
     cJSON_AddStringToObject(root, "message", message.c_str());
 

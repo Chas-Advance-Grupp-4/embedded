@@ -1,6 +1,7 @@
 /**
  * @file wifi_manager.cpp
- * @brief Implementation of Wi-Fi setup and event handling for ESP32 in AP+STA mode.
+ * @brief Implementation of Wi-Fi setup and event handling for ESP32 in AP+STA
+ * mode.
  *
  * Initializes the ESP32 Wi-Fi stack in dual-mode (Access Point + Station),
  * configures static IP settings for the AP interface, and sets up WPA2
@@ -12,9 +13,9 @@
  * Uses FreeRTOS event groups to wait for successful STA connection and logs
  * IP, gateway, and netmask information upon acquisition.
  *
- * The AP interface allows local devices (e.g. Sensor Units - Arduino clients) to connect
- * directly to the ESP32, while the STA interface connects to an external
- * Wi-Fi network for upstream communication.
+ * The AP interface allows local devices (e.g. Sensor Units - Arduino clients)
+ * to connect directly to the ESP32, while the STA interface connects to an
+ * external Wi-Fi network for upstream communication.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
@@ -58,7 +59,7 @@ static void wifi_event_handler(void*            arg,
              event_base,
              event_id);
     if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
-        ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
+        ip_event_got_ip_t* event = static_cast<ip_event_got_ip_t*>(event_data);
         ESP_LOGI(WIFI_TAG, "Got IP: " IPSTR, IP2STR(&event->ip_info.ip));
         xEventGroupSetBits(wifi_event_group, WIFI_CONNECTED_BIT);
         ESP_LOGI(WIFI_TAG, "Gateway: " IPSTR, IP2STR(&event->ip_info.gw));
@@ -71,8 +72,14 @@ static void wifi_event_handler(void*            arg,
 }
 
 void init_wifi() {
-    esp_log_level_set("wifi", ESP_LOG_VERBOSE);
+    /**
+     * NOTE: This function is intended to be called only once during system
+     * startup. esp_wifi_restore() must be called before esp_wifi_init() to
+     * restore saved Wi-Fi config from NVS.
+     */
+    esp_wifi_restore();
 
+    esp_log_level_set("wifi", ESP_LOG_VERBOSE);
     ESP_LOGI(WIFI_TAG, "Initializing Wi-Fi");
 
     wifi_event_group = xEventGroupCreate();
@@ -149,28 +156,29 @@ void init_wifi() {
     esp_wifi_set_config(WIFI_IF_STA, &sta_config);
 
     // Configure AP
-    wifi_config_t ap_config   = {};
+    wifi_config_t ap_config = {};
     memset(&ap_config, 0, sizeof(ap_config));
-    std::string   ap_ssid     = CONTROL_UNIT_SSID;
-    std::string   ap_password = CONTROL_UNIT_PASSWORD;
+    std::string ap_ssid     = CONTROL_UNIT_SSID;
+    std::string ap_password = CONTROL_UNIT_PASSWORD;
 
-    ap_config.ap.max_connection = 4;
+    ap_config.ap.max_connection  = 4;
     ap_config.ap.beacon_interval = 100; // maybe not needed
-    ap_config.ap.channel = 6; // 1, 6 and 9 good for Arduino. But maybe not needed.
+    ap_config.ap.channel =
+        6; // 1, 6 and 9 good for Arduino. But maybe not needed.
 
-    // Set SSID    
+    // Set SSID
     std::copy(ap_ssid.begin(), ap_ssid.end(), ap_config.ap.ssid);
     ap_config.ap.ssid[ap_ssid.size()] = '\0';
-    ap_config.ap.ssid_len = ap_ssid.size();
-    
-    ap_config.ap.authmode       = WIFI_AUTH_WPA2_PSK;
+    ap_config.ap.ssid_len             = ap_ssid.size();
+
+    ap_config.ap.authmode = WIFI_AUTH_WPA2_PSK;
     std::copy(ap_password.begin(), ap_password.end(), ap_config.ap.password);
     ap_config.ap.password[ap_password.size()] = '\0';
 
     ESP_LOGI(WIFI_TAG, "AP SSID: %s", CONTROL_UNIT_SSID);
     ESP_LOGI(WIFI_TAG, "AP IP: %s", CONTROL_UNIT_IP_ADDR);
     ESP_LOGI(WIFI_TAG, "Auth mode: %d", ap_config.ap.authmode);
-    ESP_LOGI(WIFI_TAG, "AP channes: %d", ap_config.ap.channel );
+    ESP_LOGI(WIFI_TAG, "AP channes: %d", ap_config.ap.channel);
 
     esp_wifi_set_config(WIFI_IF_AP, &ap_config);
 

@@ -20,7 +20,7 @@
 #include "esp_log.h"
 
 ConnectHandler::ConnectHandler(const std::string& uri,
-                               SensorUnitManager& sensorUnitManager)
+                               const SensorUnitManager& sensorUnitManager)
     : PostHandler(uri), m_sensorUnitManager(sensorUnitManager) {}
 
 esp_err_t ConnectHandler::processBody(httpd_req_t*       req,

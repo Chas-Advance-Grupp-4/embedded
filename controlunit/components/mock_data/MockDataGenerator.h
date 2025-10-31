@@ -43,7 +43,7 @@ class MockDataGeneratorTrigger {
  */
 class MockDataGeneratorTask {
   public:
-    MockDataGeneratorTask(ControlUnitManager& manager);
+    explicit MockDataGeneratorTask(ControlUnitManager& manager);
     void         start();
     TaskHandle_t getHandle() const;
 

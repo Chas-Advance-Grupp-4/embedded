@@ -11,3 +11,6 @@ arduino_secrets.h
 
 # Ignore local file generated when building
 compile_commands.json
+
+#ignore generated cppcheck file
+cppcheck_sensorunit.txt

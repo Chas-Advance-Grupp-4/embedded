@@ -6,11 +6,13 @@
  * storing incoming sensor readings, and grouping them by timestamp
  * for batch processing or transmission.
  *
- * Typical usage:
+ * It uses a FreeRTOS mutex for protecting resource shared between tasks
+ *
+ * Class functionality:
  * - Add or remove sensor units using their UUIDs.
  * - Store readings as they arrive.
  * - Retrieve grouped readings for backend dispatch.
- * - Clear stored readings when no longer needed.
+ * - Clear stored readings when succesfully dispatched.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
@@ -18,6 +20,7 @@
  * @license MIT
  */
 #pragma once
+#include "freertos/FreeRTOS.h"
 #include "sensor_data_types.h"
 #include <map>
 #include <string>
@@ -32,6 +35,18 @@
  */
 class SensorUnitManager {
   public:
+    /**
+     * @brief Default constructor added just for clarity
+     *
+     */
+    SensorUnitManager() = default;
+    /**
+     * @brief Class needs to run init in app_main to create the FreeRTOS 
+     * mutex needed to protect shared resources. Function is declared as 
+     * const because m_readingsMutex is mutable and used in const functions
+     *
+     */
+    void init() const;
     /**
      * @brief Registers a sensor unit by UUID.
      * @param uuid Unique identifier of the sensor unit.
@@ -66,10 +81,17 @@ class SensorUnitManager {
      * @brief Clears all stored sensor readings.
      */
     void clearReadings();
+    /**
+     * @brief Clears a given amount of stored sensor readings.
+     * @param amount the number of readings to clear from the buffer
+     */
+    void clearReadings(size_t amount);
 
   private:
+    mutable SemaphoreHandle_t m_readingsMutex = nullptr;
     std::map<Uuid, std::shared_ptr<Uuid>>
         m_active_units; /**< Registered sensor units by UUID. */
     std::vector<ca_sensorunit_snapshot>
         m_all_readings; /**< All stored sensor readings. */
+    static constexpr const char* TAG = "SensorUnitManager";
 };
