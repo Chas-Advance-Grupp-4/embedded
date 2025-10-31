@@ -25,7 +25,7 @@ class TimeSyncManager : public ITimeSyncManager {
      * @brief Constructs a TimeSyncManager with a reference to a RestClient.
      * @param restClient Reference to the RestClient used for time synchronization requests.
      */
-    TimeSyncManager(IRestClient& restClient);
+    explicit TimeSyncManager(IRestClient& restClient);
     /**
      * @brief Checks if the system time is currently considered synchronized.
      * @return True if time is synced, false otherwise.

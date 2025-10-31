@@ -36,8 +36,8 @@ class JsonParser {
      * @return etl::string<MAX_JSON_SIZE> A JSON string
      */
     static etl::string<json_config::max_json_size> composeSensorSnapshotGroup(
-        etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
-        const char*                                                    uuid);
+        const etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
+        const char*                                                          uuid);
     /**
      * @brief Composes a JSON string for connecting with Control Unit
      *
@@ -60,24 +60,22 @@ class JsonParser {
      */
     static ConnectResponse
     parseConnectResponse(etl::string<json_config::max_small_json_size> payload);
-      /**
-       * @brief Parse the response of a dispatch to see if Sensor Unit should disconnect
-       * Only disconnects if status explicitly says disconnected
-       * 
-       * @param payload 
-       * @return true if still connected
-       * @return false if disconnected
-       */
-    static bool
-    parseDispatchResponse(etl::string<json_config::max_small_json_size> payload);
+    /**
+     * @brief Parse the response of a dispatch to see if Sensor Unit should disconnect
+     * Only disconnects if status explicitly says disconnected
+     *
+     * @param payload
+     * @return true if still connected
+     * @return false if disconnected
+     */
+    static bool parseDispatchResponse(etl::string<json_config::max_small_json_size> payload);
     /**
      * @brief Parse a JSON response from GET /time
      *
      * @param payload The JSON payload received from the Control Unit
      * @return unsigned long - Unix timestamp with current time
      */
-    static uint32_t
-    parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload);
+    static uint32_t parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload);
 
   private:
     static constexpr const char* TAG = "JsonParser";

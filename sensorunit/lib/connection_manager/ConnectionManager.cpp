@@ -64,7 +64,7 @@ void ConnectionManager::disconnect() {
     init();
 }
 
-bool ConnectionManager::isPairedWithControlUnit() {
+bool ConnectionManager::isPairedWithControlUnit() const {
     return m_isPaired;
 }
 

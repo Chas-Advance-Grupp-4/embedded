@@ -16,8 +16,8 @@
 #include "logging.h"
 
 etl::string<json_config::max_json_size> JsonParser::composeSensorSnapshotGroup(
-    etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
-    const char*                                                    uuid) {
+    const etl::vector<CaSensorunitReading, json_config::max_batch_size>& readings,
+    const char*                                                          uuid) {
     StaticJsonDocument<json_config::max_json_doc_size> doc;
     doc["sensor_unit_id"]   = uuid;
     JsonArray readingsArray = doc["readings"].to<JsonArray>();
@@ -47,7 +47,7 @@ ConnectResponse
 JsonParser::parseConnectResponse(etl::string<json_config::max_small_json_size> payload) {
     const char*                                              json = payload.c_str();
     StaticJsonDocument<json_config::max_small_json_doc_size> doc;
-    ConnectResponse response {false};
+    ConnectResponse                                          response{false};
     DeserializationError                                     error = deserializeJson(doc, json);
     if (error) {
         LOG_ERROR(TAG, "DeserializationError: %s", error.c_str());
@@ -56,7 +56,7 @@ JsonParser::parseConnectResponse(etl::string<json_config::max_small_json_size> p
     if (!doc.containsKey("status")) {
         LOG_WARN(TAG, "Missing 'status' field in connect response");
         return response;
-    } 
+    }
 
     const char* responseStatusText = doc["status"];
     LOG_INFO(TAG, "Connect response: %s", responseStatusText);
@@ -65,11 +65,10 @@ JsonParser::parseConnectResponse(etl::string<json_config::max_small_json_size> p
     return response;
 }
 
-bool
-JsonParser::parseDispatchResponse(etl::string<json_config::max_small_json_size> payload) {
+bool JsonParser::parseDispatchResponse(etl::string<json_config::max_small_json_size> payload) {
     const char*                                              json = payload.c_str();
     StaticJsonDocument<json_config::max_small_json_doc_size> doc;
-    bool response {false};
+    bool                                                     response{false};
     DeserializationError                                     error = deserializeJson(doc, json);
     if (error) {
         LOG_ERROR(TAG, "DeserializationError: %s", error.c_str());
@@ -78,7 +77,7 @@ JsonParser::parseDispatchResponse(etl::string<json_config::max_small_json_size> 
     if (!doc.containsKey("status")) {
         LOG_WARN(TAG, "Missing 'status' field in dispatch response");
         return response;
-    } 
+    }
 
     const char* responseStatusText = doc["status"];
     LOG_INFO(TAG, "Dispatch response: %s", responseStatusText);
@@ -87,8 +86,7 @@ JsonParser::parseDispatchResponse(etl::string<json_config::max_small_json_size> 
     return response;
 }
 
-uint32_t
-JsonParser::parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload) {
+uint32_t JsonParser::parseGetTimeResponse(etl::string<json_config::max_small_json_size> payload) {
 
     const char*                                              json = payload.c_str();
     StaticJsonDocument<json_config::max_small_json_doc_size> doc;
