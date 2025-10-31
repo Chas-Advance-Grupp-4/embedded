@@ -25,6 +25,7 @@ extern "C" void app_main(void) {
     nvs_flash_init();
     init_wifi();
 
+    
     static TimeSyncManager timeSyncManager;
     timeSyncManager.start();
 
@@ -63,7 +64,7 @@ extern "C" void app_main(void) {
 
     vTaskDelay(pdMS_TO_TICKS(200));
     static SensorUnitLinkSyncer statusPoller(
-        client, sensorUnitManager, 8'000'000, "Uuid");
+        client, sensorUnitManager, 8'000'000, CONTROL_UNIT_ID);
     statusPoller.start();
 
 #ifdef REMOVE_AND_ADD_SENSORUNIT_WITH_DELAY_FOR_TESTING
