@@ -1,10 +1,10 @@
-name: CAGroup4 mbedded CI Pipeline
+name: Chas Advance Group4 embedded CI Pipeline
 
 on:
    push:
-       branches: [ci-test]
+       branches: [main]
    pull_request:
-       branches: [ci-test]
+       branches: [main]
    workflow_dispatch:
 
 jobs:
