@@ -39,13 +39,13 @@ class RestClient {
     /**
      * @brief Constructs a RestClient with base URL, JWT token, and timeout.
      *
-     * @param base_url Base URL of the remote server.
-     * @param jwt_token JWT token for authorization
-     * @param timeout_ms Timeout for HTTPS requests in milliseconds.
+     * @param baseUrl Base URL of the remote server.
+     * @param jwtToken JWT token for authorization
+     * @param timeoutMs Timeout for HTTPS requests in milliseconds.
      */
-    RestClient(const std::string& base_url,
-               const std::string& jwt_token,
-               int                timeout_ms = 5000);
+    RestClient(const std::string& baseUrl,
+               const std::string& jwtToken,
+               int                timeoutMs = 5000);
 
     /**
      * @brief Cleans up the internal HTTPS client.

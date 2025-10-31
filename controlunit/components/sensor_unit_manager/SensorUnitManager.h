@@ -5,7 +5,7 @@
  * This class provides functionality for registering sensor units,
  * storing incoming sensor readings, and grouping them by timestamp
  * for batch processing or transmission.
- * 
+ *
  * It uses a FreeRTOS mutex for protecting resource shared between tasks
  *
  * Class functionality:
@@ -20,11 +20,11 @@
  * @license MIT
  */
 #pragma once
+#include "freertos/FreeRTOS.h"
 #include "sensor_data_types.h"
 #include <map>
 #include <string>
 #include <vector>
-#include "freertos/FreeRTOS.h"
 
 /**
  * @class SensorUnitManager
@@ -37,15 +37,16 @@ class SensorUnitManager {
   public:
     /**
      * @brief Default constructor added just for clarity
-     * 
+     *
      */
     SensorUnitManager() = default;
     /**
-     * @brief Class needs to run init in app_main to create the 
-     * FreeRTOR mutex needed to protect shared resources
-     * 
+     * @brief Class needs to run init in app_main to create the FreeRTOS 
+     * mutex needed to protect shared resources. Function is declared as 
+     * const because m_readingsMutex is mutable and used in const functions
+     *
      */
-    void init();
+    void init() const;
     /**
      * @brief Registers a sensor unit by UUID.
      * @param uuid Unique identifier of the sensor unit.
