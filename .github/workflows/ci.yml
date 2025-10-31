@@ -19,9 +19,9 @@ jobs:
              uses: actions/checkout@v4
 
            - name: Set up ESP-IDF environment
-             uses: espressif/setup-idf@latest
+             uses: espressif/install-esp-idf-action@v1
              with:
-                 esp_idf_version: v5.5.1
+               esp_idf_version: v5.5.1
 
            - name: Echo from controlunit
              run: echo "Building controlunit with ESP-IDF for ESP32-S3-Zero"
