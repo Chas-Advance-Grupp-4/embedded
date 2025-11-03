@@ -12,7 +12,15 @@
 #include "constants.h"
 #include <etl/string.h>
 
+/**
+ * @brief Broader than pure Rest Client http status
+ * and includes internal errors (values < 0 ) not related
+ * to server request
+ *
+ * * Currently unused, but to be implemented where applicable
+ */
 enum RestClientStatus {
+    ClientSideError      = -7,
     BodyOverflow         = -6,
     InvalidResponse      = -5,
     HttpInitFailed       = -4,
@@ -31,11 +39,19 @@ enum RestClientStatus {
     InternalServerError  = 500
 };
 
+/**
+ * @brief A Rest Respons with http status and JSON payload response
+ *
+ */
 struct RestResponse {
     int                                           status;
     etl::string<json_config::max_small_json_size> payload;
 };
 
+/**
+ * @brief Interface for Rest Client
+ *
+ */
 class IRestClient {
   public:
     virtual RestResponse getTo(const char* endpoint)                                   = 0;

@@ -37,7 +37,7 @@ public:
      * @param uri The URI this handler responds to.
      * @param sensorUnitManager Reference to the sensor unit manager used for status lookup.
      */
-    ConnectHandler(const std::string& uri, SensorUnitManager& sensorUnitManager);
+    ConnectHandler(const std::string& uri, const SensorUnitManager& sensorUnitManager);
 
 protected:
     /**

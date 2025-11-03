@@ -15,9 +15,14 @@
  */
 #pragma once
 
+#define MANUALLY_ADD_SENSORUNIT_FOR_TESTING
+#define GENERATE_MOCKED_SENSOR_DATA
+// #define REMOVE_AND_ADD_SENSORUNIT_WITH_DELAY_FOR_TESTING
+
 #define WIFI_SECRET_SSID "Network"
 #define WIFI_SECRET_PASS "Password"
 #define CLIENT_URL "http://<your-url>"
+#define CONTROL_UNIT_ID "00000000-0000-0000-0000-000000000000"  // Add your unique Contol Unit Id here
 
 #define CONTROL_UNIT_SSID      "CU-0"           // Assign each Control Unit a unique number
 #define CONTROL_UNIT_PASSWORD  "Password"

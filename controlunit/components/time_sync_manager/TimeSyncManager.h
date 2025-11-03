@@ -32,7 +32,7 @@ class TimeSyncManager {
      * @param syncIntervalMs Interval between automatic resyncs in milliseconds
      * (default: 1 hour).
      */
-    TimeSyncManager(const std::string& ntpServer      = "se.pool.ntp.org",
+    explicit TimeSyncManager(const std::string& ntpServer      = "se.pool.ntp.org",
                     uint32_t           syncIntervalMs = 60 * 60 * 1000);
 
     /**
@@ -56,7 +56,7 @@ class TimeSyncManager {
      * updated.
      */
     void resync();
-    bool isTimeSynced();
+    bool isTimeSynced() const;
 
   private:
     std::string m_ntpServer; /**< Address of the NTP server to use. */

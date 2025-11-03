@@ -15,10 +15,10 @@
 
 class RestClient : public IRestClient {
   public:
-    RestClient(const char*   baseUrl,
-               uint16_t      port      = 8080,
-               const char*   jwtToken  = "currently_not_used",
-               unsigned long timeoutMs = 5000);
+    explicit RestClient(const char*   baseUrl,
+                        uint16_t      port      = 8080,
+                        const char*   jwtToken  = "currently_not_used",
+                        unsigned long timeoutMs = 5000);
 
     /**
      * @brief Send GET request to the server
@@ -30,7 +30,7 @@ class RestClient : public IRestClient {
 
     /**
      * @brief Send POST request to the server
-     * 
+     *
      * @param endpoint should include slash, example: "/connect"
      * @param payload a formated json string
      * @return RestResponse struct with status and payload
@@ -40,13 +40,13 @@ class RestClient : public IRestClient {
 
   private:
     RestResponse                 parseResponse();
-    int                          extractStatusCode(const etl::string<128>& statusLine);
+    static int                   extractStatusCode(const etl::string<128>& statusLine);
     void                         sendGetHeader(const char* endpoint);
     void                         sendPostHeader(const char* endpoint, uint16_t contentLength);
     etl::string<32>              m_baseUrl;
-    etl::string<64>              m_jwtToken;
     uint16_t                     m_port;
-    WiFiClient                   m_client;
+    etl::string<64>              m_jwtToken;
     unsigned long                m_timeout; /**< Timeout for HTTP requests in milliseconds. */
+    WiFiClient                   m_client;
     static constexpr const char* TAG = "RestClient";
 };
