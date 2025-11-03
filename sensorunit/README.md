@@ -1,6 +1,6 @@
 # Sensor Unit (Arduino UNO R4 WiFi)
 
-The `sensorunit/` directory contains the source code for the Arduino-based Sensor Unit, which reads sensor data and sends them to the control unit server. 
+The `sensorunit/` directory contains the source code for the Arduino-based Sensor Unit, which reads sensor data and sends them to the control unit server  
 
 ## Overview
 
@@ -14,7 +14,10 @@ The Sensor Unit handles:
 
 ## Getting Started
 
-Prerequisites: You will need an Arduino UNO R4 WiFi or equivalent board  
+Prerequisites:  
+
+- You will need an Arduino UNO R4 WiFi or equivalent board  
+- You will need a DHT11 temperature and humidity sensor  
 
 ---
 
