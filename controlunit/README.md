@@ -30,7 +30,7 @@ Copy `wifi_config_example.h` and make modifications as needed
 
 - You will need to source `idf.py` every time you open the project:  
 navigate to `controlunit/`  
-`source /your-installed-path-to/esp/v5.5.1/esp-idf/export.sh`   
+`source /your-installed-path-to/esp/v5.5.1/esp-idf/export.sh`  
 
 - When setting up you need to edit some settings in menuconfig  
 If you haven't source `idf.py` then run `idf.py menuconfig`
