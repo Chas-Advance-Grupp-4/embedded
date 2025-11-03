@@ -1,3 +1,15 @@
+/**
+ * @file main.cpp
+ * @author Erik Dahl (erik@iunderlandet.se)
+ * @brief Main entry point for the Sensor Unit app. 
+ * NOTE: The scheduler utilizes the main loop for triggering. This solution was chosen for simplicity.
+ * 
+ * @date 2025-11-03
+ * 
+ * @copyright Copyright (c) 2025 Erik Dahl
+ * @license MIT
+ * 
+ */
 #include "ConnectionManager.h"
 #include "ReadingProcessor.h"
 #include "ReadingsDispatcher.h"

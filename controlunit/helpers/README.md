@@ -13,3 +13,15 @@ From the project root:
 ```bash
 python3 helpers/merge_compile_commands.py
 ```
+
+---
+
+## mergerunner.sh
+
+Script used by Makefile to determine which python version to use when merging compile commands
+
+---
+
+## cu_cppcheck.sh
+
+Script for running cppcheck linting for `controlunit/`
