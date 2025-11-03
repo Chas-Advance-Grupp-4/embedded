@@ -1,5 +1,7 @@
 # API calls for Embedded system
 
+Chas Advance Group 4 Embedded uses the following API calls
+
 ## Sensor Unit to Control Unit
 
 ---
@@ -103,7 +105,7 @@ The JWT token must include the following claim:
 
 #### Generate JWT
 
-A helper program for generating a key and token is located in `controlunit/helpers/jwtgenerator`
+A helper program for generating a key and token is located in [controlunit/helpers/jwtgenerator](controlunit/helpers/jwtgenerator/README.md)  
 
 ---
 
