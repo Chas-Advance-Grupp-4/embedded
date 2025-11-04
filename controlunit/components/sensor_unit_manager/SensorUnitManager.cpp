@@ -1,9 +1,10 @@
 /**
  * @file SensorUnitManager.cpp
- * @brief Implementation of SensorUnitManager for managing sensor units and their readings.
+ * @brief Implementation of SensorUnitManager for managing sensor units and
+ * their readings.
  *
- * Defines the logic for adding/removing units, storing readings, and grouping them
- * for backend dispatch. Uses ESP-IDF logging for diagnostics.
+ * Defines the logic for adding/removing units, storing readings, and grouping
+ * them for backend dispatch. Uses ESP-IDF logging for diagnostics.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
  * @date 2025-10-07
@@ -13,14 +14,20 @@
 #include "SensorUnitManager.h"
 #include <esp_log.h>
 
-static const char* SENSORUM_TAG = "sensor_unit_manager";
+void SensorUnitManager::init() const {
+    ESP_LOGI(TAG, "Initializing Sensor Unit Manager");
+    m_readingsMutex = xSemaphoreCreateMutex();
+    if (m_readingsMutex == nullptr) {
+        ESP_LOGE(TAG, "Failed to create mutex");
+    }
+}
 
 void SensorUnitManager::addUnit(const Uuid& uuid) {
     if (m_active_units.find(uuid) == m_active_units.end()) {
         m_active_units[uuid] = std::make_shared<Uuid>(uuid);
-        ESP_LOGI(SENSORUM_TAG, "Adding Sensor Unit %s", uuid.toString().c_str());
+        ESP_LOGI(TAG, "Adding Sensor Unit %s", uuid.toString().c_str());
     } else {
-        ESP_LOGE(SENSORUM_TAG, "Sensor Unit %s already added", uuid.toString().c_str());
+        ESP_LOGE(TAG, "Sensor Unit %s already added", uuid.toString().c_str());
     }
 }
 
@@ -28,9 +35,9 @@ void SensorUnitManager::removeUnit(const Uuid& uuid) {
     auto it = m_active_units.find(uuid);
     if (it != m_active_units.end()) {
         m_active_units.erase(it);
-        ESP_LOGI(SENSORUM_TAG, "Removed Sensor Unit %s", uuid.toString().c_str());
+        ESP_LOGI(TAG, "Removed Sensor Unit %s", uuid.toString().c_str());
     } else {
-        ESP_LOGE(SENSORUM_TAG, "No Sensor Unit %s in list", uuid.toString().c_str());
+        ESP_LOGE(TAG, "No Sensor Unit %s in list", uuid.toString().c_str());
     }
 }
 
@@ -39,18 +46,52 @@ bool SensorUnitManager::hasUnit(const Uuid& uuid) const {
 }
 
 void SensorUnitManager::storeReading(const ca_sensorunit_snapshot& reading) {
-    m_all_readings.push_back(reading);
+    ESP_LOGI(TAG, "Storing reading, mutex protected");
+    if (xSemaphoreTake(m_readingsMutex, portMAX_DELAY) == pdTRUE) {
+        m_all_readings.push_back(reading);
+        xSemaphoreGive(m_readingsMutex);
+    }
 }
 
 std::map<time_t, std::vector<ca_sensorunit_snapshot>>
 SensorUnitManager::getGroupedReadings() const {
+    ESP_LOGI(TAG, "Getting grouped readings, mutex protected");
     std::map<time_t, std::vector<ca_sensorunit_snapshot>> grouped;
-    for (const auto& snapshot : m_all_readings) {
-        grouped[snapshot.timestamp].push_back(snapshot);
+    // Consider copying vector to avoid blocking mutex
+    if (xSemaphoreTake(m_readingsMutex, portMAX_DELAY) == pdTRUE) {
+        for (const auto& snapshot : m_all_readings) {
+            grouped[snapshot.timestamp].push_back(snapshot);
+        }
+        xSemaphoreGive(m_readingsMutex);
     }
     return grouped;
 }
 
 void SensorUnitManager::clearReadings() {
-    m_all_readings.clear();
+    ESP_LOGI(TAG, "Clearing readings, mutex protected");
+    if (xSemaphoreTake(m_readingsMutex, portMAX_DELAY) == pdTRUE) {
+        m_all_readings.clear();
+        xSemaphoreGive(m_readingsMutex);
+    }
+}
+
+void SensorUnitManager::clearReadings(size_t amount) {
+    ESP_LOGI(TAG, "Clearing %zu readings, mutex protected", amount);
+    if (xSemaphoreTake(m_readingsMutex, portMAX_DELAY) == pdTRUE) {
+        if (amount > m_all_readings.size()) {
+            ESP_LOGW(
+                TAG,
+                "Trying to delete %zu readings but only %zu present buffer",
+                amount,
+                m_all_readings.size());
+            ESP_LOGI(TAG, "Clearing buffer");
+            m_all_readings.clear();
+        } else {
+            ESP_LOGI(TAG, "Clearing %zu readings", amount);
+            m_all_readings.erase(m_all_readings.begin(),
+                                 m_all_readings.begin() + amount);
+        }
+        ESP_LOGI(TAG, "Remaining readings: %zu", m_all_readings.size());
+        xSemaphoreGive(m_readingsMutex);
+    }
 }

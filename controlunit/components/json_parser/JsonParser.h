@@ -3,12 +3,11 @@
  * @brief Static utility class for parsing and composing JSON related to sensor
  * and connection data.
  *
- * Provides functions for converting to and from internal data structures and JSON
- * strings 
- * From Sensor Unit: connect requests/responses, batched sensor readings, 
- * From Backend: connect requests
- * To Backend: batched sensor readings, connect responses, error messages
- * 
+ * Provides functions for converting to and from internal data structures and
+ * JSON strings From Sensor Unit: connect requests/responses, batched sensor
+ * readings, From Backend: connect requests To Backend: batched sensor readings,
+ * connect responses, error messages
+ *
  * All methods are static and stateless, defined in the JsonParser class.
  *
  * @author Erik Dahl (erik@iunderlandet.se)
@@ -36,6 +35,45 @@
 class JsonParser {
   public:
     /**
+     * @brief Composes a JSON-formatted status request containing the control
+     * unit identifier.
+     *
+     * Example output:
+     * @code
+     * {
+     *   "control_unit_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+     * }
+     * @endcode
+     *
+     * @param controlUnitId A non-empty string representing the UUID of the
+     * control unit.
+     * @return A JSON string containing the control unit ID, or an empty string
+     * if input is empty.
+     */
+    static std::string composeStatusRequest(const std::string& controlUnitId);
+
+    /**
+     * @brief Parses a JSON-formatted status response and extracts a sensor
+     * connection command.   
+     *
+     * Note: This implementation only handles a single command per response.
+     * Future versions may support arrays of commands.
+     *
+     * Accepted status values:
+     * - `"in_transit"`returns `CONNECT`
+     * - `"delivered"` returns `DISCONNECT`
+     * - Any other value returns `DISCONNECT`
+     *
+     * @param json A JSON string containing the backend command.
+     * @return A vector of `SensorConnectRequest` objects. Empty if parsing
+     * fails or fields are invalid.
+     */
+    static std::vector<SensorConnectRequest>
+    parseStatusResponse(const std::string& json);
+
+    static size_t parseBackendReadingsResponse(const std::string& json);
+
+    /**
      * @brief Parses a JSON string containing grouped sensor snapshots.
      * @param json JSON-formatted string representing sensor readings.
      * @return Vector of parsed sensor snapshots.
@@ -46,12 +84,12 @@ class JsonParser {
     /**
      * @brief Composes a JSON string from grouped sensor readings.
      * @param readings Map of timestamp to vector of sensor snapshots.
-     * @param controlunit_uuid UUID of the control unit sending the data.
+     * @param controlUnitId UUID of the control unit sending the data.
      * @return JSON-formatted string representing the grouped readings.
      */
     static std::string composeGroupedReadings(
         const std::map<time_t, std::vector<ca_sensorunit_snapshot>>& readings,
-        const std::string& controlunit_uuid);
+        const std::string& controlUnitId);
 
     /**
      * @brief Parses a sensor connection request from JSON.
@@ -65,31 +103,12 @@ class JsonParser {
     /**
      * @brief Composes a JSON response for a sensor connection.
      * @param response Response data to be sent.
-     * @param controlunit_uuid UUID of the control unit.
+     * @param controlUnitId UUID of the control unit.
      * @return JSON-formatted string representing the response.
      */
     static std::string
     composeSensorConnectResponse(const SensorConnectResponse& response,
-                                 const std::string&           controlunit_uuid);
-
-    /**
-     * @brief Parses a driver connection request from JSON.
-     * @param json JSON-formatted string representing the request.
-     * @param type Type of request (e.g., connect, disconnect).
-     * @return Parsed DriverConnectRequest object.
-     */
-    static DriverConnectRequest
-    parseDriverConnectRequest(const std::string& json, requestType type);
-
-    /**
-     * @brief Composes a JSON response for a driver connection.
-     * @param response Response data to be sent.
-     * @param controlunit_uuid UUID of the control unit.
-     * @return JSON-formatted string representing the response.
-     */
-    static std::string
-    composeDriverConnectResponse(const DriverConnectResponse& response,
-                                 const std::string&           controlunit_uuid);
+                                 const std::string&           controlUnitId);
 
     /**
      * @brief Parses a Connect Request from a Sensor Unit
@@ -110,14 +129,22 @@ class JsonParser {
     composeSensorunitStatusPayload(const std::string& status);
 
     /**
-     * @brief Composes a generic error response in JSON format.
-     * @param message Error message to include.
-     * @param controlunit_uuid UUID of the control unit.
-     * @return JSON-formatted string representing the error response.
+     * @brief Composes a JSON payload containing a Unix timestamp.
      *
-     * TODO: Discuss error handling with backend and expected responses
+     * Example: {"timestamp": <Unixtimestamp> }
+     *
+     * @param now The current time as a Unix timestamp (time_t).
+     * @return A JSON-formatted string containing the timestamp.
+     */
+    static std::string composeTimestampPayload(time_t now);
+
+    /**
+     * @brief Composes a generic error response in JSON format. (Unused)
+     * @param message Error message to include.
+     * @param controlUnitId UUID of the control unit.
+     * @return JSON-formatted string representing the error response.
      */
     static std::string
     composeErrorResponse(const std::string& message,
-                         const std::string& controlunit_uuid);
+                         const std::string& controlUnitId);
 };

@@ -42,11 +42,19 @@
 constexpr const char* SENSOR_UNIT_ID = "REPLACE_WITH_UUID";
 
 /**
- * @brief Wi-Fi network name (SSID) to connect to.
+ * @brief Control Unit IP
+ * Update as needed. All control units should use the same fixed IP
  */
-constexpr const char* WIFI_SSID = "REPLACE_WITH_SSID";
+#define CONTROL_UNIT_IP_ADDR "192.168.4.1"
 
 /**
- * @brief Wi-Fi password for the specified SSID.
+ * @brief Control Unit Password
+ *  Make sure it matches the password set in controlunit config
  */
-constexpr const char* WIFI_PASSWORD = "REPLACE_WITH_PASSWORD";
+#define CONTROL_UNIT_PASSWORD "<your-controlunit-password>"
+
+/**
+ * @brief Control Unit Port
+ * Make sure it matches the port set in controlunit config
+ */
+#define CONTROL_UNIT_PORT 8080
